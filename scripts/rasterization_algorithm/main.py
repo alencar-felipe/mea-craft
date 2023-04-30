@@ -30,6 +30,45 @@ def world_to_screen(pos, camera):
 def edge(a, b, c):
     return (c[0] - a[0]) * (b[1] - a[1]) - (c[1] - a[1]) * (b[0] - a[0])
 
+def range_triangle(vs):
+    x1, x2, x3 = vs[0][0], vs[1][0], v[2][0]
+    y1, y2, y3 = vs[0][0], vs[1][0], v[2][0]
+
+    # Sort vertices by y-coordinate
+    if y1 > y2:
+        y1, y2 = y2, y1
+        x1, x2 = x2, x1
+    if y2 > y3:
+        y2, y3 = y3, y2
+        x2, x3 = x3, x2
+    if y1 > y2:
+        y1, y2 = y2, y1
+        x1, x2 = x2, x1
+
+    # Calculate slopes of the three edges
+    slope1 = (x2 - x1) / (y2 - y1) if y2 != y1 else 0
+    slope2 = (x3 - x2) / (y3 - y2) if y3 != y2 else 0
+    slope3 = (x3 - x1) / (y3 - y1) if y3 != y1 else 0
+
+    # Initialize x-coordinates of edges at top vertex
+    x_top = x1
+    x_bottom_left = x1
+    x_bottom_right = x2
+
+    # Draw scanlines
+    for y in range(y1, y3 + 1):
+        # Draw pixels between left and right edges
+        for x in range(round(x_bottom_left), round(x_bottom_right) + 1):
+            yield (x, y)
+
+        # Update x-coordinates of edges for next scanline
+        if y < y2:
+            x_top += slope1
+            x_bottom_left += slope3
+        else:
+            x_top += slope2
+            x_bottom_right += slope3
+
 def render_triangle(triangle, texture, camera, raster, zbuf):
     v = np.copy(triangle['vertices'])
     t = np.copy(triangle['texture'])
@@ -48,7 +87,7 @@ def render_triangle(triangle, texture, camera, raster, zbuf):
     # compute the inverse of the z coordinate
     v[:,2] = 1 / v[:,2]
     
-    # compute the inverse of the texture coordinate
+    # divide texture coordinate by z
     t[:,0] *= v[:,2]
     t[:,1] *= v[:,2]
 
@@ -63,8 +102,8 @@ def render_triangle(triangle, texture, camera, raster, zbuf):
 
     area = edge(v[0], v[1], v[2])
 
-    for j in range(h):
-        for i in range(w):
+    for j in range(int(ymin), int(ymax+1)):
+        for i in range(int(xmin), int(xmax+1)):
             pixel = np.asarray([i + 0.5, j + 0.5], dtype=real_dt)
 
             w0 = edge(v[1], v[2], pixel)
