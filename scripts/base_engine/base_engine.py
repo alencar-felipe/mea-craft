@@ -90,7 +90,7 @@ def render_triangle(triangle, texture, camera, raster, zbuf):
                 uvt = uvt * z * [tw, th]
                 uvt = uvt.astype(int)
 
-                if uvt[1] > 0 and uvt[1] < th and uvt[0] > 0 and uvt[0] < tw:
+                if uvt[1] >= 0 and uvt[1] < th and uvt[0] >= 0 and uvt[0] < tw:
                     raster[j][i] = texture[uvt[1]][uvt[0]]*255
          
 def cube(pos, rot, scl):
