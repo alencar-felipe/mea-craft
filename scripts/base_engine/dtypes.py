@@ -10,5 +10,6 @@ camera_dt = np.dtype([
 ])
 
 triangle_dt = np.dtype([
-    ('vertices', real_dt, (3, 3))
+    ('vertices', real_dt, (3, 3)),
+    ('texture', real_dt, (3, 2))
 ])
