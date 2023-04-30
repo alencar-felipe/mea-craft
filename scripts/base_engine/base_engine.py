@@ -3,7 +3,6 @@ import numpy as np
 import numpy.linalg as npla
 
 from dtypes import *
-from numba import jit
 from transforms import *
 
 def world_to_screen(pos, camera):
@@ -83,7 +82,7 @@ def render_triangle(triangle, texture, camera, raster, zbuf):
             # the z coordinates has already been inverted
             z = 1 / ( v[0][2]*w0 + v[1][2]*w1 + v[2][2]*w2 )
 
-            if z < zbuf[j][i]:
+            if z < zbuf[j][i] or True:
                 zbuf[j][i] = z
                 
                 # interpolate point baricentric coordinates
@@ -102,12 +101,12 @@ def cube(pos, rot, scl):
 
     indexes = [
         [0, 2, 1], [2, 4, 3], [4, 6, 5], [6, 0, 7], [0, 6, 2], [3, 5, 1],
-        [1, 2, 3], [3, 4, 5], [5, 6, 7], [7, 0, 1], [2, 6, 4], [7, 5, 1]
+        [1, 2, 3], [3, 4, 5], [5, 6, 7], [7, 0, 1], [2, 6, 4], [1, 5, 7]
     ]
 
     textures = [[[0, 0], [0, 1], [1, 0]]]*6 + [[[1, 0], [0, 1], [1, 1]]]*6
 
-    triangles = np.zeros(8, dtype=triangle_dt)
+    triangles = np.zeros(12, dtype=triangle_dt)
 
     m = translate(pos) @ rotate(rot) @ scale(scl)
 
@@ -130,7 +129,7 @@ if __name__ == '__main__':
 
     triangles = cube(
         [0, 0, 5],
-        [-np.pi/8, np.pi/8, 0],
+        [-np.pi/8, np.pi/8, np.pi],
         [1, 1, 1]
     )
 
