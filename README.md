@@ -13,3 +13,5 @@
 ### GPU Architecture
 
 - [Fundamentals of GPU Architecture](https://www.youtube.com/playlist?list=PLxNPSjHT5qvscDTMaIAY9boOOXAJAS7y4)
+- [RISC-V Instruction Table](https://five-embeddev.com/riscv-isa-manual/latest/instr-table.html)
+- [RISC-V RV32I Cheat Sheet](http://blog.translusion.com/images/posts/RISC-V-cheatsheet-RV32I-4-3.pdf)
