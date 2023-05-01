@@ -16,3 +16,4 @@
 - [RISC-V Instruction Table](https://five-embeddev.com/riscv-isa-manual/latest/instr-table.html)
 - [RISC-V RV32I Cheat Sheet](http://blog.translusion.com/images/posts/RISC-V-cheatsheet-RV32I-4-3.pdf)
 - [RV32I, RV64I Instructions](https://msyksphinz-self.github.io/riscv-isadoc/html/rvi.html)
+- [RISC-V Instruction Encoder/Decoder](https://luplab.gitlab.io/rvcodecjs)
