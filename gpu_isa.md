@@ -1,5 +1,7 @@
 # GPU Instruction Set Architecture (ISA)
 
+Based on the RISC-V (RV32I) ISA.
+
 ## Instructions
 
 ### 20-bit immediate
@@ -34,7 +36,7 @@
 | `sh rs2, imm12(rs1)` | store halfword | `mem[rs1 + imm12] = rs2[15:0]` |
 | `sw rs2, imm12(rs1)` | store word | `mem[rs1 + imm12] = rsw[31:0]` |
 
-### Common Arithmetic
+### Standard Arithmetic
 
 | Mnemonic | Instruction | Implementation |
 | --- | --- | --- |

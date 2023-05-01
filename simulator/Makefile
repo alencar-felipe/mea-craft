@@ -12,7 +12,7 @@ SRCS = $(wildcard $(SRC_DIR)/*.c)
 OBJS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SRCS))
 
 # Define target executable
-TARGET = emulator
+TARGET = simulator
 
 # Create build directory if it doesn't exist
 $(shell mkdir -p $(BUILD_DIR))
