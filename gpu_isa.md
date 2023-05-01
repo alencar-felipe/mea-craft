@@ -2,9 +2,16 @@
 
 ## Instructions
 
+### 20-bit immediate
+
+| Mnemonic | Instruction | Implementation |
+| --- | --- | --- |
+| `lui rd, imm20` | load upper immediate | `rd = imm20 << 12` |
+| `auipc rd, imm20` | add upper immediate to pc | `rd = pc + imm20 << 12` |
+
 ### Branching
 
-| Mnemonic | Instruction | Description |
+| Mnemonic | Instruction | Implementation |
 | --- | --- | --- |
 | `jal rd, imm20` | jump and link | `rd = pc + 4; pc = pc + imm20` |
 | `jalr rd, imm12(rs1)` | jump and link register | `rd = pc + 4; pc = rs1 + imm12` |
@@ -16,7 +23,7 @@
 | `bgeu rs1, rs2, imm12` | branch greater than or equal unsigned | `if rs1 >= rs2: pc = pc + imm12` |
 ### Memory
 
-| Mnemonic | Instruction | Description |
+| Mnemonic | Instruction | Implementation |
 | --- | --- | --- |
 | `lb rd, imm12(rs1)` | load byte | `rd = mem[rs1 + imm12]` |
 | `lh rd, imm12(rs1)` | load halfword | `rd = mem[rs1 + imm12]` |
@@ -29,7 +36,7 @@
 
 ### Common Arithmetic
 
-| Mnemonic | Instruction | Description |
+| Mnemonic | Instruction | Implementation |
 | --- | --- | --- |
 | `addi rd, rs1, imm12` | add immediate | `rd = rs1 + imm12` |
 | `slti rd, rs1, imm12` | set less than immediate | `rd = rs1 < rs2 ? 1 : 0` |
@@ -51,8 +58,10 @@
 | `or rd, rs1, rs2` | or | `rd = rs1 \| rs2` |
 | `and rd, rs1, rs2` | and | `rd = rs1 & rs2` |
 
-lui
-auipc
-fence
-ecall
-ebreak
+### Environment
+
+| Mnemonic | Instruction | Implementation |
+| --- | --- | --- |
+| `fence pred, succ` | memory fence | |
+| `ecall` | environment call | |
+| `ebreak` | environment break | |
