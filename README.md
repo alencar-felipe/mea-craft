@@ -17,3 +17,4 @@
 - [RISC-V RV32I Cheat Sheet](http://blog.translusion.com/images/posts/RISC-V-cheatsheet-RV32I-4-3.pdf)
 - [RV32I, RV64I Instructions](https://msyksphinz-self.github.io/riscv-isadoc/html/rvi.html)
 - [RISC-V Instruction Encoder/Decoder](https://luplab.gitlab.io/rvcodecjs)
+- [Rudimental RV32I in VHDL](https://github.com/hamsternz/Rudi-RV32I)

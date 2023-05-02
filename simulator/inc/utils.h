@@ -11,5 +11,5 @@
 #define BIT(n, i) (n)
 #define BITS(n, i, j) (n)
 
-bus_t load(int bits, mem_t mem, bus_t addr);
-void store(int bits, mem_t mem, bus_t addr, bus_t value);
+word_t load(int bits, mem_t mem, word_t addr);
+void store(int bits, mem_t mem, word_t addr, word_t value);

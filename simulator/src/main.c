@@ -5,39 +5,39 @@ int main()
     return 0;
 }
 
-void decode_and_excute(ctx_t *ctx, bus_t data)
+void decode_and_excute(ctx_t *ctx, word_t data)
 {
-    bus_t op = BITS(data, 0, 6);
+    word_t op = BITS(data, 0, 6);
     
-    bus_t rd = BITS(data, 7, 11);
-    bus_t rs1 = BITS(data, 15, 19);
-    bus_t rs2 = BITS(data, 20, 24);
+    word_t rd = BITS(data, 7, 11);
+    word_t rs1 = BITS(data, 15, 19);
+    word_t rs2 = BITS(data, 20, 24);
 
-    bus_t imm12 = BITS(data, 20, 31);
-    bus_t imm20 = BITS(data, 12, 31); 
+    word_t imm12 = BITS(data, 20, 31);
+    word_t imm20 = BITS(data, 12, 31); 
     
-    bus_t imm12_alt =
+    word_t imm12_alt =
         (BITS(data,  7, 11) <<  0) +
         (BITS(data, 25, 31) <<  5);
 
-    bus_t imm13 =
+    word_t imm13 =
         (BITS(data,  8, 11) <<  1) +
         (BITS(data, 25, 30) <<  5) +
         (BITS(data,  7,  7) << 11) +
         (BITS(data, 31, 31) << 12);
 
-    bus_t imm20_alt = 
+    word_t imm20_alt = 
         (BITS(data, 19, 12) <<  0) +
         (BITS(data, 20, 20) <<  8) +
         (BITS(data, 21, 30) <<  9) +
         (BITS(data, 31, 31) << 19);
 
-    bus_t funct3 = BITS(data, 12, 14);
-    bus_t shamt = BITS(data, 20, 24);
-    bus_t pred = BITS(data, 24, 27);
-    bus_t succ = BITS(data, 20, 23);
+    word_t funct3 = BITS(data, 12, 14);
+    word_t shamt = BITS(data, 20, 24);
+    word_t pred = BITS(data, 24, 27);
+    word_t succ = BITS(data, 20, 23);
     
-    bus_t shift_arg = BITS(data, 5, 31);
+    word_t shift_arg = BITS(data, 5, 31);
 
     if(op == 0b011011) {
         lui(ctx, rd, imm20);
