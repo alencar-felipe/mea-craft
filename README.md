@@ -18,3 +18,4 @@
 - [RV32I, RV64I Instructions](https://msyksphinz-self.github.io/riscv-isadoc/html/rvi.html)
 - [RISC-V Instruction Encoder/Decoder](https://luplab.gitlab.io/rvcodecjs)
 - [Rudimental RV32I in VHDL](https://github.com/hamsternz/Rudi-RV32I)
+- [RISC-V Datapath](https://rohansinha.nl/images/datapath.jpg)

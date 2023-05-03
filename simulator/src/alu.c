@@ -22,10 +22,6 @@ word_t alu(word_t op, word_t a, word_t b, word_t *c)
             *c = a ^ b;
             break;
 
-        case ALU_UNUSED:
-            *c = 0;
-            break;
-
         case ALU_ADD:
             *c = a + b;
             break;
@@ -41,7 +37,7 @@ word_t alu(word_t op, word_t a, word_t b, word_t *c)
 
         default:
             *c = 0;
-            ret = ERR_ALU;
+            ret = ERROR_ALU;
     }
 
     return ret;
