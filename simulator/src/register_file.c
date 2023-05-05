@@ -21,6 +21,9 @@ word_t register_file(
         ret = ERROR_REGISTER_FILE;
     }
 
+    // x0 is always 0, writes to it are ignored
+    data[0] = 0;
+
     if(read_address_a < REGISTER_FILE_LEN) {
         *read_data_a = data[read_address_a];
     } else {

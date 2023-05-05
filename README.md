@@ -19,3 +19,4 @@
 - [RISC-V Instruction Encoder/Decoder](https://luplab.gitlab.io/rvcodecjs)
 - [Rudimental RV32I in VHDL](https://github.com/hamsternz/Rudi-RV32I)
 - [RISC-V Datapath](https://rohansinha.nl/images/datapath.jpg)
+- [riscv-simple-sv](https://github.com/tilk/riscv-simple-sv)
