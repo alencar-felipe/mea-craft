@@ -2,7 +2,7 @@
 
 word_t mem(ctx_t *ctx, word_t mode, word_t address, word_t *data)
 {
-    word_t ret = ERROR_OK;
+    word_t ret = ERR_OK;
 
     if(address < MEM_LEN) {
         if(mode == MEM_READ) {
@@ -10,10 +10,10 @@ word_t mem(ctx_t *ctx, word_t mode, word_t address, word_t *data)
         } else if(mode == MEM_WRITE) {
             ctx->mem[address] = *data;
         } else {
-            ret = ERROR_MEM;
+            ret = ERR_MEM;
         }
     } else {
-        ret = ERROR_MEM;
+        ret = ERR_MEM;
     }
 
     return ret;

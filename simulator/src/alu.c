@@ -2,7 +2,7 @@
 
 word_t alu(word_t f3, word_t f7, word_t a, word_t b, word_t *c)
 {   
-    word_t ret = ERROR_OK;
+    word_t ret = ERR_OK;
     word_t pad = 0;
 
     /* Support for signed number operations and arithmetical shifts. */
@@ -23,7 +23,7 @@ word_t alu(word_t f3, word_t f7, word_t a, word_t b, word_t *c)
                 break;
 
             default:
-                ret = ERROR_ALU;
+                ret = ERR_ALU;
                 break;
         }
     }
@@ -64,7 +64,7 @@ word_t alu(word_t f3, word_t f7, word_t a, word_t b, word_t *c)
             break;
 
         default:
-            ret = ERROR_ALU;
+            ret = ERR_ALU;
     }
 
     if(ret) *c = 0;

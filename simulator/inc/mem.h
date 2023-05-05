@@ -1,6 +1,6 @@
 #pragma once
 
-#include "error.h"
+#include "err.h"
 #include "types.h"
 
 #define MEM_LEN (1024)

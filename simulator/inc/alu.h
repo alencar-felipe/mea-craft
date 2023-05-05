@@ -1,7 +1,7 @@
 #pragma once
 
 #include "bit_macro.h"
-#include "error.h"
+#include "err.h"
 #include "types.h"
 
 #define ALU_F3_ADD  (0b000)

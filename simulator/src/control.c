@@ -2,12 +2,13 @@
 
 word_t control(ctx_t *ctx)
 {
-    word_t ret = ERROR_OK;
+    word_t ret = ERR_OK;
     word_t inst;
     word_t opcode;
-    word_t r1, d1;
-    word_t r2, d2;
-    word_t r3, d3;
+    word_t immed;
+    word_t rd, dd;
+    word_t rs1, d1;
+    word_t rs2, d2;
     word_t f3, f7;
     word_t tmp;
 
@@ -16,26 +17,41 @@ word_t control(ctx_t *ctx)
         mem(ctx, MEM_READ, ctx->pc + i, &tmp);
         inst += (tmp << 8*i);
     }
-    
-    #include <stdio.h>
-    printf("%#010x\n", inst);
-
     opcode = BITS(inst, 0, 6);
 
     switch(opcode) {
-        // case OPCODE_LUI:
-        //     break;
+        case OPCODE_LUI:
+            rd = BITS(inst, 7, 11);
+            ret = immed_gen(inst, &immed);
+            if(ret) break;
+            immed = immed << 12;
+            ret = sext(SEXT_20, immed, &dd);
+            if(ret) break;
+            ret = reg_file_write(ctx, rd, dd);
+            break;
             
-        // case OPCODE_AUIPC:
-        //     break;
+        case OPCODE_AUIPC:
+            rd = BITS(inst, 7, 11);
+            d1 = ctx->pc;
+            f3 = 0;
+            f7 = 0;
+            ret = immed_gen(inst, &immed);
+            if(ret) break;
+            immed = immed << 12;
+            ret = sext(SEXT_20, immed, &d2);
+            if(ret) break;
+            ret = alu(f3, f7, d1, d2, &dd);
+            if(ret) break;
+            ret = reg_file_write(ctx, rd, dd);
+            break;
 
-        // case OPCODE_JAL:
+        //case OPCODE_JAL:
         //     break;
 
         // case OPCODE_JALR:
         //     break;
 
-        // case OPCODE_BRANC:
+        // case OPCODE_BRANCH:
         //     break;
 
         // case OPCODE_LOAD:
@@ -45,45 +61,51 @@ word_t control(ctx_t *ctx)
         //     break;
 
         case OPCODE_OP_IMMED:
-            r1 = BITS(inst, 15, 19);
-            r2 = 0;
-            r3 = BITS(inst, 7, 11);
+            rd = BITS(inst, 7, 11);
             f3 = BITS(inst, 12, 14);
+            rs1 = BITS(inst, 15, 19);
             f7 = 0;
-
-            ret = reg_file(ctx, r1, &d1, r2, &d2, r3, d3, 1);
+            ret = reg_file_read(ctx, rs1, &d1);
             if(ret) break;
-            ret = immed_gen(inst, &d2);
+            ret = immed_gen(inst, &immed);
             if(ret) break;
-            ret = alu(f3, f7, d1, d2, &d3);
+            ret = alu(f3, f7, d1, immed, &dd);
             if(ret) break;
-            ret = reg_file(ctx, r1, &d1, r2, &d2, r3, d3, 1);
+            ret = reg_file_write(ctx, rd, dd);
             break;
 
         case OPCODE_OP:
-            r1 = BITS(inst, 15, 19);
-            r2 = BITS(inst, 20, 24);
-            r3 = BITS(inst, 7, 11);
+            rd = BITS(inst, 7, 11);
             f3 = BITS(inst, 12, 14);
+            rs1 = BITS(inst, 15, 19);
+            rs2 = BITS(inst, 20, 24);
             f7 = BITS(inst, 25, 31);
-
-            ret = reg_file(ctx, r1, &d1, r2, &d2, r3, d3, 1);
+            ret = reg_file_read(ctx, rs1, &d1);
             if(ret) break;
-            ret = alu(f3, f7, d1, d2, &d3);
+            ret = reg_file_read(ctx, rs2, &d2);
             if(ret) break;
-            ret = reg_file(ctx, r1, &d1, r2, &d2, r3, d3, 1);
+            ret = alu(f3, f7, d1, d2, &dd);
+            if(ret) break;
+            ret = reg_file_write(ctx, rd, dd);
             break;
 
         // case OPCODE_FENCE:
         //     break;
 
-        // case OPCODE_ENVIRONMENT:
-        //     break;
+        case OPCODE_ENV:
+            if(CHK_BIT(inst, 20)) {
+                ret = ERR_BREAK;
+            } else {
+                ret = ERR_CONTROL;
+            }
+            break;
 
         default:
-            ret = ERROR_CONTROL;
+            ret = ERR_CONTROL;
             break;
     }
+
+    ctx->pc += 4;
 
     return ret;
 }

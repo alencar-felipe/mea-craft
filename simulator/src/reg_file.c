@@ -1,40 +1,30 @@
 #include "reg_file.h"
 
-word_t reg_file(
-    ctx_t *ctx,
-    word_t read_address_a,
-    word_t *read_data_a,
-    word_t read_address_b,
-    word_t *read_data_b,
-    word_t write_address,
-    word_t write_data,
-    word_t write_enable
-)
+word_t reg_file_read(ctx_t *ctx, word_t address, word_t *data)
 {
-    word_t ret = ERROR_OK;
+    word_t ret = ERR_OK;
 
-    if(write_address < REG_FILE_LEN) {
-        if(write_address) {
-            ctx->reg_file[write_address] = write_data;
-        }
+    if(address < REG_FILE_LEN) {
+        *data = ctx->reg_file[address];
     } else {
-        ret = ERROR_REG_FILE;
+        ret = ERR_REG_FILE;
     }
 
-    // x0 is always 0, writes to it are ignored
+    return ret;
+}
+
+word_t reg_file_write(ctx_t *ctx, word_t address, word_t data)
+{
+    word_t ret = ERR_OK;
+
+    if(address < REG_FILE_LEN) {
+        ctx->reg_file[address] = data;
+    } else {
+        ret = ERR_REG_FILE;
+    }
+
+    // x0 is always 0, writes to it are ignored (but are not an sts)
     ctx->reg_file[0] = 0;
-
-    if(read_address_a < REG_FILE_LEN) {
-        *read_data_a = ctx->reg_file[read_address_a];
-    } else {
-        ret = ERROR_REG_FILE;
-    }
-
-    if(read_address_b < REG_FILE_LEN) {
-        *read_data_b = ctx->reg_file[read_address_b];
-    } else {
-        ret = ERROR_REG_FILE;
-    }
 
     return ret;
 }

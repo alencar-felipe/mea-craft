@@ -1,7 +1,7 @@
 #pragma once
 
 #include "bit_macro.h"
-#include "error.h"
+#include "err.h"
 #include "opcode.h"
 #include "types.h"
 

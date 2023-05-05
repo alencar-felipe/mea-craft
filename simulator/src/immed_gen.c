@@ -2,7 +2,7 @@
 
 word_t immed_gen(word_t inst, word_t *immed)
 {
-    word_t res = ERROR_OK;
+    word_t res = ERR_OK;
 
     word_t opcode = BITS(inst, 0, 6);
 
@@ -11,7 +11,7 @@ word_t immed_gen(word_t inst, word_t *immed)
         /* I-type immediate */
 
         case OPCODE_LOAD:
-        case OPCODE_OP_IMMEDIATE:
+        case OPCODE_OP_IMMED:
         case OPCODE_JALR:
             *immed = 
                 (BITS(inst, 20, 31) <<  0);
@@ -54,7 +54,7 @@ word_t immed_gen(word_t inst, word_t *immed)
 
         default:
             *immed = 0;
-            res = ERROR_IMMED_GEN;
+            res = ERR_IMMED_GEN;
     }
 
     return res;

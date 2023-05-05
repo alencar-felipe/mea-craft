@@ -1,21 +1,37 @@
-#include "main.h"
+#include <stdio.h>
+#include <stdlib.h>
 
+#include "err.h"
+#include "control.h"
+#include "types.h"
+#include "util.h"
 
 int main()
-{
-    ctx_t *ctx = (ctx_t *) malloc(sizeof(ctx_t));
+{   
+    word_t err;
+    ctx_t ctx;
+    byte_t *mem;
+    
 
-    ctx->pc = 0;
+    mem = malloc(MEM_LEN);
+    load_bin("../software/build/build.bin", mem, MEM_LEN);
 
-    ctx->reg_file[2] = 5;
-    ctx->reg_file[3] = 6;
+    ctx.pc = 0;
+    ctx.mem = mem;
 
-    ((word_t *) ctx->mem)[0] = 0x06400093;
-
-    word_t ret = control(ctx);
-
-    printf("ret: %d\n", ret);
-    printf("x1: %d\n", ctx->reg_file[1]);
+    err = ERR_OK;
+    while(!err) {
+        err = control(&ctx);
+    }
+    
+    printf("err: 0x%08x\n", err);
+    printf("pc:  0x%08x\n", ctx.pc);
+    printf("x1: %d\n", ctx.reg_file[1]);
+    printf("x2: %d\n", ctx.reg_file[2]);
+    printf("x3: %d\n", ctx.reg_file[3]);
+    printf("x4: %d\n", ctx.reg_file[4]);
+    printf("x5: %d\n", ctx.reg_file[5]);
+    printf("x6: %d\n", ctx.reg_file[6]);
 
     return 0;
 }
