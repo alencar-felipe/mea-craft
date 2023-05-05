@@ -64,9 +64,10 @@ word_t alu(word_t f3, word_t f7, word_t a, word_t b, word_t *c)
             break;
 
         default:
-            *c = 0;
             ret = ERROR_ALU;
     }
+
+    if(ret) *c = 0;
 
     return ret;
 }

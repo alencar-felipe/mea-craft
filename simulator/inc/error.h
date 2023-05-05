@@ -5,3 +5,5 @@
 #define ERROR_SIGN_EXT (2)
 #define ERROR_REG_FILE (3)
 #define ERROR_IMMED_GEN (4)
+#define ERROR_MEM (5)
+#define ERROR_CONTROL (6)
