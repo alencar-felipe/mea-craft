@@ -3,9 +3,9 @@
 #include "error.h"
 #include "types.h"
 
-#define REGISTER_FILE_LEN (32)
+#define REG_FILE_LEN (32)
 
-word_t register_file(
+word_t reg_file(
     word_t read_address_a,
     word_t *read_data_a,
     word_t read_address_b,

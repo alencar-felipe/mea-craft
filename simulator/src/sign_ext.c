@@ -1,51 +1,41 @@
-#pragma once
+#include "sign_ext.h"
 
-#include "bit_macros.h"
-#include "error.h"
-
-#define SIGNAL_EXTEND_SIGNED (0)
-#define SIGNAL_EXTEND_UNSIGNED (1)
-
-#define SIGNAL_EXTEND_8 (0)
-#define SIGNAL_EXTEND_16 (1)
-#define SIGNAL_EXTEND_32 (2)
-
-word_t signal_extend(word_t op, word_t width, word_t in, word_t *out)
+word_t sign_ext(word_t op, word_t width, word_t in, word_t *out)
 {
     word_t ret = ERROR_OK;
     word_t pad = 0;
 
     switch(op) {
-        case SIGNAL_EXTEND_SIGNED:
+        case SIGN_EXT_SIGNED:
             pad = 0xFFFFFFFF;
             break;
 
-        case SIGNAL_EXTEND_UNSIGNED:
+        case SIGN_EXT_UNSIGNED:
             pad = 0x00000000;
             break;
 
         default:
-            ret = ERROR_SIGNAL_EXTEND;
+            ret = ERROR_SIGN_EXT;
             break;
     }
 
     switch(width) {
-        case SIGNAL_EXTEND_8:
+        case SIGN_EXT_8:
             *out = (BITS(in ,  0,  7) <<  0) +
                    (BITS(pad,  8, 31) <<  8);
             break;
 
-        case SIGNAL_EXTEND_16:
+        case SIGN_EXT_16:
             *out = (BITS(in ,  0, 15) <<  0) +
                    (BITS(pad, 16, 31) << 16);
             break;
 
-        case SIGNAL_EXTEND_32:
+        case SIGN_EXT_32:
             *out = in; 
             break;
 
         default:
-            ret = ERROR_SIGNAL_EXTEND;
+            ret = ERROR_SIGN_EXT;
             break;
     }
 

@@ -1,4 +1,4 @@
-#include "immediate_generator.h"
+#include "immed_gen.h"
 
 word_t immed_gen(word_t inst, word_t *immed)
 {
@@ -14,42 +14,42 @@ word_t immed_gen(word_t inst, word_t *immed)
         case OPCODE_OP_IMMEDIATE:
         case OPCODE_JALR:
             *immed = 
-                (BITS(inst, 31, 20) <<  0);
+                (BITS(inst, 20, 31) <<  0);
             break;
 
         /* S-type immediate */
 
         case OPCODE_STORE:
             *immed =
-                (BITS(data,  7, 11) <<  0) +
-                (BITS(data, 25, 31) <<  5);
+                (BITS(inst,  7, 11) <<  0) +
+                (BITS(inst, 25, 31) <<  5);
             break;
 
         /* B-type immediate */
 
         case OPCODE_BRANCH:
             *immed =
-                (BITS(data,  8, 11) <<  1) +
-                (BITS(data, 25, 30) <<  5) +
-                (BITS(data,  7,  7) << 11) +
-                (BITS(data, 31, 31) << 12);
+                (BITS(inst,  8, 11) <<  1) +
+                (BITS(inst, 25, 30) <<  5) +
+                (BITS(inst,  7,  7) << 11) +
+                (BITS(inst, 31, 31) << 12);
             break;
 
         /* U-type immediate */
 
         case OPCODE_LUI:
             *immed = 
-                (BITS(data, 12, 31) <<  0); 
+                (BITS(inst, 12, 31) <<  0); 
             break;
 
         /* J-type immediate */
 
         case OPCODE_JAL:
             *immed =
-                (BITS(data, 19, 12) <<  0) +
-                (BITS(data, 20, 20) <<  8) +
-                (BITS(data, 21, 30) <<  9) +
-                (BITS(data, 31, 31) << 19);
+                (BITS(inst, 12, 19) <<  0) +
+                (BITS(inst, 20, 20) <<  8) +
+                (BITS(inst, 21, 30) <<  9) +
+                (BITS(inst, 31, 31) << 19);
             break;
 
         default:
