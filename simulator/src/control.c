@@ -45,8 +45,8 @@ word_t control(ctx_t *ctx)
             ret = reg_file_write(ctx, rd, dd);
             break;
 
-        //case OPCODE_JAL:
-        //     break;
+        case OPCODE_JAL:
+            break;
 
         // case OPCODE_JALR:
         //     break;
@@ -69,7 +69,9 @@ word_t control(ctx_t *ctx)
             if(ret) break;
             ret = immed_gen(inst, &immed);
             if(ret) break;
-            ret = alu(f3, f7, d1, immed, &dd);
+            ret = sext(SEXT_12, immed, &d2);
+            if(ret) break;
+            ret = alu(f3, f7, d1, d2, &dd);
             if(ret) break;
             ret = reg_file_write(ctx, rd, dd);
             break;

@@ -17,6 +17,11 @@ word_t sext(word_t width, word_t in, word_t *out)
                    (BITS(pad,  8, 31) <<  8);
             break;
 
+        case SEXT_12:
+            *out = (BITS(in ,  0, 11) <<  0) +
+                   (BITS(pad, 12, 31) << 12);
+            break;
+
         case SEXT_16:
             *out = (BITS(in ,  0, 15) <<  0) +
                    (BITS(pad, 16, 31) << 16);

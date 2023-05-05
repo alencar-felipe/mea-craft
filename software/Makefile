@@ -55,10 +55,6 @@ $(BIN_TARGET): $(ELF_TARGET)
 $(TXT_TARGET): $(ELF_TARGET)
 	$(OBJDUMP) -D $(ELF_TARGET) > $(TXT_TARGET)
 
-# Run the executable
-run: $(BUILD_DIR)/$(TARGET)
-	./$<
-
 # Clean up object files and executable
 clean:
 	rm -rf $(BUILD_DIR)
