@@ -4,6 +4,7 @@ LD = ld.lld
 OBJCOPY = llvm-objcopy
 OBJDUMP = llvm-objdump
 
+# Define linker script path
 LDSCRIPT = linker.ld
 
 # Define compiler flags
