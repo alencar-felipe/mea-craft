@@ -2,7 +2,7 @@
 
 module reg_file (
     input clk,
-    input write_enable,
+    input write_en,
     input reg_addr_t rd_addr,
     input reg_addr_t rs1_addr,
     input reg_addr_t rs2_addr,
@@ -18,7 +18,7 @@ module reg_file (
     initial data[0] = 0;
 
     always_ff @(posedge clk) begin
-        if (write_enable) begin
+        if (write_en) begin
             if(rd_addr != 0) data[rd_addr] <= rd_data;
         end
     end

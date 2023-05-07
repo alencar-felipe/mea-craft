@@ -19,7 +19,7 @@ module thread (
     word_t next_pc;
     word_t next_inst;
 
-    logic write_enable;
+    logic write_en;
     reg_addr_t rd_addr;
     reg_addr_t rs1_addr;
     reg_addr_t rs2_addr;
@@ -33,7 +33,7 @@ module thread (
 
     reg_file reg_file_0 (
         .clk (clk),
-        .write_enable (write_enable),
+        .write_en (write_en),
         .rd_addr (rd_addr),
         .rs1_addr (rs1_addr),
         .rs2_addr (rs2_addr),
@@ -74,12 +74,12 @@ module thread (
                 next_pc = pc;
                 next_inst = unit_out;
 
-                unit_sel = UNIT_SEL_RAM;
-                unit_ctrl = RAM_CTRL_READ;
+                unit_sel = UNIT_SEL_MEM;
+                unit_ctrl = MEM_CTRL_READ;
                 unit_in[0] = pc;
                 unit_in[1] = 0;
 
-                write_enable = 0;
+                write_en = 0;
                 rd_addr = 0;
                 rs1_addr = 0;
                 rs2_addr = 0;
@@ -96,7 +96,7 @@ module thread (
                 unit_in[0] = rs1_data;
                 unit_in[1] = rs2_data;
 
-                write_enable = 1;
+                write_en = 1;
                 rd_addr = inst[11:7];
                 rs1_addr = inst[19:15];
                 rs2_addr = inst[24:20];
@@ -113,7 +113,7 @@ module thread (
                 unit_in[0] = rs1_data;
                 unit_in[1] = immed;
 
-                write_enable = 1;
+                write_en = 1;
                 rd_addr = inst[11:7];
                 rs1_addr = inst[19:15];
                 rs2_addr = 0;
@@ -130,7 +130,7 @@ module thread (
                 unit_in[0] = pc;
                 unit_in[1] = 4;
 
-                write_enable = 0;
+                write_en = 0;
                 rd_addr = 0;
                 rs1_addr = 0;
                 rs2_addr = 0;
@@ -147,7 +147,7 @@ module thread (
                 unit_in[0] = 0;
                 unit_in[1] = 0;
 
-                write_enable = 0;
+                write_en = 0;
                 rd_addr = 0;
                 rs1_addr = 0;
                 rs2_addr = 0;

@@ -2,7 +2,7 @@
 
 module alu (
     input alu_ctrl_t ctrl,
-    input word_t [1:0] in,
+    input word_t in [1:0],
     output word_t out
 );
     always_comb begin

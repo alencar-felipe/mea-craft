@@ -56,9 +56,9 @@ typedef enum word_t {
 } alu_ctrl_t;
 
 typedef enum word_t {
-    RAM_CTRL_READ = 0,
-    RAM_CTRL_WRITE
-} ram_ctrl_t;
+    MEM_CTRL_READ = 0,
+    MEM_CTRL_WRITE = 1
+} mem_ctrl_t;
 
 typedef enum logic [4:0] {
     SEXT_WIDTH_8 = 7,
@@ -77,7 +77,7 @@ typedef enum {
 
 typedef enum {
     UNIT_SEL_ALU = 0,
-    UNIT_SEL_RAM
+    UNIT_SEL_MEM
 } unit_sel_t;
 
 `endif
