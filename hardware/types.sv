@@ -20,6 +20,15 @@ typedef enum logic [6:0] {
 } isa_opcode_t;    
 
 typedef enum logic [2:0] {
+    ISA_BRANCH_F3_BEQ   = 3'b000,
+    ISA_BRANCH_F3_BNE   = 3'b001,
+    ISA_BRANCH_F3_BLT   = 3'b100,
+    ISA_BRANCH_F3_BGE   = 3'b101,
+    ISA_BRANCH_F3_BLTU  = 3'b110,
+    ISA_BRANCH_F3_BGEU  = 3'b111
+} isa_branch_f3_t;
+
+typedef enum logic [2:0] {
     ISA_ALU_F3_ADD  = 3'b000,
     ISA_ALU_F3_SL   = 3'b001, // shift left
     ISA_ALU_F3_SLT  = 3'b010, // set less than
@@ -31,23 +40,25 @@ typedef enum logic [2:0] {
 } isa_alu_f3_t;
 
 typedef enum word_t {
-    ALU_CTRL_ADD,
-    ALU_CTRL_SUB,
-    ALU_CTRL_SLL,
-    ALU_CTRL_SRL,
-    ALU_CTRL_SRA,
-    ALU_CTRL_SEQ,
-    ALU_CTRL_SLT,
-    ALU_CTRL_SLTU,
-    ALU_CTRL_XOR,
-    ALU_CTRL_OR,
-    ALU_CTRL_AND
+    ALU_CTRL_ADD = 0,   // addition
+    ALU_CTRL_SUB,       // subration
+    ALU_CTRL_SLL,       // shift left logical
+    ALU_CTRL_SRL,       // shift right logical
+    ALU_CTRL_SRA,       // shift right arithmetical
+    ALU_CTRL_SEQ,       // set equal
+    ALU_CTRL_SLT,       // set less than
+    ALU_CTRL_SGE,       // set greater than
+    ALU_CTRL_SLTU,      // set less than unsigned
+    ALU_CTRL_SGEU,      // set greater than unsigned
+    ALU_CTRL_XOR,       // xor
+    ALU_CTRL_OR,        // or
+    ALU_CTRL_AND        // and
 } alu_ctrl_t;
 
 typedef enum word_t {
-    RAM_CTRL_READ,
+    RAM_CTRL_READ = 0,
     RAM_CTRL_WRITE
-}
+} ram_ctrl_t;
 
 typedef enum logic [4:0] {
     SEXT_WIDTH_8 = 7,
@@ -58,14 +69,14 @@ typedef enum logic [4:0] {
 } sext_width_t;
 
 typedef enum {
-    THREAD_STATE_FETCH,
+    THREAD_STATE_FETCH = 0,
     THREAD_STATE_OP,
     THREAD_STATE_OP_IMMED,
     THREAD_STATE_INC_PC
 } thread_state_t;
 
 typedef enum {
-    UNIT_SEL_ALU,
+    UNIT_SEL_ALU = 0,
     UNIT_SEL_RAM
 } unit_sel_t;
 

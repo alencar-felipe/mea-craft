@@ -5,7 +5,7 @@ module thread (
     input rst,
 
     output unit_sel_t unit_sel,
-    output word_t unit_contr,
+    output word_t unit_ctrl,
     output word_t unit_in [1:0],
     input word_t unit_out
 );
@@ -15,7 +15,7 @@ module thread (
     word_t inst;
 
     thread_state_t next_state;
-    word_t next_ic;
+    logic [7:0] next_ic;
     word_t next_pc;
     word_t next_inst;
 
@@ -27,65 +27,131 @@ module thread (
     word_t rs2_data;
     word_t rd_data;
 
+    word_t alu_ctrl;
+
+    word_t immed;
+
     reg_file reg_file_0 (
         .clk (clk),
         .write_enable (write_enable),
         .rd_addr (rd_addr),
         .rs1_addr (rs1_addr),
         .rs2_addr (rs2_addr),
+        .rd_data (rd_data),
         .rs1_data (rs1_data),
-        .rs2_data (rs2_data),
-        .rd_data (rd_data)
+        .rs2_data (rs2_data)
     );
 
-    always @(rst) begin
+    alu_ctrl_gen alu_ctrl_gen_0 (
+        .inst (inst),
+        .alu_ctrl (alu_ctrl)
+    );
+
+    immed_gen immed_gen_0 (
+        .inst (inst),
+        .immed (immed)
+    );
+
+    always_ff @(posedge clk, posedge rst) begin
         if(rst) begin
-            ic = 0;
-            pc = 0;
-            current = THREAD_STATE_FETCH; 
+            ic <= 0;
+            pc <= 0;
+            inst <= 0;
+            state <= THREAD_STATE_FETCH;
+        end
+        else begin
+            ic <= next_ic;
+            pc <= next_pc;
+            state <= next_state;
+            inst <= next_inst;
         end
     end
 
-    always @(posedge clk) begin
-        state = next_state;
-        ic = next_ic;
-        pc = next_pc;
-        inst = next_inst;
-    end
-
     always_comb begin
-        case (current)
+        case (state)
             THREAD_STATE_FETCH: begin
                 next_ic = 1; 
-                
+                next_pc = pc;
+                next_inst = unit_out;
+
                 unit_sel = UNIT_SEL_RAM;
-                unit_contr = RAM_CTRL_READ;
+                unit_ctrl = RAM_CTRL_READ;
                 unit_in[0] = pc;
                 unit_in[1] = 0;
-                next_inst = unit_out;
+
+                write_enable = 0;
+                rd_addr = 0;
+                rs1_addr = 0;
+                rs2_addr = 0;
+                rd_data = 0;
             end
 
             THREAD_STATE_OP: begin
                 next_ic = ic + 1;
+                next_pc = pc;
+                next_inst = inst;
 
                 unit_sel = UNIT_SEL_ALU;
-                unit_contr = 
+                unit_ctrl = alu_ctrl;
                 unit_in[0] = rs1_data;
                 unit_in[1] = rs2_data;
-                rd_data = unit_out;
 
+                write_enable = 1;
+                rd_addr = inst[11:7];
+                rs1_addr = inst[19:15];
+                rs2_addr = inst[24:20];
+                rd_data = unit_out;
             end
 
             THREAD_STATE_OP_IMMED: begin
+                next_ic = ic + 1;
+                next_pc = pc;
+                next_inst = inst;
 
+                unit_sel = UNIT_SEL_ALU;
+                unit_ctrl = alu_ctrl;
+                unit_in[0] = rs1_data;
+                unit_in[1] = immed;
+
+                write_enable = 1;
+                rd_addr = inst[11:7];
+                rs1_addr = inst[19:15];
+                rs2_addr = 0;
+                rd_data = unit_out;
             end
 
             THREAD_STATE_INC_PC: begin
+                next_ic = ic + 1;
+                next_pc = unit_out;
+                next_inst = inst;
 
+                unit_sel = UNIT_SEL_ALU;
+                unit_ctrl = ALU_CTRL_ADD;
+                unit_in[0] = pc;
+                unit_in[1] = 4;
+
+                write_enable = 0;
+                rd_addr = 0;
+                rs1_addr = 0;
+                rs2_addr = 0;
+                rd_data = 0; 
             end
 
             default: begin
+                next_ic = 0;
+                next_pc = 0;
+                next_inst = 0;
 
+                unit_sel = 0;
+                unit_ctrl = 0;
+                unit_in[0] = 0;
+                unit_in[1] = 0;
+
+                write_enable = 0;
+                rd_addr = 0;
+                rs1_addr = 0;
+                rs2_addr = 0;
+                rd_data = 0; 
             end
         endcase
     end
@@ -96,6 +162,18 @@ module thread (
                 case(next_ic)
                     1: next_state       = THREAD_STATE_OP                      ;
                     2: next_state       = THREAD_STATE_INC_PC                  ;
+                    default: next_state = THREAD_STATE_FETCH                   ;
+                endcase
+            end
+            ISA_OPCODE_OP_IMMED: begin
+                case(next_ic)
+                    1: next_state       = THREAD_STATE_OP_IMMED                ;
+                    2: next_state       = THREAD_STATE_INC_PC                  ;
+                    default: next_state = THREAD_STATE_FETCH                   ;
+                endcase
+            end
+            default: begin
+                case(next_ic)
                     default: next_state = THREAD_STATE_FETCH                   ;
                 endcase
             end

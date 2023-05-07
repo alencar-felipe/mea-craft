@@ -17,7 +17,7 @@ module reg_file (
 
     initial data[0] = 0;
 
-    always @(posedge clk) begin
+    always_ff @(posedge clk) begin
         if (write_enable) begin
             if(rd_addr != 0) data[rd_addr] <= rd_data;
         end

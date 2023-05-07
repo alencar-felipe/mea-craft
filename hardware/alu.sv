@@ -12,27 +12,31 @@ module alu (
         logic signed [31:0] sb = $signed(in[1]);
  
         case (ctrl)
-            ALU_OP_ADD:
+            ALU_CTRL_ADD:
                 out = sa + sb;
-            ALU_OP_SUB:
+            ALU_CTRL_SUB:
                 out = sa - sb;
-            ALU_OP_SLL:
+            ALU_CTRL_SLL:
                 out = a << b[4:0];
-            ALU_OP_SRL:
+            ALU_CTRL_SRL:
                 out = a >> b[4:0];
-            ALU_OP_SRA:
+            ALU_CTRL_SRA:
                 out = sa >>> sb[4:0];
-            ALU_OP_SEQ:
+            ALU_CTRL_SEQ:
                 out = {31'b0, a == b};
-            ALU_OP_SLT:
+            ALU_CTRL_SLT:
                 out = {31'b0, sa < sb};
-            ALU_OP_SLTU:
+            ALU_CTRL_SGE:
+                out = {31'b0, sa >= sb};
+            ALU_CTRL_SLTU:
                 out = {31'b0, a < b};
-            ALU_OP_XOR:
+            ALU_CTRL_SGEU:
+                out = {31'b0, a >= b};
+            ALU_CTRL_XOR:
                 out = a ^ b;
-            ALU_OP_OR:
+            ALU_CTRL_OR:
                 out = a | b;
-            ALU_OP_AND:
+            ALU_CTRL_AND:
                 out = a & b;
             default:
                 out = 0;
