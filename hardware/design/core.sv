@@ -6,14 +6,14 @@ module core (
     input word_t dout,
     output word_t din,
     output word_t addr,
-    output write_en
+    output logic write_en
 );
     unit_sel_t unit_sel;
     word_t unit_ctrl;
     word_t unit_in [1:0];
     word_t unit_out;
 
-    word_t alu_ctrl;
+    alu_ctrl_t alu_ctrl;
     word_t alu_out;
 
     thread thread_0 (
@@ -37,21 +37,21 @@ module core (
     always_comb begin
         case(unit_sel)
             UNIT_SEL_ALU: begin
-                alu_ctrl = unit_ctrl;
+                $cast(alu_ctrl, unit_ctrl);
                 write_en = 0;
 
                 unit_out = alu_out;
             end
 
             UNIT_SEL_MEM: begin
-                alu_ctrl = 0;
+                $cast(alu_ctrl, 0);
                 write_en = unit_ctrl[0];
 
                 unit_out = dout;
             end
 
             default: begin
-                alu_ctrl = 0;
+                $cast(alu_ctrl, 0);
                 write_en = 0;
 
                 unit_out = 0;

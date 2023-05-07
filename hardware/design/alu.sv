@@ -4,13 +4,13 @@ module alu (
     input alu_ctrl_t ctrl,
     input word_t in [1:0],
     output word_t out
-);
+);        
     always_comb begin
         word_t a = in[0];
         word_t b = in[1];
         logic signed [31:0] sa = $signed(in[0]);
         logic signed [31:0] sb = $signed(in[1]);
- 
+
         case (ctrl)
             ALU_CTRL_ADD:
                 out = sa + sb;

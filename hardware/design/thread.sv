@@ -138,11 +138,11 @@ module thread (
             end
 
             default: begin
-                next_ic = 0;
-                next_pc = 0;
-                next_inst = 0;
+                next_ic = ic;
+                next_pc = pc;
+                next_inst = inst;
 
-                unit_sel = 0;
+                unit_sel = UNIT_SEL_NONE;
                 unit_ctrl = 0;
                 unit_in[0] = 0;
                 unit_in[1] = 0;
@@ -160,16 +160,16 @@ module thread (
         case (inst[6:0])
             ISA_OPCODE_OP: begin
                 case(next_ic)
+                    default: next_state = THREAD_STATE_FETCH                   ;
                     1: next_state       = THREAD_STATE_OP                      ;
                     2: next_state       = THREAD_STATE_INC_PC                  ;
-                    default: next_state = THREAD_STATE_FETCH                   ;
                 endcase
             end
             ISA_OPCODE_OP_IMMED: begin
                 case(next_ic)
+                    default: next_state = THREAD_STATE_FETCH                   ;
                     1: next_state       = THREAD_STATE_OP_IMMED                ;
                     2: next_state       = THREAD_STATE_INC_PC                  ;
-                    default: next_state = THREAD_STATE_FETCH                   ;
                 endcase
             end
             default: begin
@@ -179,5 +179,4 @@ module thread (
             end
         endcase
     end
-
 endmodule
