@@ -34,7 +34,7 @@ module core_tb;
     
     always #5 clk = ~clk;
 
-    always_ff @(posedge clk) begin
+    always_ff @(negedge clk) begin
         if (write_en) begin
             mem[addr + 0] <= din[ 7: 0];
             mem[addr + 1] <= din[15: 8];

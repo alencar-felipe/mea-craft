@@ -57,7 +57,7 @@ module thread (
             ic <= 0;
             pc <= 0;
             inst <= 0;
-            state <= THREAD_STATE_FETCH;
+            state <= THREAD_STATE_INIT;
         end
         else begin
             ic <= next_ic;
@@ -69,8 +69,42 @@ module thread (
 
     always_comb begin
         case (state)
-            THREAD_STATE_FETCH: begin
+            THREAD_STATE_INIT: begin
+                next_ic = 0; 
+                next_pc = 0;
+                next_inst = 0;
+
+                unit_sel = UNIT_SEL_NONE;
+                unit_ctrl = 0;
+                unit_in[0] = 0;
+                unit_in[1] = 0;
+
+                write_en = 0;
+                rd_addr = 0;
+                rs1_addr = 0;
+                rs2_addr = 0;
+                rd_data = 0;
+            end
+
+            THREAD_STATE_FETCH_0: begin
                 next_ic = 1; 
+                next_pc = pc;
+                next_inst = unit_out;
+
+                unit_sel = UNIT_SEL_MEM;
+                unit_ctrl = MEM_CTRL_READ;
+                unit_in[0] = pc;
+                unit_in[1] = 0;
+
+                write_en = 0;
+                rd_addr = 0;
+                rs1_addr = 0;
+                rs2_addr = 0;
+                rd_data = 0;
+            end
+
+            THREAD_STATE_FETCH_1: begin
+                next_ic = ic + 1; 
                 next_pc = pc;
                 next_inst = unit_out;
 
@@ -137,10 +171,27 @@ module thread (
                 rd_data = 0; 
             end
 
-            default: begin
+            THREAD_STATE_BREAK: begin
                 next_ic = ic;
                 next_pc = pc;
                 next_inst = inst;
+
+                unit_sel = UNIT_SEL_NONE;
+                unit_ctrl = 0;
+                unit_in[0] = 0;
+                unit_in[1] = 0;
+
+                write_en = 0;
+                rd_addr = 0;
+                rs1_addr = 0;
+                rs2_addr = 0;
+                rd_data = 0;
+            end
+
+            default: begin
+                next_ic = 0;
+                next_pc = 0;
+                next_inst = 0;
 
                 unit_sel = UNIT_SEL_NONE;
                 unit_ctrl = 0;
@@ -160,21 +211,32 @@ module thread (
         case (inst[6:0])
             ISA_OPCODE_OP: begin
                 case(next_ic)
-                    default: next_state = THREAD_STATE_FETCH                   ;
-                    1: next_state       = THREAD_STATE_OP                      ;
-                    2: next_state       = THREAD_STATE_INC_PC                  ;
+                    default: next_state = THREAD_STATE_FETCH_0                 ;
+                    1: next_state       = THREAD_STATE_FETCH_1                 ;
+                    2: next_state       = THREAD_STATE_OP                      ;
+                    3: next_state       = THREAD_STATE_INC_PC                  ;
                 endcase
             end
             ISA_OPCODE_OP_IMMED: begin
                 case(next_ic)
-                    default: next_state = THREAD_STATE_FETCH                   ;
-                    1: next_state       = THREAD_STATE_OP_IMMED                ;
-                    2: next_state       = THREAD_STATE_INC_PC                  ;
+                    default: next_state = THREAD_STATE_FETCH_0                 ;
+                    1: next_state       = THREAD_STATE_FETCH_1                 ;
+                    2: next_state       = THREAD_STATE_OP_IMMED                ;
+                    3: next_state       = THREAD_STATE_INC_PC                  ;
+                endcase
+            end
+            ISA_OPCODE_ENV: begin
+                case(next_ic)
+                    default: next_state = THREAD_STATE_FETCH_0                 ;
+                    1: next_state       = THREAD_STATE_FETCH_1                 ;
+                    2: next_state       = THREAD_STATE_BREAK                   ; 
                 endcase
             end
             default: begin
                 case(next_ic)
-                    default: next_state = THREAD_STATE_FETCH                   ;
+                    default: next_state = THREAD_STATE_FETCH_0                 ;
+                    1: next_state       = THREAD_STATE_FETCH_1                 ;
+                    2: next_state       = THREAD_STATE_BREAK                   ;
                 endcase
             end
         endcase

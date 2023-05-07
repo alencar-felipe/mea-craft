@@ -69,10 +69,13 @@ typedef enum logic [4:0] {
 } sext_width_t;
 
 typedef enum {
-    THREAD_STATE_FETCH,
+    THREAD_STATE_INIT,
+    THREAD_STATE_FETCH_0,
+    THREAD_STATE_FETCH_1,
     THREAD_STATE_OP,
     THREAD_STATE_OP_IMMED,
-    THREAD_STATE_INC_PC
+    THREAD_STATE_INC_PC,
+    THREAD_STATE_BREAK
 } thread_state_t;
 
 typedef enum {
