@@ -214,13 +214,13 @@ module thread (
 
             THREAD_STATE_JUMP_REG: begin
                 next_ic = 0; 
-                next_pc = unit_out;
+                next_pc = {unit_out[31:1], 1'b0};
                 next_inst = inst;
 
                 unit_sel = UNIT_SEL_ALU;
                 unit_ctrl = ALU_CTRL_ADD;
                 unit_in[0] = rs1_data;
-                unit_in[1] = pc;
+                unit_in[1] = immed;
 
                 write_en = 0;
                 rd_addr = 0;
