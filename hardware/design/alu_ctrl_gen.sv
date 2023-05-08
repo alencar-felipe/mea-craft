@@ -36,8 +36,15 @@ module alu_ctrl_gen(
             ISA_OPCODE_OP, ISA_OPCODE_OP_IMMED: begin
                 case (inst[14:12])      
                     ISA_ALU_F3_ADD: begin
-                        if(!inst[30]) alu_ctrl = ALU_CTRL_ADD;
-                        else alu_ctrl = ALU_CTRL_SUB;
+                        if (
+                            (inst[6:0] == ISA_OPCODE_OP_IMMED) |
+                            (inst[30] == 0)
+                        ) begin
+                            alu_ctrl = ALU_CTRL_ADD;
+                        end
+                        else begin
+                            alu_ctrl = ALU_CTRL_SUB;
+                        end
                     end
                     ISA_ALU_F3_SL: begin
                         alu_ctrl = ALU_CTRL_SLL;
