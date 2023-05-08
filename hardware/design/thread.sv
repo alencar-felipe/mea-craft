@@ -10,12 +10,12 @@ module thread (
     input word_t unit_out
 );
     thread_state_t state;
-    logic [7:0] ic; // instruction counter
+    logic [4:0] ic; // instruction counter
     word_t pc;
     word_t inst;
 
     thread_state_t next_state;
-    logic [7:0] next_ic;
+    logic [4:0] next_ic;
     word_t next_pc;
     word_t next_inst;
 
@@ -120,6 +120,81 @@ module thread (
                 rd_data = 0;
             end
 
+            THREAD_STATE_LUI: begin
+                next_ic = ic + 1; 
+                next_pc = pc;
+                next_inst = inst;
+
+                unit_sel = UNIT_SEL_NONE;
+                unit_ctrl = 0;
+                unit_in[0] = 0;
+                unit_in[1] = 0;
+
+                write_en = 1;
+                rd_addr = inst[11:7];
+                rs1_addr = 0;
+                rs2_addr = 0;
+                rd_data = immed;
+            end
+
+            THREAD_STATE_BRANCH: begin
+                // next_ic = ic + 1; 
+                next_pc = pc;
+                next_inst = inst;
+
+                unit_sel = UNIT_SEL_ALU;
+                unit_ctrl = alu_ctrl;
+                unit_in[0] = rs1_data;
+                unit_in[1] = rs2_data;
+
+                write_en = 0;
+                rd_addr = 0;
+                rs1_addr = inst[19:15];
+                rs2_addr = inst[24:20];
+                rd_data = 0;
+
+                if (unit_out[0] == 1) begin
+                    next_ic = ic + 1;
+                end
+                else begin
+                    next_ic = ic + 2; 
+                end
+            end
+
+            THREAD_STATE_JUMP: begin
+                next_ic = 0; 
+                next_pc = unit_out;
+                next_inst = inst;
+
+                unit_sel = UNIT_SEL_ALU;
+                unit_ctrl = ALU_CTRL_ADD;
+                unit_in[0] = pc;
+                unit_in[1] = immed;
+
+                write_en = 0;
+                rd_addr = 0;
+                rs1_addr = 0;
+                rs2_addr = 0;
+                rd_data = 0;
+            end
+
+            THREAD_STATE_JUMP_REG: begin
+                next_ic = 0; 
+                next_pc = unit_out;
+                next_inst = inst;
+
+                unit_sel = UNIT_SEL_ALU;
+                unit_ctrl = ALU_CTRL_ADD;
+                unit_in[0] = pc;
+                unit_in[1] = rs2_data;
+
+                write_en = 0;
+                rd_addr = 0;
+                rs1_addr = inst[19:15];
+                rs2_addr = 0;
+                rd_data = 0;
+            end
+
             THREAD_STATE_OP: begin
                 next_ic = ic + 1;
                 next_pc = pc;
@@ -209,6 +284,23 @@ module thread (
 
     always_comb begin
         case (inst[6:0])
+            ISA_OPCODE_LUI: begin
+                case(next_ic)
+                    default: next_state = THREAD_STATE_FETCH_0                 ;
+                    1: next_state       = THREAD_STATE_FETCH_1                 ;
+                    2: next_state       = THREAD_STATE_LUI                     ;
+                    3: next_state       = THREAD_STATE_INC_PC                  ;
+                endcase
+            end
+            ISA_OPCODE_BRANCH: begin
+                case(next_ic)
+                    default: next_state = THREAD_STATE_FETCH_0                 ;
+                    1: next_state       = THREAD_STATE_FETCH_1                 ;
+                    2: next_state       = THREAD_STATE_BRANCH                  ;
+                    3: next_state       = THREAD_STATE_JUMP                    ;
+                    4: next_state       = THREAD_STATE_INC_PC                  ;
+                endcase
+            end
             ISA_OPCODE_OP: begin
                 case(next_ic)
                     default: next_state = THREAD_STATE_FETCH_0                 ;

@@ -24,6 +24,8 @@ module alu (
                 out = sa >>> sb[4:0];
             ALU_CTRL_SEQ:
                 out = {31'b0, a == b};
+            ALU_CTRL_SNE:
+                out = {31'b0, a != b};
             ALU_CTRL_SLT:
                 out = {31'b0, sa < sb};
             ALU_CTRL_SGE:

@@ -10,8 +10,11 @@ module alu_ctrl_gen(
         case (inst[6:0])
             ISA_OPCODE_BRANCH: begin
                 case (inst[14:12])
-                    ISA_BRANCH_F3_BEQ, ISA_BRANCH_F3_BNE: begin
+                    ISA_BRANCH_F3_BEQ: begin
                         alu_ctrl = ALU_CTRL_SEQ;
+                    end
+                    ISA_BRANCH_F3_BNE: begin
+                        alu_ctrl = ALU_CTRL_SNE;
                     end
                     ISA_BRANCH_F3_BLT: begin
                         alu_ctrl = ALU_CTRL_SLT;
@@ -33,7 +36,7 @@ module alu_ctrl_gen(
             ISA_OPCODE_OP, ISA_OPCODE_OP_IMMED: begin
                 case (inst[14:12])      
                     ISA_ALU_F3_ADD: begin
-                        if(inst[30]) alu_ctrl = ALU_CTRL_ADD;
+                        if(!inst[30]) alu_ctrl = ALU_CTRL_ADD;
                         else alu_ctrl = ALU_CTRL_SUB;
                     end
                     ISA_ALU_F3_SL: begin

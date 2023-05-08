@@ -46,6 +46,7 @@ typedef enum word_t {
     ALU_CTRL_SRL,       // shift right logical
     ALU_CTRL_SRA,       // shift right arithmetical
     ALU_CTRL_SEQ,       // set equal
+    ALU_CTRL_SNE,       // set not equal
     ALU_CTRL_SLT,       // set less than
     ALU_CTRL_SGE,       // set greater than
     ALU_CTRL_SLTU,      // set less than unsigned
@@ -72,6 +73,10 @@ typedef enum {
     THREAD_STATE_INIT,
     THREAD_STATE_FETCH_0,
     THREAD_STATE_FETCH_1,
+    THREAD_STATE_LUI,
+    THREAD_STATE_BRANCH,
+    THREAD_STATE_JUMP,
+    THREAD_STATE_JUMP_REG,
     THREAD_STATE_OP,
     THREAD_STATE_OP_IMMED,
     THREAD_STATE_INC_PC,
