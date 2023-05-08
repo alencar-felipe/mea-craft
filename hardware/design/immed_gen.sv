@@ -43,7 +43,8 @@ module immed_gen (
             // J-type
             ISA_OPCODE_JAL: begin
                 width = SEXT_WIDTH_20;
-                sext_in = {12'b0, inst[31], inst[30:21], inst[20], inst[19:12]};
+                sext_in = {11'b0, inst[31], inst[19:12], inst[20],
+                    inst[30:21], 1'b0};
             end
 
             default: begin

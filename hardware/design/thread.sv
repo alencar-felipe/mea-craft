@@ -154,6 +154,23 @@ module thread (
                 rd_data = unit_out;
             end
 
+            THREAD_STATE_JAL: begin
+                next_ic = ic + 1; 
+                next_pc = pc;
+                next_inst = inst;
+
+                unit_sel = UNIT_SEL_ALU;
+                unit_ctrl = ALU_CTRL_ADD;
+                unit_in[0] = pc;
+                unit_in[1] = 4;
+
+                write_en = 1;
+                rd_addr = inst[11:7];
+                rs1_addr = 0;
+                rs2_addr = 0;
+                rd_data = unit_out;
+            end
+
             THREAD_STATE_BRANCH: begin
                 // next_ic = ic + 1; 
                 next_pc = pc;
@@ -202,8 +219,8 @@ module thread (
 
                 unit_sel = UNIT_SEL_ALU;
                 unit_ctrl = ALU_CTRL_ADD;
-                unit_in[0] = pc;
-                unit_in[1] = rs2_data;
+                unit_in[0] = rs1_data;
+                unit_in[1] = pc;
 
                 write_en = 0;
                 rd_addr = 0;
@@ -315,6 +332,24 @@ module thread (
                     1: next_state       = THREAD_STATE_FETCH_1                 ;
                     2: next_state       = THREAD_STATE_AUIPC                   ;
                     3: next_state       = THREAD_STATE_INC_PC                  ;
+                endcase
+            end
+            ISA_OPCODE_JAL: begin
+                case(next_ic)
+                    default: next_state = THREAD_STATE_FETCH_0                 ;
+                    1: next_state       = THREAD_STATE_FETCH_1                 ;
+                    2: next_state       = THREAD_STATE_JAL                     ;
+                    3: next_state       = THREAD_STATE_JUMP                    ;
+                    4: next_state       = THREAD_STATE_INC_PC                  ;
+                endcase
+            end
+            ISA_OPCODE_JALR: begin
+                case(next_ic)
+                    default: next_state = THREAD_STATE_FETCH_0                 ;
+                    1: next_state       = THREAD_STATE_FETCH_1                 ;
+                    2: next_state       = THREAD_STATE_JAL                     ;
+                    3: next_state       = THREAD_STATE_JUMP_REG                ;
+                    4: next_state       = THREAD_STATE_INC_PC                  ;
                 endcase
             end
             ISA_OPCODE_BRANCH: begin

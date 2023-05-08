@@ -20,6 +20,17 @@ test_auipc:
     beq x1, x2, 8                       // assert x1 == x2
     ebreak
 
+test_jal:
+    jal x1, 8                           // x1 = pc + 4; pc += 8
+    ebreak                              // should not run
+    auipc x2, 0                         // x2 = pc
+    addi x2, x2, -4
+    beq x1, x2, 8                       // assert x1 == x2
+    ebreak
+
+test_jalr:
+    
+
 end:
     ebreak
     
