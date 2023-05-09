@@ -35,6 +35,10 @@ module thread (
     state_t next;
     step_t step;
 
+    reg_addr_t isa_rd;
+    reg_addr_t isa_rs1;   
+    reg_addr_t isa_rs2; 
+
     logic write_en;
     reg_addr_t rd_addr;
     reg_addr_t rs1_addr;
@@ -46,6 +50,10 @@ module thread (
     word_t alu_ctrl;
 
     word_t immed;
+
+    assign isa_rd = curr.inst[11:7];
+    assign isa_rs1 = curr.inst[19:15];
+    assign isa_rs2 = curr.inst[24:20]; 
 
     reg_file reg_file_0 (
         .clk (clk),
@@ -110,7 +118,7 @@ module thread (
 
             STEP_LUI: begin
                 write_en = 1;
-                rd_addr = curr.inst[11:7];
+                rd_addr = isa_rd;
                 rd_data = immed;
             end
 
@@ -121,7 +129,7 @@ module thread (
                 unit_in[1] = immed;
 
                 write_en = 1;
-                rd_addr = curr.inst[11:7];
+                rd_addr = isa_rd;
                 rd_data = unit_out;
             end
 
@@ -132,7 +140,7 @@ module thread (
                 unit_in[1] = 4;
 
                 write_en = 1;
-                rd_addr = curr.inst[11:7];
+                rd_addr = isa_rd;
                 rd_data = unit_out;
             end
 
@@ -142,8 +150,8 @@ module thread (
                 unit_in[0] = rs1_data;
                 unit_in[1] = rs2_data;
 
-                rs1_addr = curr.inst[19:15];
-                rs2_addr = curr.inst[24:20];
+                rs1_addr = isa_rs1;
+                rs2_addr = isa_rs2;
 
                 if (unit_out[0] == 0) begin
                     next.ic = curr.ic + 2; // skip jump
@@ -169,7 +177,7 @@ module thread (
                 unit_in[0] = rs1_data;
                 unit_in[1] = immed;
 
-                rs1_addr = curr.inst[19:15];
+                rs1_addr = isa_rs1;
             end
             
             STEP_OP: begin
@@ -179,9 +187,9 @@ module thread (
                 unit_in[1] = rs2_data;
 
                 write_en = 1;
-                rd_addr = curr.inst[11:7];
-                rs1_addr = curr.inst[19:15];
-                rs2_addr = curr.inst[24:20];
+                rd_addr = isa_rd;
+                rs1_addr = isa_rs1;
+                rs2_addr = isa_rs2;
                 rd_data = unit_out;
             end
 
@@ -192,8 +200,8 @@ module thread (
                 unit_in[1] = immed;
 
                 write_en = 1;
-                rd_addr = curr.inst[11:7];
-                rs1_addr = curr.inst[19:15];
+                rd_addr = isa_rd;
+                rs1_addr = isa_rs1;
                 rd_data = unit_out;
             end
 
