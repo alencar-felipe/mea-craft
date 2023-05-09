@@ -61,33 +61,13 @@ typedef enum word_t {
     MEM_CTRL_WRITE = 1
 } mem_ctrl_t;
 
-typedef enum logic [4:0] {
-    SEXT_WIDTH_8 = 7,
-    SEXT_WIDTH_12 = 11,
-    SEXT_WIDTH_16 = 15,
-    SEXT_WIDTH_20 = 19,
-    SEXT_WIDTH_32 = 31 
-} sext_width_t;
+typedef union packed {
+    alu_ctrl_t alu;
+    mem_ctrl_t mem;
+} ctrl_t;
 
 typedef enum {
-    THREAD_STATE_INIT,
-    THREAD_STATE_FETCH_0,
-    THREAD_STATE_FETCH_1,
-    THREAD_STATE_LUI,
-    THREAD_STATE_AUIPC,
-    THREAD_STATE_JAL,
-    THREAD_STATE_JALR,
-    THREAD_STATE_BRANCH,
-    THREAD_STATE_JUMP,
-    THREAD_STATE_JUMP_REG,
-    THREAD_STATE_OP,
-    THREAD_STATE_OP_IMMED,
-    THREAD_STATE_INC_PC,
-    THREAD_STATE_BREAK
-} thread_state_t;
-
-typedef enum {
-    UNIT_SEL_NONE,
+    UNIT_SEL_NONE = 0,
     UNIT_SEL_ALU,
     UNIT_SEL_MEM
 } unit_sel_t;
