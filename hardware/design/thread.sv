@@ -210,9 +210,9 @@ module thread (
                 rd_addr = isa_rd;
 
                 case (isa_f3)
-                    ISA_MEM_F3_BYTE_U:
+                    ISA_MEM_F3_BYTE:
                         rd_data = { {24{unit_out[7]}} , unit_out[7:0] };
-                    ISA_MEM_F3_HALF_U:
+                    ISA_MEM_F3_HALF:
                         rd_data = { {16{unit_out[15]}} , unit_out[15:0] };
                     default:
                         rd_data = unit_out;
