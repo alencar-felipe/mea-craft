@@ -121,8 +121,58 @@ test_mem_1:
     beq x7, x6, 8                       // assert x7 == x6
     ebreak
 
-    lhu x7, 0(x1)                       // x7 = sext(array[0][31:0])
+    lhu x7, 0(x1)                       // x7 = array[0][31:0]
     beq x7, x5, 8                       // assert x7 == x5
+    ebreak
+
+test_op_immed: 
+    li x1, 40                           // x1 = 40
+    li x2, 0x0AA                        // x2 = 0x00000AAA
+    li x3, -40                          // x3 = -40
+
+    addi x10, x1, 40                    // x10 = x1 + 40
+    li x11, 80                         // x11 = 80
+    beq x10, x11, 8                     // assert x10 == x11
+    ebreak
+    
+    slti x10, x1, -40                   // x10 = x1 < -40
+    li x11, 0
+    beq x10, x11, 8                     // assert x10 == x11
+    ebreak
+
+    sltiu x10, x1, -40                  // x10 = u(x1) < u(-40)
+    li x11, 1
+    beq x10, x11, 8                     // assert x10 == x11
+    ebreak
+
+    xori x10, x2, 0x92                  // x10 = x2 ^ 0x92
+    li x11, 0x38                        // x11 = 0x38
+    beq x10, x11, 8                     // assert x10 == x11
+    ebreak
+
+    ori x10, x2, 0x92                   // x10 = x2 | 0x92
+    li x11, 0xBA                        // x11 = 0xBA
+    beq x10, x11, 8                     // assert x10 == x11
+    ebreak
+
+    andi x10, x2, 0x92                  // x10 = x2 & 0x92
+    li x11, 0x82                        // x11 = 0x82
+    beq x10, x11, 8                     // assert x10 == x11
+    ebreak
+
+    slli x10, x1, 2                     // x10 = x1 << 2
+    li x11, 160                         // x11 = 160
+    beq x10, x11, 8                     // assert x10 == x11
+    ebreak
+
+    srli x10, x1, 2                     // x10 = x2 >> 2
+    li x11, 10                          // x11 = 2
+    beq x10, x11, 8                     // assert x10 == x11
+    ebreak
+
+    srai x10, x3, 2                     // x10 = s(x10) >> 2
+    li x11, -10                         // x11 = -10
+    beq x10, x11, 8                     // assert x10 == x11
     ebreak
 
 end:

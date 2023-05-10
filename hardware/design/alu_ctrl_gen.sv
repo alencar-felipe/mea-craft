@@ -59,8 +59,12 @@ module alu_ctrl_gen(
                         alu_ctrl = ALU_CTRL_XOR;
                     end
                     ISA_ALU_F3_SR: begin
-                        if(inst[30]) alu_ctrl = ALU_CTRL_SRA;
-                        alu_ctrl = ALU_CTRL_SRL;
+                        if(inst[30]) begin
+                            alu_ctrl = ALU_CTRL_SRA;
+                        end
+                        else begin
+                            alu_ctrl = ALU_CTRL_SRL;
+                        end
                     end
                     ISA_ALU_F3_OR: begin
                         alu_ctrl = ALU_CTRL_OR;
