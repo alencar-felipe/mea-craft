@@ -66,6 +66,39 @@ test_branch:
     bgeu x4, x1, 8                      // if u(x4) >= u(x1); pc = pc + 8
     ebreak                              // should not run
 
+test_mem:
+    lui x1, %hi(array)                  // x1 = array
+    addi x1, x1, %lo(array)              
+
+    lui x2, %hi(0xDEADBEEF)             // x2 = 0xDEADBEEF
+    addi x2, x2, %lo(0xDEADBEEF)
+    
+    lui x3, %hi(0xBADC0FFE)             // x3 = 0xBADC0FFE
+    addi x3, x3, %lo(0xBADC0FFE)
+
+    lw x4, 0(x1)                        // x4 = array[0]
+    beq x4, x2, 8                       // assert x4 == x2
+    ebreak
+
+    lw x5, 4(x1)                        // x5 = array[1]
+    beq x5, x3, 8                       // assert x5 == x2
+    ebreak
+
+    sw x3, 0(x1)                        // array[0] = x3
+    sw x2, 4(x1)                        // array[1] = x2
+
+    lw x4, 0(x1)                        // x4 = array[1]
+    beq x4, x3, 8                       // assert x4 == x2
+    ebreak
+
+    lw x5, 4(x1)                        // x5 = array[0]
+    beq x5, x2, 8                       // assert x5 == x2
+    ebreak
+
 end:
     ebreak
     
+.section .data
+array:
+  .word 0xDEADBEEF
+  .word 0xBADC0FFE

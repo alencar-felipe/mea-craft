@@ -13,6 +13,7 @@ module thread (
         logic [4:0] ic;
         word_t pc;
         word_t inst;
+        word_t tmp;
     } state_t;
 
     typedef enum {
@@ -23,6 +24,9 @@ module thread (
         STEP_BRANCH,
         STEP_JUMP,
         STEP_JUMP_REG,
+        STEP_CALC_ADDR,
+        STEP_LOAD,
+        STEP_STORE,
         STEP_OP,
         STEP_OP_IMMED,
         STEP_INC_PC,
@@ -36,6 +40,7 @@ module thread (
     reg_addr_t isa_rd;
     reg_addr_t isa_rs1;   
     reg_addr_t isa_rs2; 
+    logic [2:0] isa_f3;
 
     logic write_en;
     reg_addr_t rd_addr;
@@ -46,12 +51,13 @@ module thread (
     word_t rd_data;
 
     word_t alu_ctrl;
-
+    word_t mem_ctrl;
     word_t immed;
 
     assign isa_rd = curr.inst[11:7];
     assign isa_rs1 = curr.inst[19:15];
     assign isa_rs2 = curr.inst[24:20]; 
+    assign isa_f3 = curr.inst[14:12];
 
     reg_file reg_file_0 (
         .clk (clk),
@@ -69,6 +75,11 @@ module thread (
         .alu_ctrl (alu_ctrl)
     );
 
+    mem_ctrl_gen mem_ctrl_gen_0 (
+        .inst (curr.inst),
+        .mem_ctrl (mem_ctrl)
+    );
+
     immed_gen immed_gen_0 (
         .inst (curr.inst),
         .immed (immed)
@@ -76,7 +87,7 @@ module thread (
 
     always_ff @(posedge clk, posedge rst) begin
         if(rst) begin
-            curr <= '{ic: 0, pc: 0, inst: 0};
+            curr <= '{ic: 0, pc: 0, inst: 0, tmp: 0};
         end
         else if (unit_ready) begin
             curr <= next;
@@ -90,7 +101,8 @@ module thread (
         next.ic = curr.ic + 1;
         next.pc = curr.pc;
         next.inst = curr.inst;
-        
+        next.tmp = 0;
+
         unit_sel = UNIT_SEL_NONE;
         unit_in = '{0, 0, 0};
 
@@ -108,7 +120,7 @@ module thread (
                 next.inst = unit_out;
 
                 unit_sel = UNIT_SEL_MEM;
-                unit_in[0] = MEM_CTRL_READ;
+                unit_in[0] = MEM_CTRL_READ_WORD;
                 unit_in[1] = curr.pc;
                 unit_in[2] = 0;
             end
@@ -175,6 +187,45 @@ module thread (
                 unit_in[2] = immed;
 
                 rs1_addr = isa_rs1;
+            end
+
+            STEP_CALC_ADDR: begin
+                next.tmp = unit_out;
+
+                unit_sel = UNIT_SEL_ALU;
+                unit_in[0] = ALU_CTRL_ADD;
+                unit_in[1] = rs1_data;
+                unit_in[2] = immed; 
+
+                rs1_addr = isa_rs1;
+            end
+            
+            STEP_LOAD: begin                
+                unit_sel = UNIT_SEL_MEM;
+                unit_in[0] = mem_ctrl;
+                unit_in[1] = curr.tmp;
+                unit_in[2] = 0;
+
+                write_en = 1;
+                rd_addr = isa_rd;
+
+                case (isa_f3)
+                    ISA_MEM_F3_BYTE_U:
+                        rd_data = { {24{unit_out[7]}} , unit_out[7:0] };
+                    ISA_MEM_F3_HALF_U:
+                        rd_data = { {16{unit_out[15]}} , unit_out[15:0] };
+                    default:
+                        rd_data = unit_out;
+                endcase                
+            end
+
+            STEP_STORE: begin
+                unit_sel = UNIT_SEL_MEM;
+                unit_in[0] = mem_ctrl;
+                unit_in[1] = curr.tmp;
+                unit_in[2] = rs2_data;
+
+                rs2_addr = isa_rs2;
             end
             
             STEP_OP: begin
@@ -254,6 +305,22 @@ module thread (
                     default: step   = STEP_FETCH                               ;
                     1: step         = STEP_BRANCH                              ;
                     2: step         = STEP_JUMP                                ;
+                    3: step         = STEP_INC_PC                              ;
+                endcase
+            end
+            ISA_OPCODE_LOAD: begin
+                case(curr.ic)
+                    default: step   = STEP_FETCH                               ;
+                    1: step         = STEP_CALC_ADDR                           ;
+                    2: step         = STEP_LOAD                                ;
+                    3: step         = STEP_INC_PC                              ;
+                endcase
+            end
+            ISA_OPCODE_STORE: begin
+                case(curr.ic)
+                    default: step   = STEP_FETCH                               ;
+                    1: step         = STEP_CALC_ADDR                           ;
+                    2: step         = STEP_STORE                               ;
                     3: step         = STEP_INC_PC                              ;
                 endcase
             end

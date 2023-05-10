@@ -39,6 +39,14 @@ typedef enum logic [2:0] {
     ISA_ALU_F3_AND  = 3'b111
 } isa_alu_f3_t;
 
+typedef enum logic [2:0] {
+    ISA_MEM_F3_BYTE     = 3'b000, // byte
+    ISA_MEM_F3_HALF     = 3'b001, // half word
+    ISA_MEM_F3_WORD     = 3'b010, // word
+    ISA_MEM_F3_BYTE_U   = 3'b100, // unsigned byte
+    ISA_MEM_F3_HALF_U   = 3'b101  // unsigned half word
+} isa_mem_f3_t;
+
 typedef enum word_t {
     ALU_CTRL_ADD,       // addition
     ALU_CTRL_SUB,       // subration
@@ -57,12 +65,12 @@ typedef enum word_t {
 } alu_ctrl_t;
 
 typedef enum word_t {
-    MEM_CTRL_READ,
     MEM_CTRL_READ_BYTE,
     MEM_CTRL_READ_HALF,
-    MEM_CTRL_WRITE,
-    MEM_CTRL_WRITE_BYTE,
-    MEM_CTRL_WRITE_HALF
+    MEM_CTRL_READ_WORD,
+    MEM_CTRL_STORE_BYTE,
+    MEM_CTRL_STORE_HALF,
+    MEM_CTRL_STORE_WORD
 } mem_ctrl_t;
 
 typedef enum {
