@@ -8,17 +8,17 @@ module core_tb;
     word_t dout;
     word_t din;
     word_t addr;
-    logic write_en;
+    mem_ctrl_t ctrl;
 
     byte mem [1023:0];
 
     core uut (
         .clk (clk),
         .rst (rst),
-        .dout (dout),
-        .din (din),
-        .addr (addr),
-        .write_en (write_en)
+        .mem_dout(dout),
+        .mem_din(din),
+        .mem_addr(addr),
+        .mem_ctrl(ctrl)
     );
 
     initial begin  
@@ -35,17 +35,39 @@ module core_tb;
     always #5 clk = ~clk;
 
     always_ff @(posedge clk) begin
-        if (write_en) begin
-            mem[addr + 0] <= din[ 7: 0];
-            mem[addr + 1] <= din[15: 8];
-            mem[addr + 2] <= din[23:16];
-            mem[addr + 3] <= din[31:24];
-        end
-        
-        dout[ 7: 0] <= mem[addr + 0];
-        dout[15: 8] <= mem[addr + 1];
-        dout[23:16] <= mem[addr + 2];
-        dout[31:24] <= mem[addr + 3];
+        case (ctrl)
+            MEM_CTRL_READ: begin
+                dout[ 7: 0] <= mem[addr + 0];
+                dout[15: 8] <= mem[addr + 1];
+                dout[23:16] <= mem[addr + 2];
+                dout[31:24] <= mem[addr + 3];
+            end
+            MEM_CTRL_READ_BYTE: begin
+                dout[ 7: 0] <= mem[addr + 0];
+                dout[15: 8] <= 0;
+                dout[23:16] <= 0;
+                dout[31:24] <= 0;
+            end
+            MEM_CTRL_READ_HALF: begin
+                dout[ 7: 0] <= mem[addr + 0];
+                dout[15: 8] <= mem[addr + 1];
+                dout[23:16] <= 0;
+                dout[31:24] <= 0;
+            end
+            MEM_CTRL_WRITE: begin
+                mem[addr + 0] <= din[ 7: 0];
+                mem[addr + 1] <= din[15: 8];
+                mem[addr + 2] <= din[23:16];
+                mem[addr + 3] <= din[31:24];
+            end
+            MEM_CTRL_WRITE_BYTE: begin
+                mem[addr + 0] <= din[ 7: 0];
+            end
+            MEM_CTRL_WRITE_HALF: begin
+                mem[addr + 0] <= din[ 7: 0];
+                mem[addr + 1] <= din[15: 8];
+            end
+        endcase 
     end
 
 endmodule

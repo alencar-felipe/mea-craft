@@ -40,7 +40,7 @@ typedef enum logic [2:0] {
 } isa_alu_f3_t;
 
 typedef enum word_t {
-    ALU_CTRL_ADD = 0,   // addition
+    ALU_CTRL_ADD,       // addition
     ALU_CTRL_SUB,       // subration
     ALU_CTRL_SLL,       // shift left logical
     ALU_CTRL_SRL,       // shift right logical
@@ -57,19 +57,21 @@ typedef enum word_t {
 } alu_ctrl_t;
 
 typedef enum word_t {
-    MEM_CTRL_READ = 0,
-    MEM_CTRL_WRITE = 1
+    MEM_CTRL_READ,
+    MEM_CTRL_READ_BYTE,
+    MEM_CTRL_READ_HALF,
+    MEM_CTRL_WRITE,
+    MEM_CTRL_WRITE_BYTE,
+    MEM_CTRL_WRITE_HALF
 } mem_ctrl_t;
 
-typedef union packed {
-    alu_ctrl_t alu;
-    mem_ctrl_t mem;
-} ctrl_t;
-
 typedef enum {
-    UNIT_SEL_NONE = 0,
+    UNIT_SEL_NONE,
     UNIT_SEL_ALU,
     UNIT_SEL_MEM
 } unit_sel_t;
+
+typedef word_t [2:0] unit_in_t;
+typedef word_t unit_out_t;
 
 `endif

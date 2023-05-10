@@ -3,12 +3,10 @@
 module thread (
     input clk,
     input rst,
-
-    output unit_sel_t unit_sel,
-    output ctrl_t unit_ctrl,
-    output word_t unit_in [1:0],
-    input word_t unit_out,
-    input logic unit_ready
+    input logic unit_ready,
+    input unit_out_t unit_out,
+    output unit_in_t unit_in,
+    output unit_sel_t unit_sel
 );
 
     typedef struct packed {
@@ -94,8 +92,7 @@ module thread (
         next.inst = curr.inst;
         
         unit_sel = UNIT_SEL_NONE;
-        unit_ctrl = 0;
-        unit_in = '{0, 0};
+        unit_in = '{0, 0, 0};
 
         write_en = 0;
         rd_addr = 0;
@@ -111,9 +108,9 @@ module thread (
                 next.inst = unit_out;
 
                 unit_sel = UNIT_SEL_MEM;
-                unit_ctrl = MEM_CTRL_READ;
-                unit_in[0] = curr.pc;
-                unit_in[1] = 0;
+                unit_in[0] = MEM_CTRL_READ;
+                unit_in[1] = curr.pc;
+                unit_in[2] = 0;
             end
 
             STEP_LUI: begin
@@ -124,9 +121,9 @@ module thread (
 
             STEP_AUIPC: begin
                 unit_sel = UNIT_SEL_ALU;
-                unit_ctrl = ALU_CTRL_ADD;
-                unit_in[0] = curr.pc;
-                unit_in[1] = immed;
+                unit_in[0] = ALU_CTRL_ADD;
+                unit_in[1] = curr.pc;
+                unit_in[2] = immed;
 
                 write_en = 1;
                 rd_addr = isa_rd;
@@ -135,9 +132,9 @@ module thread (
 
             STEP_JAL: begin
                 unit_sel = UNIT_SEL_ALU;
-                unit_ctrl = ALU_CTRL_ADD;
-                unit_in[0] = curr.pc;
-                unit_in[1] = 4;
+                unit_in[0] = ALU_CTRL_ADD;
+                unit_in[1] = curr.pc;
+                unit_in[2] = 4;
 
                 write_en = 1;
                 rd_addr = isa_rd;
@@ -146,9 +143,9 @@ module thread (
 
             STEP_BRANCH: begin
                 unit_sel = UNIT_SEL_ALU;
-                unit_ctrl = alu_ctrl;
-                unit_in[0] = rs1_data;
-                unit_in[1] = rs2_data;
+                unit_in[0] = alu_ctrl;
+                unit_in[1] = rs1_data;
+                unit_in[2] = rs2_data;
 
                 rs1_addr = isa_rs1;
                 rs2_addr = isa_rs2;
@@ -163,9 +160,9 @@ module thread (
                 next.pc = unit_out;
 
                 unit_sel = UNIT_SEL_ALU;
-                unit_ctrl = ALU_CTRL_ADD;
-                unit_in[0] = curr.pc;
-                unit_in[1] = immed;
+                unit_in[0] = ALU_CTRL_ADD;
+                unit_in[1] = curr.pc;
+                unit_in[2] = immed;
             end
 
             STEP_JUMP_REG: begin
@@ -173,18 +170,18 @@ module thread (
                 next.pc = {unit_out[31:1], 1'b0};
 
                 unit_sel = UNIT_SEL_ALU;
-                unit_ctrl = ALU_CTRL_ADD;
-                unit_in[0] = rs1_data;
-                unit_in[1] = immed;
+                unit_in[0] = ALU_CTRL_ADD;
+                unit_in[1] = rs1_data;
+                unit_in[2] = immed;
 
                 rs1_addr = isa_rs1;
             end
             
             STEP_OP: begin
                 unit_sel = UNIT_SEL_ALU;
-                unit_ctrl = alu_ctrl;
-                unit_in[0] = rs1_data;
-                unit_in[1] = rs2_data;
+                unit_in[0] = alu_ctrl;
+                unit_in[1] = rs1_data;
+                unit_in[2] = rs2_data;
 
                 write_en = 1;
                 rd_addr = isa_rd;
@@ -195,9 +192,9 @@ module thread (
 
             STEP_OP_IMMED: begin
                 unit_sel = UNIT_SEL_ALU;
-                unit_ctrl = alu_ctrl;
-                unit_in[0] = rs1_data;
-                unit_in[1] = immed;
+                unit_in[0] = alu_ctrl;
+                unit_in[1] = rs1_data;
+                unit_in[2] = immed;
 
                 write_en = 1;
                 rd_addr = isa_rd;
@@ -209,9 +206,9 @@ module thread (
                 next.pc = unit_out;
 
                 unit_sel = UNIT_SEL_ALU;
-                unit_ctrl = ALU_CTRL_ADD;
-                unit_in[0] = curr.pc;
-                unit_in[1] = 4;
+                unit_in[0] = ALU_CTRL_ADD;
+                unit_in[1] = curr.pc;
+                unit_in[2] = 4;
             end
 
             STEP_BREAK: begin
