@@ -175,6 +175,65 @@ test_op_immed:
     beq x10, x11, 8                     // assert x10 == x11
     ebreak
 
+test_op: 
+    li x1, 40                           // x1 = 40
+    li x2, 0x0AA                        // x2 = 0x00000AAA
+    li x3, -40                          // x3 = -40
+
+    li x12, 40                          // x12 = 40
+    add x10, x1, x12                   // x10 = x1 + x12
+    li x11, 80                          // x11 = 80
+    beq x10, x11, 8                     // assert x10 == x11
+    ebreak
+    
+    li x12, -40                         // x12 = -40
+    slt x10, x1, x12                    // x10 = x1 < x12
+    li x11, 0
+    beq x10, x11, 8                     // assert x10 == x11
+    ebreak
+
+    li x12, -40                         // x12 = -40
+    sltu x10, x1, x12                   // x10 = u(x1) < u(-40)
+    li x11, 1
+    beq x10, x11, 8                     // assert x10 == x11
+    ebreak
+
+    li x12, 0x92                        // x12 = 0x92
+    xor x10, x2, x12                    // x10 = x2 ^ x12
+    li x11, 0x38                        // x11 = 0x38
+    beq x10, x11, 8                     // assert x10 == x11
+    ebreak
+
+    li x12, 0x92                        // x12 = 0x92
+    or x10, x2, x12                     // x10 = x2 | x12
+    li x11, 0xBA                        // x11 = 0xBA
+    beq x10, x11, 8                     // assert x10 == x11
+    ebreak
+
+    li x12, 0x92
+    and x10, x2, x12                    // x10 = x2 & x12
+    li x11, 0x82                        // x11 = 0x82
+    beq x10, x11, 8                     // assert x10 == x11
+    ebreak
+
+    li x12, 2                           // x12 = 2
+    sll x10, x1, x12                    // x10 = x1 << x12
+    li x11, 160                         // x11 = 160
+    beq x10, x11, 8                     // assert x10 == x11
+    ebreak
+
+    li x12, 2                           // x12 = 2
+    srl x10, x1, x12                   // x10 = x2 >> x12
+    li x11, 10                          // x11 = 2
+    beq x10, x11, 8                     // assert x10 == x11
+    ebreak
+
+    li x12, 2                           // x12 = 2
+    sra x10, x3, x12                    // x10 = s(x10) >> x12
+    li x11, -10                         // x11 = -10
+    beq x10, x11, 8                     // assert x10 == x11
+    ebreak
+
 end:
     ebreak
     
