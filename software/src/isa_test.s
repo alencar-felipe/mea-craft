@@ -1,241 +1,241 @@
 .section .text
-.globl _start
+.globl test_isa
 
-_start:
+test_isa:
 
-test_lui:
-    lui x1, 1                           // x1 = 0x1000
-    addi x2, x0, 1                      // x2 = 0x1000
-    slli x2, x2, 12  
-    beq x1, x2, 8                       // assert x1 == x2
+test_isa_lui:
+    lui t0, 1                           // t0 = 0x1000
+    addi t1, x0, 1                      // t1 = 0x1000
+    slli t1, t1, 12  
+    beq t3, t4, 8                       // assert t0 == t1
     ebreak
 
-test_auipc:
-    auipc x1, 1                         // x1 = test_auipc + 0x1000
-    lui x2, %hi(test_auipc)             // x2 = text_auipc + 0x1000
-    addi x2, x2, %lo(test_auipc)
-    addi x3, x0, 1
-    slli x3, x3, 12
-    add x2, x2, x3
-    beq x1, x2, 8                       // assert x1 == x2
+test_isa_auipc:
+    auipc t0, 1                         // t0 = test_isa_auipc + 0x1000
+    lui t1, %hi(test_isa_auipc)         // t1 = text_auipc + 0x1000
+    addi t1, t1, %lo(test_isa_auipc)
+    addi t2, x0, 1
+    slli t2, t2, 12
+    add t1, t1, t2
+    beq t3, t4, 8                       // assert t0 == t1
     ebreak
 
-test_jal:
-    jal x1, 8                           // x1 = pc + 4; pc += 8
+test_isa_jal:
+    jal t0, 8                           // t0 = pc + 4; pc += 8
     ebreak                              // should not run
-    auipc x2, 0                         // x2 = pc
-    addi x2, x2, -4                     // x2 = x2 - 4
-    beq x1, x2, 8                       // assert x1 == x2
+    auipc t1, 0                         // t1 = pc
+    addi t1, t1, -4                     // t1 = t1 - 4
+    beq t3, t4, 8                       // assert t0 == t1
     ebreak
 
-test_jalr:
-    auipc x2, 0                         // x2 = pc
-    jalr x1, x2, 13                     // x1 = pc + 4; pc = (x2 + 13) & ~1; 
+test_isa_jalr:
+    auipc t1, 0                         // t1 = pc
+    jalr t0, t1, 13                     // t0 = pc + 4; pc = (x2 + 13) & ~1; 
     ebreak                              // should not run
-    addi x2, x2, 8                      // x2 = x2 + 8
-    beq x1, x1, 8                       // assert x2 == x3
+    addi t1, t1, 8                      // t1 = t1 + 8
+    beq t0, t0, 8                       // assert t1 == t2
     ebreak
 
-test_branch:
-    addi x1, x0, 10                     // x1 = 10
-    addi x2, x0, 10                     // x2 = 10
-    addi x3, x0, 11                     // x3 = 11
-    addi x4, x0, -15                    // x4 = -15
+test_isa_branch:
+    addi t0, x0, 10                     // t0 = 10
+    addi t1, x0, 10                     // t1 = 10
+    addi t2, x0, 11                     // t2 = 11
+    addi t3, x0, -15                    // t3 = -15
     
-    beq x1, x3, 8                       // if x1 == x3; pc = pc + 8
-    beq x1, x2, 8                       // if x1 == x2; pc = pc + 8
+    beq t0, t2, 8                       // if t0 == t2; pc = pc + 8
+    beq t3, t4, 8                       // if t0 == t1; pc = pc + 8
     ebreak                              // should not run
 
-    bne x1, x2, 8                       // if x1 != x2; pc = pc + 8
-    bne x1, x3, 8                       // if x1 != x3, pc = pc + 8
+    bne t0, t1, 8                       // if t0 != t1; pc = pc + 8
+    bne t0, t2, 8                       // if t0 != t2, pc = pc + 8
     ebreak                              // should not run
 
-    blt x1, x2, 8                       // if x1 < x2; pc = pc + 8
-    blt x4, x1, 8                       // if x4 < x1; pc = pc + 8
+    blt t0, t1, 8                       // if t0 < t1; pc = pc + 8
+    blt t3, t0, 8                       // if t3 < t0; pc = pc + 8
     ebreak                              // should not run
 
-    bge x2, x3, 8                       // if x2 >= x3; pc = pc + 8
-    bge x3, x2, 8                       // if x3 >= x2; pc = pc + 8
+    bge t1, t2, 8                       // if t1 >= t2; pc = pc + 8
+    bge t2, t1, 8                       // if t2 >= t1; pc = pc + 8
     ebreak                              // should not run
 
-    bltu x4, x1, 8                      // if u(x4) < u(x2); pc = pc + 8
-    bltu x1, x4, 8                      // uf u(x2) < u(x4); pc = pc + 8
+    bltu t3, t0, 8                      // if u(x4) < u(x2); pc = pc + 8
+    bltu t0, t3, 8                      // uf u(x2) < u(x4); pc = pc + 8
     ebreak                              // should not run
 
-    bgeu x1, x4, 8                      // if u(x1) >= u(x4); pc = pc + 8
-    bgeu x4, x1, 8                      // if u(x4) >= u(x1); pc = pc + 8
+    bgeu t0, t3, 8                      // if u(x1) >= u(x4); pc = pc + 8
+    bgeu t3, t0, 8                      // if u(x4) >= u(x1); pc = pc + 8
     ebreak                              // should not run
 
-test_mem_0:
-    lui x1, %hi(array)                  // x1 = array
-    addi x1, x1, %lo(array)              
+test_isa_mem_0:
+    lui t0, %hi(array)                  // t0 = array
+    addi t0, t0, %lo(array)              
 
-    lui x2, %hi(0xDEADBEEF)             // x2 = 0xDEADBEEF
-    addi x2, x2, %lo(0xDEADBEEF)
+    lui t1, %hi(0xDEADBEEF)             // t1 = 0xDEADBEEF
+    addi t1, t1, %lo(0xDEADBEEF)
     
-    lui x3, %hi(0xBADC0FFE)             // x3 = 0xBADC0FFE
-    addi x3, x3, %lo(0xBADC0FFE)
+    lui t2, %hi(0xBADC0FFE)             // t2 = 0xBADC0FFE
+    addi t2, t2, %lo(0xBADC0FFE)
 
-    sw x2, 0(x1)                        // array[0] = x2
-    sw x3, 4(x1)                        // array[1] = x3
+    sw t1, 0(t0)                        // array[0] = t1
+    sw t2, 4(t0)                        // array[1] = t2
 
-    lw x4, 0(x1)                        // x4 = array[0]
-    beq x4, x2, 8                       // assert x4 == x2
+    lw t3, 0(t0)                        // t3 = array[0]
+    beq t3, t1, 8                       // assert t3 == t1
     ebreak
 
-    lw x5, 4(x1)                        // x5 = array[1]
-    beq x5, x3, 8                       // assert x5 == x2
+    lw t4, 4(t0)                        // t4 = array[1]
+    beq t4, t2, 8                       // assert t4 == t1
     ebreak
 
-test_mem_1:
-    la x1, array                        // x1 = array
-    li x2, 0xDEADBEEF                   // x2 = 0xDEADBEEF
-    li x3, 0x000000EF                   // x3 = 0x000000EF
-    li x4, 0xFFFFFFEF                   // x4 = 0xFFFFFFEF
-    li x5, 0x0000BEEF                   // x5 = 0x0000BEEF
-    li x6, 0xFFFFBEEF                   // x6 = 0xFFFFBEEF
+test_isa_mem_1:
+    la t0, array                        // t0 = array
+    li t1, 0xDEADBEEF                   // t1 = 0xDEADBEEF
+    li t2, 0x000000EF                   // t2 = 0x000000EF
+    li t3, 0xFFFFFFEF                   // t3 = 0xFFFFFFEF
+    li t4, 0x0000BEEF                   // t4 = 0x0000BEEF
+    li t5, 0xFFFFBEEF                   // t5 = 0xFFFFBEEF
 
-    sw x0, 0(x1)                        // array[0] = 0
-    sb x2, 0(x1)                        // array[0] = 0xEF
+    sw x0, 0(t0)                        // array[0] = 0
+    sb t1, 0(t0)                        // array[0] = 0xEF
 
-    lw x7, 0(x1)                        // x7 = array[0]
-    beq x7, x3, 8                       // assert x7 == x3
-    ebreak
-    
-    lb x7, 0(x1)                        // x7 = sext(array[0][7:0])
-    beq x7, x4, 8                       // assert x7 == x4
-    ebreak
-
-    lbu x7, 0(x1)                       // x7 = array_b[0][7:0]
-    beq x7, x3, 8                       // assert x7 == x3
+    lw t6, 0(t0)                        // t6 = array[0]
+    beq t6, t2, 8                       // assert t6 == t2
     ebreak
     
-    sw x0, 0(x1)                        // array[0] = 0
-    sh x2, 0(x1)                        // array[0] = 0xBEEF
-    
-    lw x7, 0(x1)                        // x7 = array[0]
-    beq x7, x5, 8                       // assert x7 == x5
+    lb t6, 0(t0)                        // t6 = sext(array[0][7:0])
+    beq t6, t3, 8                       // assert t6 == t3
     ebreak
 
-    lh x7, 0(x1)                        // x7 = sext(array[0][15:0])
-    beq x7, x6, 8                       // assert x7 == x6
-    ebreak
-
-    lhu x7, 0(x1)                       // x7 = array[0][31:0]
-    beq x7, x5, 8                       // assert x7 == x5
-    ebreak
-
-test_op_immed: 
-    li x1, 40                           // x1 = 40
-    li x2, 0x0AA                        // x2 = 0x00000AAA
-    li x3, -40                          // x3 = -40
-
-    addi x10, x1, 40                    // x10 = x1 + 40
-    li x11, 80                         // x11 = 80
-    beq x10, x11, 8                     // assert x10 == x11
+    lbu t6, 0(t0)                       // t6 = array_b[0][7:0]
+    beq t6, t2, 8                       // assert t6 == t2
     ebreak
     
-    slti x10, x1, -40                   // x10 = x1 < -40
-    li x11, 0
-    beq x10, x11, 8                     // assert x10 == x11
+    sw x0, 0(t0)                        // array[0] = 0
+    sh t1, 0(t0)                        // array[0] = 0xBEEF
+    
+    lw t6, 0(t0)                        // t6 = array[0]
+    beq t6, t4, 8                       // assert t6 == t4
     ebreak
 
-    sltiu x10, x1, -40                  // x10 = u(x1) < u(-40)
-    li x11, 1
-    beq x10, x11, 8                     // assert x10 == x11
+    lh t6, 0(t0)                        // t6 = sext(array[0][15:0])
+    beq t6, t5, 8                       // assert t6 == t5
     ebreak
 
-    xori x10, x2, 0x92                  // x10 = x2 ^ 0x92
-    li x11, 0x38                        // x11 = 0x38
-    beq x10, x11, 8                     // assert x10 == x11
+    lhu t6, 0(t0)                       // t6 = array[0][31:0]
+    beq t6, t4, 8                       // assert t6 == t4
     ebreak
 
-    ori x10, x2, 0x92                   // x10 = x2 | 0x92
-    li x11, 0xBA                        // x11 = 0xBA
-    beq x10, x11, 8                     // assert x10 == x11
-    ebreak
+test_isa_op_immed: 
+    li t0, 40                           // t0 = 40
+    li t1, 0x0AA                        // t1 = 0x00000AAA
+    li t2, -40                          // t2 = -40
 
-    andi x10, x2, 0x92                  // x10 = x2 & 0x92
-    li x11, 0x82                        // x11 = 0x82
-    beq x10, x11, 8                     // assert x10 == x11
-    ebreak
-
-    slli x10, x1, 2                     // x10 = x1 << 2
-    li x11, 160                         // x11 = 160
-    beq x10, x11, 8                     // assert x10 == x11
-    ebreak
-
-    srli x10, x1, 2                     // x10 = x2 >> 2
-    li x11, 10                          // x11 = 2
-    beq x10, x11, 8                     // assert x10 == x11
-    ebreak
-
-    srai x10, x3, 2                     // x10 = s(x10) >> 2
-    li x11, -10                         // x11 = -10
-    beq x10, x11, 8                     // assert x10 == x11
-    ebreak
-
-test_op: 
-    li x1, 40                           // x1 = 40
-    li x2, 0x0AA                        // x2 = 0x00000AAA
-    li x3, -40                          // x3 = -40
-
-    li x12, 40                          // x12 = 40
-    add x10, x1, x12                   // x10 = x1 + x12
-    li x11, 80                          // x11 = 80
-    beq x10, x11, 8                     // assert x10 == x11
+    addi t3, t0, 40                     // t3 = t0 + 40
+    li t4, 80                           // t4 = 80
+    beq t3, t4, 8                       // assert t3 == t4
     ebreak
     
-    li x12, -40                         // x12 = -40
-    slt x10, x1, x12                    // x10 = x1 < x12
-    li x11, 0
-    beq x10, x11, 8                     // assert x10 == x11
+    slti t3, t0, -40                    // t3 = t0 < -40
+    li t4, 0                            // t4 = 0
+    beq t3, t4, 8                       // assert t3 == t4
     ebreak
 
-    li x12, -40                         // x12 = -40
-    sltu x10, x1, x12                   // x10 = u(x1) < u(-40)
-    li x11, 1
-    beq x10, x11, 8                     // assert x10 == x11
+    sltiu t3, t0, -40                   // t3 = u(x1) < u(-40)
+    li t4, 1                            // t4 = 1
+    beq t3, t4, 8                       // assert t3 == t4
     ebreak
 
-    li x12, 0x92                        // x12 = 0x92
-    xor x10, x2, x12                    // x10 = x2 ^ x12
-    li x11, 0x38                        // x11 = 0x38
-    beq x10, x11, 8                     // assert x10 == x11
+    xori t3, t1, 0x92                  // t3 = t1 ^ 0x92
+    li t4, 0x38                        // t4 = 0x38
+    beq t3, t4, 8                      // assert t3 == t4
     ebreak
 
-    li x12, 0x92                        // x12 = 0x92
-    or x10, x2, x12                     // x10 = x2 | x12
-    li x11, 0xBA                        // x11 = 0xBA
-    beq x10, x11, 8                     // assert x10 == x11
+    ori t3, t1, 0x92                   // t3 = t1 | 0x92
+    li t4, 0xBA                        // t4 = 0xBA
+    beq t3, t4, 8                      // assert t3 == t4
     ebreak
 
-    li x12, 0x92
-    and x10, x2, x12                    // x10 = x2 & x12
-    li x11, 0x82                        // x11 = 0x82
-    beq x10, x11, 8                     // assert x10 == x11
+    andi t3, t1, 0x92                  // t3 = t1 & 0x92
+    li t4, 0x82                        // t4 = 0x82
+    beq t3, t4, 8                      // assert t3 == t4
     ebreak
 
-    li x12, 2                           // x12 = 2
-    sll x10, x1, x12                    // x10 = x1 << x12
-    li x11, 160                         // x11 = 160
-    beq x10, x11, 8                     // assert x10 == x11
+    slli t3, t0, 2                     // t3 = t0 << 2
+    li t4, 160                         // t4 = 160
+    beq t3, t4, 8                      // assert t3 == t4
     ebreak
 
-    li x12, 2                           // x12 = 2
-    srl x10, x1, x12                   // x10 = x2 >> x12
-    li x11, 10                          // x11 = 2
-    beq x10, x11, 8                     // assert x10 == x11
+    srli t3, t0, 2                     // t3 = t0 >> 2
+    li t4, 10                          // t4 = 2
+    beq t3, t4, 8                      // assert t3 == t4
     ebreak
 
-    li x12, 2                           // x12 = 2
-    sra x10, x3, x12                    // x10 = s(x10) >> x12
-    li x11, -10                         // x11 = -10
-    beq x10, x11, 8                     // assert x10 == x11
+    srai t3, t2, 2                     // t3 = s(t2) >> 2
+    li t4, -10                         // t4 = -10
+    beq t3, t4, 8                      // assert t3 == t4
     ebreak
 
-end:
+test_isa_op: 
+    li t0, 40                           // t0 = 40
+    li t1, 0x0AA                        // t1 = 0x00000AAA
+    li t2, -40                          // t2 = -40
+
+    li t5, 40                           // t5 = 40
+    add t3, t0, t5                      // t3 = t0 + t5
+    li t4, 80                           // t4 = 80
+    beq t3, t4, 8                       // assert t3 == t4
     ebreak
+    
+    li t5, -40                          // t5 = -40
+    slt t3, t0, t5                      // t3 = t0 < t5
+    li t4, 0
+    beq t3, t4, 8                       // assert t3 == t4
+    ebreak
+
+    li t5, -40                          // t5 = -40
+    sltu t3, t0, t5                     // t3 = u(t0) < u(t5)
+    li t4, 1                            // t4 = 1
+    beq t3, t4, 8                       // assert t3 == t4
+    ebreak
+
+    li t5, 0x92                         // t5 = 0x92
+    xor t3, t1, t5                      // t3 = t1 ^ t5
+    li t4, 0x38                         // t4 = 0x38
+    beq t3, t4, 8                       // assert t3 == t4
+    ebreak
+
+    li t5, 0x92                         // t5 = 0x92
+    or t3, t1, t5                       // t3 = t1 | t5
+    li t4, 0xBA                         // t4 = 0xBA
+    beq t3, t4, 8                       // assert t3 == t4
+    ebreak
+
+    li t5, 0x92                         // t5 = 0x92
+    and t3, t1, t5                      // t3 = t1 & t5
+    li t4, 0x82                         // t4 = 0x82
+    beq t3, t4, 8                       // assert t3 == t4
+    ebreak
+
+    li t5, 2                            // t2 = 2
+    sll t3, t0, t5                      // t3 = t0 << t5
+    li t4, 160                          // t4 = 160
+    beq t3, t4, 8                       // assert t3 == t4
+    ebreak
+
+    li t5, 2                            // t5 = 2
+    srl t3, t0, t5                      // t3 = t0 >> t5
+    li t4, 10                           // t4 = 10
+    beq t3, t4, 8                       // assert t3 == t4
+    ebreak
+
+    li t5, 2                            // t5 = 2
+    sra t3, t2, t5                      // t3 = s(t2) >> t5
+    li t4, -10                          // t4 = -10
+    beq t3, t4, 8                       // assert t3 == t4
+    ebreak
+
+test_isa_end:
+    ret
     
 .section .data
 array:

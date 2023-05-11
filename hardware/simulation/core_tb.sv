@@ -10,7 +10,7 @@ module core_tb;
     word_t addr;
     mem_ctrl_t ctrl;
 
-    byte mem [1023:0];
+    byte mem [4095:0];
 
     core uut (
         .clk (clk),
