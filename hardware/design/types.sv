@@ -4,6 +4,8 @@
 
 typedef logic [31:0] word_t;
 typedef logic [4:0] reg_addr_t;
+typedef logic [2:0] f3_t;
+typedef logic [11:0] csr_addr_t;
 
 typedef enum logic [6:0] {
     ISA_OPCODE_LUI      = 7'b0110111,
@@ -19,7 +21,7 @@ typedef enum logic [6:0] {
     ISA_OPCODE_ENV      = 7'b1110011
 } isa_opcode_t;    
 
-typedef enum logic [2:0] {
+typedef enum f3_t {
     ISA_BRANCH_F3_BEQ   = 3'b000,
     ISA_BRANCH_F3_BNE   = 3'b001,
     ISA_BRANCH_F3_BLT   = 3'b100,
@@ -28,7 +30,7 @@ typedef enum logic [2:0] {
     ISA_BRANCH_F3_BGEU  = 3'b111
 } isa_branch_f3_t;
 
-typedef enum logic [2:0] {
+typedef enum f3_t {
     ISA_ALU_F3_ADD  = 3'b000,
     ISA_ALU_F3_SL   = 3'b001, // shift left
     ISA_ALU_F3_SLT  = 3'b010, // set less than
@@ -39,7 +41,7 @@ typedef enum logic [2:0] {
     ISA_ALU_F3_AND  = 3'b111
 } isa_alu_f3_t;
 
-typedef enum logic [2:0] {
+typedef enum f3_t {
     ISA_MEM_F3_BYTE     = 3'b000, // byte
     ISA_MEM_F3_HALF     = 3'b001, // half word
     ISA_MEM_F3_WORD     = 3'b010, // word
@@ -47,7 +49,28 @@ typedef enum logic [2:0] {
     ISA_MEM_F3_HALF_U   = 3'b101  // unsigned half word
 } isa_mem_f3_t;
 
+typedef enum f3_t {
+    ISA_ENV_F3_BREAK    = 3'b000,
+    ISA_ENV_F3_CSRRW    = 3'b001,
+    ISA_ENV_F3_CSRRS    = 3'b010,
+    ISA_ENV_F3_CSRRC    = 3'b011,
+    ISA_ENV_F3_CSRRWI   = 3'b101,
+    ISA_ENV_F3_CSRRSI   = 3'b110,
+    ISA_ENV_F3_CSRRCI   = 3'b111 
+} isa_env_f3_t;
+
+typedef enum csr_addr_t {
+    ISA_CSR_ADDR_MSTATUS    = 12'h0300,
+    ISA_CSR_ADDR_MIE        = 12'h0304,
+    ISA_CSR_ADDR_MTVEC      = 12'h0305,     
+    ISA_CSR_ADDR_MSCRATCH   = 12'h0340,
+    ISA_CSR_ADDR_MEPC       = 12'h0341,  
+    ISA_CSR_ADDR_MCAUSE     = 12'h0342,    
+    ISA_CSR_ADDR_MIP        = 12'h0344
+} isa_csr_addr_t;
+
 typedef enum word_t {
+    ALU_CTRL_PASS,      // passthrough
     ALU_CTRL_ADD,       // addition
     ALU_CTRL_SUB,       // subration
     ALU_CTRL_SLL,       // shift left logical
@@ -61,7 +84,8 @@ typedef enum word_t {
     ALU_CTRL_SGEU,      // set greater than unsigned
     ALU_CTRL_XOR,       // xor
     ALU_CTRL_OR,        // or
-    ALU_CTRL_AND        // and
+    ALU_CTRL_AND,       // and
+    ALU_CTRL_CLR        // clear       
 } alu_ctrl_t;
 
 typedef enum word_t {

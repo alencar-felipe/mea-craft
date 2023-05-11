@@ -22,6 +22,17 @@ loop_end:
     /* Execute ISA test. */
 
     jal test_isa
+    
+    /* Setup interruptions */
+
+    li t0, 0xDEADBEEF
+    csrrw x0, mtvec, t0
+    
+    li t0, 0x00000880
+    csrrs x0, mie, t0
+
+    li t0, 0x00000080
+    csrrs x0, mstatus, t0
 
     /* Execute main function. */
 

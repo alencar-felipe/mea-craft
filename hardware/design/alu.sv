@@ -12,6 +12,8 @@ module alu (
         logic signed [31:0] sb = $signed(in[1]);
 
         case (ctrl)
+            ALU_CTRL_PASS:
+                out = a;
             ALU_CTRL_ADD:
                 out = sa + sb;
             ALU_CTRL_SUB:
@@ -40,6 +42,8 @@ module alu (
                 out = a | b;
             ALU_CTRL_AND:
                 out = a & b;
+            ALU_CTRL_CLR:
+                out = a | ~b;
             default:
                 out = 0;
         endcase        

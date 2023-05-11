@@ -2,6 +2,7 @@
 
 module reg_file (
     input clk,
+    input rst,
     input write_en,
     input reg_addr_t rd_addr,
     input reg_addr_t rs1_addr,
@@ -17,8 +18,15 @@ module reg_file (
 
     initial data[0] = 0;
 
-    always_ff @(posedge clk) begin
-        if (write_en) begin
+    always_ff @(posedge clk, posedge rst) begin
+        integer i;
+
+        if (rst) begin
+            for(i = 0; i <= 31; i++) begin
+                data[i] <= 0;
+            end
+        end
+        else if (write_en) begin
             if(rd_addr != 0) data[rd_addr] <= rd_data;
         end
     end

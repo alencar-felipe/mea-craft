@@ -43,7 +43,7 @@ test_isa_branch:
     addi t3, x0, -15                    // t3 = -15
     
     beq t0, t2, 8                       // if t0 == t2; pc = pc + 8
-    beq t3, t4, 8                       // if t0 == t1; pc = pc + 8
+    beq t0, t1, 8                       // if t0 == t1; pc = pc + 8
     ebreak                              // should not run
 
     bne t0, t1, 8                       // if t0 != t1; pc = pc + 8

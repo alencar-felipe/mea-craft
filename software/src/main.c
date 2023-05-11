@@ -14,6 +14,6 @@ int main()
     }
 
     *((volatile uint32_t *)(4095)) = b;
-    
+
     return b;
 }
