@@ -71,8 +71,8 @@ typedef enum csr_addr_t {
     ISA_CSR_ADDR_MTVEC      = 12'h0305,     
     ISA_CSR_ADDR_MSCRATCH   = 12'h0340,
     ISA_CSR_ADDR_MEPC       = 12'h0341,  
-    ISA_CSR_ADDR_MCAUSE     = 12'h0342,    
-    ISA_CSR_ADDR_MIP        = 12'h0344
+    ISA_CSR_ADDR_MCAUSE     = 12'h0342,
+    ISA_CSR_ADDR_MHARTID    = 12'h0F14
 } isa_csr_addr_t;
 
 typedef enum logic[1:0] {

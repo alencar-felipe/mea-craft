@@ -13,7 +13,7 @@ int main()
         a = tmp;    
     }
 
-    *((volatile uint32_t *)(4094)) = b;
+    *((volatile uint32_t *)(4091)) = b;
 
     return b;
 }

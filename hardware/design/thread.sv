@@ -6,6 +6,7 @@ module thread (
     input logic clk,
     input logic rst,
     input logic irq,
+    input word_t mhartid,
     input logic unit_ready,
     input unit_out_t unit_out,
     output unit_in_t unit_in,
@@ -98,6 +99,7 @@ module thread (
         .addr (csr_addr),
         .din (csr_din),
         .dout (csr_dout),
+        .mhartid (mhartid),
         .mstatus (mstatus)
     );
 

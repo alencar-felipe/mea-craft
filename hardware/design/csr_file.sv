@@ -7,6 +7,8 @@ module csr_file (
     input csr_addr_t addr,
     input word_t din,
     output word_t dout,
+
+    input word_t mhartid,
     output word_t mstatus
 );
 
@@ -20,7 +22,7 @@ module csr_file (
         map[3] = ISA_CSR_ADDR_MSCRATCH;
         map[4] = ISA_CSR_ADDR_MEPC;
         map[5] = ISA_CSR_ADDR_MCAUSE;
-        map[6] = ISA_CSR_ADDR_MIP;
+        map[6] = ISA_CSR_ADDR_MHARTID;
     end
     
     assign mstatus = data[0];
@@ -28,8 +30,7 @@ module csr_file (
     always_comb begin
         integer i;
 
-        dout = 0; // default value
-
+        dout = 0;
         for(i = 0; i <= 6; i++) begin
             if(addr == map[i]) begin
                 dout = data[i];
@@ -44,6 +45,8 @@ module csr_file (
             for(i = 0; i <= 6; i++) begin
                 data[i] <= 0;
             end
+
+            data[6] <= mhartid;
         end
         else if (write_en) begin
             for(i = 0; i <= 6; i++) begin

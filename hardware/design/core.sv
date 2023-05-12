@@ -10,6 +10,8 @@ module core (
     output mem_ctrl_t mem_ctrl
 );
 
+    word_t mhartid = 0;
+
     unit_sel_t unit_sel;
     unit_in_t unit_in;
     unit_out_t unit_out;
@@ -27,6 +29,7 @@ module core (
         .clk (clk),
         .rst (rst),
         .irq (irq),
+        .mhartid (mhartid),
         .unit_ready (unit_ready),
         .unit_out (unit_out),
         .unit_in (unit_in),
