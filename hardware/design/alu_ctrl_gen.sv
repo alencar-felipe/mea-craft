@@ -85,19 +85,19 @@ module alu_ctrl_gen(
                 end
             endcase
 
-            ISA_OPCODE_ENV: case(inst[14:12])
-                ISA_ENV_F3_CSRRW,
-                ISA_ENV_F3_CSRRWI: begin
+            ISA_OPCODE_MISC: case(inst[14:12])
+                ISA_MISC_F3_CSRRW,
+                ISA_MISC_F3_CSRRWI: begin
                     alu_ctrl = ALU_CTRL_PASS;
                 end
 
-                ISA_ENV_F3_CSRRS,
-                ISA_ENV_F3_CSRRSI: begin
+                ISA_MISC_F3_CSRRS,
+                ISA_MISC_F3_CSRRSI: begin
                     alu_ctrl = ALU_CTRL_OR;
                 end
 
-                ISA_ENV_F3_CSRRC,
-                ISA_ENV_F3_CSRRCI: begin
+                ISA_MISC_F3_CSRRC,
+                ISA_MISC_F3_CSRRCI: begin
                     alu_ctrl = ALU_CTRL_CLR;
                 end
 

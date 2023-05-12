@@ -2,6 +2,8 @@
 `ifndef TYPES_SV
 `define TYPES_SV
 
+/* ISA Typedefs */
+
 typedef logic [31:0] word_t;
 typedef logic [4:0] reg_addr_t;
 typedef logic [2:0] f3_t;
@@ -18,8 +20,13 @@ typedef enum logic [6:0] {
     ISA_OPCODE_OP_IMMED = 7'b0010011,
     ISA_OPCODE_OP       = 7'b0110011,
     ISA_OPCODE_FENCE    = 7'b0001111,
-    ISA_OPCODE_ENV      = 7'b1110011
+    ISA_OPCODE_MISC     = 7'b1110011
 } isa_opcode_t;    
+
+typedef enum word_t {
+    ISA_NULLARY_BREAK   = 32'h00100073,
+    ISA_NULLARY_MRET    = 32'h30200073
+} isa_nullary_t;
 
 typedef enum f3_t {
     ISA_BRANCH_F3_BEQ   = 3'b000,
@@ -50,14 +57,13 @@ typedef enum f3_t {
 } isa_mem_f3_t;
 
 typedef enum f3_t {
-    ISA_ENV_F3_BREAK    = 3'b000,
-    ISA_ENV_F3_CSRRW    = 3'b001,
-    ISA_ENV_F3_CSRRS    = 3'b010,
-    ISA_ENV_F3_CSRRC    = 3'b011,
-    ISA_ENV_F3_CSRRWI   = 3'b101,
-    ISA_ENV_F3_CSRRSI   = 3'b110,
-    ISA_ENV_F3_CSRRCI   = 3'b111 
-} isa_env_f3_t;
+    ISA_MISC_F3_CSRRW   = 3'b001,
+    ISA_MISC_F3_CSRRS   = 3'b010,
+    ISA_MISC_F3_CSRRC   = 3'b011,
+    ISA_MISC_F3_CSRRWI  = 3'b101,
+    ISA_MISC_F3_CSRRSI  = 3'b110,
+    ISA_MISC_F3_CSRRCI  = 3'b111 
+} isa_misc_f3_t;
 
 typedef enum csr_addr_t {
     ISA_CSR_ADDR_MSTATUS    = 12'h0300,
@@ -68,6 +74,19 @@ typedef enum csr_addr_t {
     ISA_CSR_ADDR_MCAUSE     = 12'h0342,    
     ISA_CSR_ADDR_MIP        = 12'h0344
 } isa_csr_addr_t;
+
+typedef enum logic[1:0] {
+    ISA_LEVEL_M = 2'b11 // machine
+} isa_level_t;
+
+typedef enum word_t {
+    ISA_MCAUSE_M_EXT_INT  = 32'h8000000b // machine external interrupt
+} isa_mcause_t;
+
+/* Implementation Specifc Typedefs */
+
+typedef word_t [2:0] unit_in_t;
+typedef word_t unit_out_t;
 
 typedef enum word_t {
     ALU_CTRL_PASS,      // passthrough
@@ -102,8 +121,5 @@ typedef enum {
     UNIT_SEL_ALU,
     UNIT_SEL_MEM
 } unit_sel_t;
-
-typedef word_t [2:0] unit_in_t;
-typedef word_t unit_out_t;
 
 `endif

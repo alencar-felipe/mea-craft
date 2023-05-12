@@ -1,9 +1,9 @@
 `include "types.sv"
 
 module reg_file (
-    input clk,
-    input rst,
-    input write_en,
+    input logic clk,
+    input logic rst,
+    input logic write_en,
     input reg_addr_t rd_addr,
     input reg_addr_t rs1_addr,
     input reg_addr_t rs2_addr,

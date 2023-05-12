@@ -1,8 +1,40 @@
 .section .init
-.globl _start
+.globl irq_handler
 
-_start:
+irq_handler:
+    csrrw x0, mscratch, t0          // mscratch = t0
+    csrrs t0, mcause, x0            // t0 = mcause
 
+    beq t0, x0, start               // if mcause == reset: goto start
+
+    csrrs t0, mscratch, x0          // t0 = mscratch
+
+irq_handler_counter:
+
+    /* Save registers. */
+
+    addi sp, sp, -8
+    sw t0, 0(sp)
+    sw t1, 1(sp)
+
+    /* Increment value in address 4095. */
+
+    li t0, 4095
+    lw t1, 0(t0)
+    addi t1, t1, 1
+    sw t1, 0(t0)
+
+    /* Restore registers. */
+
+    lw t0, 0(sp)
+    lw t1, 1(sp)
+    addi sp, sp, 8
+
+    /* Return from interrupt. */
+
+    mret
+
+start:
     /* Set the stack pointer to the top of the memory. */
     
     la sp, _estack
@@ -25,13 +57,13 @@ loop_end:
     
     /* Setup interruptions */
 
-    li t0, 0xDEADBEEF
+    la t0, irq_handler
     csrrw x0, mtvec, t0
     
-    li t0, 0x00000880
+    li t0, 0x00000800
     csrrs x0, mie, t0
 
-    li t0, 0x00000080
+    li t0, 0x00000008
     csrrs x0, mstatus, t0
 
     /* Execute main function. */

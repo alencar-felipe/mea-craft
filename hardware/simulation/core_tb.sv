@@ -4,7 +4,8 @@ module core_tb;
 
     logic clk;
     logic rst;
-    
+    logic irq;
+
     word_t dout;
     word_t din;
     word_t addr;
@@ -15,6 +16,7 @@ module core_tb;
     core uut (
         .clk (clk),
         .rst (rst),
+        .irq (irq),
         .mem_dout(dout),
         .mem_din(din),
         .mem_addr(addr),
@@ -33,6 +35,8 @@ module core_tb;
     end
     
     always #5 clk = ~clk;
+
+    assign irq = mem[4095] < 3;
 
     always_ff @(posedge clk) begin
         case (ctrl)

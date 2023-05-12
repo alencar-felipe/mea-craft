@@ -1,12 +1,13 @@
 `include "types.sv"
 
 module csr_file (
-    input clk,
-    input rst,
-    input write_en,
+    input logic clk,
+    input logic rst,
+    input logic write_en,
     input csr_addr_t addr,
     input word_t din,
-    output word_t dout
+    output word_t dout,
+    output word_t mstatus
 );
 
     word_t data [6:0];
@@ -21,6 +22,8 @@ module csr_file (
         map[5] = ISA_CSR_ADDR_MCAUSE;
         map[6] = ISA_CSR_ADDR_MIP;
     end
+    
+    assign mstatus = data[0];
 
     always_comb begin
         integer i;

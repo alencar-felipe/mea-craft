@@ -1,8 +1,9 @@
 `include "types.sv"
 
 module core (
-    input clk,
-    input rst,
+    input logic clk,
+    input logic rst,
+    input logic irq,
     input word_t mem_dout,
     output word_t mem_din,
     output word_t mem_addr,
@@ -25,6 +26,7 @@ module core (
     thread thread_0 (
         .clk (clk),
         .rst (rst),
+        .irq (irq),
         .unit_ready (unit_ready),
         .unit_out (unit_out),
         .unit_in (unit_in),

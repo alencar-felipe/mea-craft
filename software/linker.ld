@@ -3,7 +3,7 @@ MEMORY
     ram (rwx) : ORIGIN = 0x00000000, LENGTH = 4096
 }
 
-ENTRY(_start)
+ENTRY(irq_handler)
 
 __heap_size = 1024;
 __stack_size = 1024;

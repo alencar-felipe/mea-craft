@@ -1,8 +1,11 @@
 `include "types.sv"
 
+/* verilator lint_off UNUSED */
+
 module thread (
-    input clk,
-    input rst,
+    input logic clk,
+    input logic rst,
+    input logic irq,
     input logic unit_ready,
     input unit_out_t unit_out,
     output unit_in_t unit_in,
@@ -13,6 +16,7 @@ module thread (
         logic [4:0] ic;
         word_t pc;
         word_t inst;
+        logic irq_now;
         word_t tmp;
     } state_t;
 
@@ -32,7 +36,13 @@ module thread (
         STEP_INC_PC,
         STEP_BREAK,
         STEP_CSR,
-        STEP_CSR_IMMED
+        STEP_CSR_IMMED,
+        STEP_IRQ_MSTATUS,
+        STEP_IRQ_MCAUSE,
+        STEP_IRQ_MEPC,
+        STEP_IRQ_JUMP,
+        STEP_MRET_MSTATUS,
+        STEP_MRET_JUMP
     } step_t;
 
     state_t curr;
@@ -57,6 +67,7 @@ module thread (
     csr_addr_t csr_addr;
     word_t csr_din;
     word_t csr_dout;
+    word_t mstatus;
 
     word_t alu_ctrl;
     word_t mem_ctrl;
@@ -86,7 +97,8 @@ module thread (
         .write_en (csr_wen),
         .addr (csr_addr),
         .din (csr_din),
-        .dout (csr_dout)
+        .dout (csr_dout),
+        .mstatus (mstatus)
     );
 
     alu_ctrl_gen alu_ctrl_gen_0 (
@@ -106,7 +118,11 @@ module thread (
 
     always_ff @(posedge clk, posedge rst) begin
         if(rst) begin
-            curr <= '{ic: 0, pc: 0, inst: 0, tmp: 0};
+            curr.ic <= 0;
+            curr.pc <= 0;
+            curr.inst <= 0;
+            curr.irq_now <= 0;
+            curr.tmp <= 0;
         end
         else if (unit_ready) begin
             curr <= next;
@@ -120,6 +136,7 @@ module thread (
         next.ic = curr.ic + 1;
         next.pc = curr.pc;
         next.inst = curr.inst;
+        next.irq_now = curr.irq_now;
         next.tmp = 0;
 
         unit_sel = UNIT_SEL_NONE;
@@ -139,13 +156,21 @@ module thread (
 
         case (step)
             STEP_FETCH: begin
-                next.ic = 1; 
-                next.inst = unit_out;
-
                 unit_sel = UNIT_SEL_MEM;
                 unit_in[0] = MEM_CTRL_READ_WORD;
                 unit_in[1] = curr.pc;
                 unit_in[2] = 0;
+
+                csr_addr = ISA_CSR_ADDR_MIE;
+
+                if (irq & mstatus[3] & csr_dout[11]) begin
+                   next.ic = 0;
+                   next.irq_now = 1;
+                end
+                else begin
+                    next.ic = 1; 
+                    next.inst = unit_out;
+                end
             end
 
             STEP_LUI: begin
@@ -308,7 +333,7 @@ module thread (
             STEP_CSR_IMMED: begin
                 unit_sel = UNIT_SEL_ALU;
                 unit_in[0] = alu_ctrl;
-                unit_in[1] = rs1_data;
+                unit_in[1] = {27'b0, isa_rs1};
                 unit_in[2] = csr_dout;
 
                 reg_wen = 1;
@@ -319,102 +344,161 @@ module thread (
                 csr_addr = isa_csr;
                 csr_din = unit_out;
             end
+            
+            STEP_IRQ_MSTATUS: begin
+                csr_wen = 1;
+                csr_addr = ISA_CSR_ADDR_MSTATUS;
+                csr_din = csr_dout;
+                csr_din[3] = 0;                 // MIE <= 0
+                csr_din[7] = 1;                 // MPIE <= 1
+                csr_din[12:11] = ISA_LEVEL_M;   // MPP <= M
+            end
+
+            STEP_IRQ_MCAUSE: begin
+                csr_wen = 1;
+                csr_addr = ISA_CSR_ADDR_MCAUSE;
+                csr_din = ISA_MCAUSE_M_EXT_INT;
+            end
+
+            STEP_IRQ_MEPC: begin
+                csr_wen = 1;
+                csr_addr = ISA_CSR_ADDR_MEPC;
+                csr_din = curr.pc;
+            end
+
+            STEP_IRQ_JUMP: begin
+                next.ic = 0;
+                next.pc = {csr_dout[31:4], 4'b0000};
+                next.irq_now = 0;
+
+                csr_addr = ISA_CSR_ADDR_MTVEC;
+            end
+
+            STEP_MRET_MSTATUS: begin
+                csr_wen = 1;
+                csr_addr = ISA_CSR_ADDR_MSTATUS;
+                csr_din = csr_dout;
+                csr_din[3] = csr_dout[7];    // MIE <= MPIE
+                csr_din[7] = 1;             // MPIE <= 1
+                csr_din[12:11] = ISA_LEVEL_M;   // MPP <= M
+            end
+
+            STEP_MRET_JUMP: begin
+                next.ic = 0;
+                next.pc = csr_dout;
+
+                csr_addr = ISA_CSR_ADDR_MEPC;
+            end
         endcase
     end
 
     always_comb begin
-        case (curr.inst[6:0])
-            ISA_OPCODE_LUI: case(curr.ic)
-                default: step       = STEP_FETCH                               ;
-                1: step             = STEP_LUI                                 ;
-                2: step             = STEP_INC_PC                              ;
+        if (curr.irq_now) case (curr.ic)
+            default: step               = STEP_IRQ_MSTATUS                     ;
+            1: step                     = STEP_IRQ_MCAUSE                      ;
+            2: step                     = STEP_IRQ_MEPC                        ;
+            3: step                     = STEP_IRQ_JUMP                        ;
+        endcase
+        else case (curr.inst)
+            ISA_NULLARY_BREAK: case (curr.ic)
+                default: step           = STEP_FETCH                           ;
+                1: step                 = STEP_BREAK                           ;
             endcase
             
-            ISA_OPCODE_AUIPC: case(curr.ic)
-                default: step       = STEP_FETCH                               ;
-                1: step             = STEP_AUIPC                               ;
-                2: step             = STEP_INC_PC                              ;
+            ISA_NULLARY_MRET: case (curr.ic)
+                default: step           = STEP_FETCH                           ;
+                1: step                 = STEP_MRET_MSTATUS                    ;
+                2: step                 = STEP_MRET_JUMP                       ;
             endcase
 
-            ISA_OPCODE_JAL: case(curr.ic)
-                default: step       = STEP_FETCH                               ;
-                1: step             = STEP_JAL                                 ;
-                2: step             = STEP_JUMP                                ;
-                3: step             = STEP_INC_PC                              ;
-            endcase
-
-            ISA_OPCODE_JALR: case(curr.ic)
-                default: step       = STEP_FETCH                               ;
-                1: step             = STEP_JAL                                 ;
-                2: step             = STEP_JUMP_REG                            ;
-                3: step             = STEP_INC_PC                              ;
-            endcase
-
-            ISA_OPCODE_BRANCH: case(curr.ic)
-                default: step       = STEP_FETCH                               ;
-                1: step             = STEP_BRANCH                              ;
-                2: step             = STEP_JUMP                                ;
-                3: step             = STEP_INC_PC                              ;
-            endcase
-
-            ISA_OPCODE_LOAD: case(curr.ic)
-                default: step       = STEP_FETCH                               ;
-                1: step             = STEP_CALC_ADDR                           ;
-                2: step             = STEP_LOAD                                ;
-                3: step             = STEP_INC_PC                              ;
-            endcase
-
-            ISA_OPCODE_STORE: case(curr.ic)
-                default: step       = STEP_FETCH                               ;
-                1: step             = STEP_CALC_ADDR                           ;
-                2: step             = STEP_STORE                               ;
-                3: step             = STEP_INC_PC                              ;
-            endcase
-
-            ISA_OPCODE_OP: case(curr.ic)
-                default: step       = STEP_FETCH                               ;
-                1: step             = STEP_OP                                  ;
-                2: step             = STEP_INC_PC                              ;
-            endcase
-
-            ISA_OPCODE_OP_IMMED: case(curr.ic)
-                default: step       = STEP_FETCH                               ;
-                1: step             = STEP_OP_IMMED                            ;
-                2: step             = STEP_INC_PC                              ;
-            endcase
-
-            ISA_OPCODE_ENV: case(isa_f3)
-                ISA_ENV_F3_BREAK: case(curr.ic)
-                    default: step   = STEP_FETCH                               ;
-                    1: step         = STEP_BREAK                               ;
+            default: case (curr.inst[6:0])
+                ISA_OPCODE_LUI: case (curr.ic)
+                    default: step       = STEP_FETCH                           ;
+                    1: step             = STEP_LUI                             ;
+                    2: step             = STEP_INC_PC                          ;
+                endcase
+                
+                ISA_OPCODE_AUIPC: case (curr.ic)
+                    default: step       = STEP_FETCH                           ;
+                    1: step             = STEP_AUIPC                           ;
+                    2: step             = STEP_INC_PC                          ;
                 endcase
 
-                ISA_ENV_F3_CSRRW,
-                ISA_ENV_F3_CSRRS,
-                ISA_ENV_F3_CSRRC: case(curr.ic)
-                    default: step   = STEP_FETCH                               ;
-                    1: step         = STEP_CSR                                 ;
-                    2: step         = STEP_INC_PC                              ;
+                ISA_OPCODE_JAL: case (curr.ic)
+                    default: step       = STEP_FETCH                           ;
+                    1: step             = STEP_JAL                             ;
+                    2: step             = STEP_JUMP                            ;
+                    3: step             = STEP_INC_PC                          ;
                 endcase
 
-                ISA_ENV_F3_CSRRWI,
-                ISA_ENV_F3_CSRRSI,
-                ISA_ENV_F3_CSRRCI: case(curr.ic)
-                    default: step   = STEP_FETCH                               ;
-                    1: step         = STEP_CSR_IMMED                           ;
-                    2: step         = STEP_INC_PC                              ;
+                ISA_OPCODE_JALR: case (curr.ic)
+                    default: step       = STEP_FETCH                           ;
+                    1: step             = STEP_JAL                             ;
+                    2: step             = STEP_JUMP_REG                        ;
+                    3: step             = STEP_INC_PC                          ;
                 endcase
 
-                default: case(curr.ic)
-                    default: step   = STEP_FETCH                               ;
-                    1: step         = STEP_BREAK                               ;
+                ISA_OPCODE_BRANCH: case (curr.ic)
+                    default: step       = STEP_FETCH                           ;
+                    1: step             = STEP_BRANCH                          ;
+                    2: step             = STEP_JUMP                            ;
+                    3: step             = STEP_INC_PC                          ;
+                endcase
+
+                ISA_OPCODE_LOAD: case (curr.ic)
+                    default: step       = STEP_FETCH                           ;
+                    1: step             = STEP_CALC_ADDR                       ;
+                    2: step             = STEP_LOAD                            ;
+                    3: step             = STEP_INC_PC                          ;
+                endcase
+
+                ISA_OPCODE_STORE: case (curr.ic)
+                    default: step       = STEP_FETCH                           ;
+                    1: step             = STEP_CALC_ADDR                       ;
+                    2: step             = STEP_STORE                           ;
+                    3: step             = STEP_INC_PC                          ;
+                endcase
+
+                ISA_OPCODE_OP: case (curr.ic)
+                    default: step       = STEP_FETCH                           ;
+                    1: step             = STEP_OP                              ;
+                    2: step             = STEP_INC_PC                          ;
+                endcase
+
+                ISA_OPCODE_OP_IMMED: case (curr.ic)
+                    default: step       = STEP_FETCH                           ;
+                    1: step             = STEP_OP_IMMED                        ;
+                    2: step             = STEP_INC_PC                          ;
+                endcase
+
+                ISA_OPCODE_MISC: case (isa_f3)
+                    ISA_MISC_F3_CSRRW,
+                    ISA_MISC_F3_CSRRS,
+                    ISA_MISC_F3_CSRRC: case (curr.ic)
+                        default: step   = STEP_FETCH                           ;
+                        1: step         = STEP_CSR                             ;
+                        2: step         = STEP_INC_PC                          ;
+                    endcase
+
+                    ISA_MISC_F3_CSRRWI,
+                    ISA_MISC_F3_CSRRSI,
+                    ISA_MISC_F3_CSRRCI: case (curr.ic)
+                        default: step   = STEP_FETCH                           ;
+                        1: step         = STEP_CSR_IMMED                       ;
+                        2: step         = STEP_INC_PC                          ;
+                    endcase
+
+                    default: case (curr.ic)
+                        default: step   = STEP_FETCH                           ;
+                        1: step         = STEP_BREAK                           ;
+                    endcase
                 endcase 
-            endcase
 
-            default: case(curr.ic)
-                    default: step   = STEP_FETCH                               ;
-                    1: step         = STEP_BREAK                               ;
+                default: case (curr.ic)
+                    default: step       = STEP_FETCH                           ;
+                    1: step             = STEP_BREAK                           ;
+                endcase
             endcase
-        endcase
+        endcase   
     end
 endmodule

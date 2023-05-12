@@ -21,7 +21,8 @@
 - [RISC-V Datapath](https://rohansinha.nl/images/datapath.jpg)
 - [riscv-simple-sv](https://github.com/tilk/riscv-simple-sv)
 - [An Introduction to RV32I Interrupts and Traps](https://www.youtube.com/watch?v=l7JIry6PEX4)
+- [RISC-V Interrupts](https://five-embeddev.com/quickref/interrupts.html)
 
-## Floating-point Arithmetic
+### Floating-point Arithmetic
 
 - [berkeley-softfloat-3](https://github.com/ucb-bar/berkeley-softfloat-3)
