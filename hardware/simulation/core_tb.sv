@@ -6,73 +6,92 @@ module core_tb;
     logic rst;
     logic irq;
 
-    word_t dout;
-    word_t din;
-    word_t addr;
-    mem_ctrl_t ctrl;
-
-    byte mem [4095:0];
+    logic [31: 0] awaddr;
+    logic [ 2: 0] awprot;
+    logic         awvalid;
+    logic         awready;
+    logic [31: 0] wdata;
+    logic [ 3: 0] wstrb;
+    logic         wvalid;
+    logic         wready;
+    logic [ 1: 0] bresp;
+    logic         bvalid;
+    logic         bready;
+    logic [31: 0] araddr;
+    logic [ 2: 0] arprot;
+    logic         arvalid;
+    logic         arready;
+    logic [31: 0] rdata;
+    logic [ 1: 0] rresp;
+    logic         rvalid;
+    logic         rready;
 
     core uut (
         .clk (clk),
         .rst (rst),
         .irq (irq),
-        .mem_dout(dout),
-        .mem_din(din),
-        .mem_addr(addr),
-        .mem_ctrl(ctrl)
+
+        .awaddr (awaddr),
+        .awprot (awprot),
+        .awvalid (awvalid),
+        .awready (awready),
+        .wdata (wdata),
+        .wstrb (wstrb),
+        .wvalid (wvalid),
+        .wready (wready),
+        .bresp (bresp),
+        .bvalid (bvalid),
+        .bready (bready),
+        .araddr (araddr),
+        .arprot (arprot),
+        .arvalid (arvalid),
+        .arready (arready),
+        .rdata (rdata),
+        .rresp (rresp),
+        .rvalid (rvalid),
+        .rready (rready)
     );
 
-    initial begin  
-        int file, ret;
-        file = $fopen("/home/felipe/git/mea-craft/software/build/build.bin", "rb");
-        ret = $fread(mem, file);
-        $fclose(file);
+    file_ram #(
+        .FILE_PATH ("/home/felipe/git/mea-craft/software/build/build.bin")
+    ) file_ram (
+        .clk (clk),
+        .rst (rst),
 
+        .s_axil_awaddr (awaddr[15:0]),
+        .s_axil_awprot (awprot),
+        .s_axil_awvalid (awvalid),
+        .s_axil_awready (awready),
+        .s_axil_wdata (wdata),
+        .s_axil_wstrb (wstrb),
+        .s_axil_wvalid (wvalid),
+        .s_axil_wready (wready),
+        .s_axil_bresp (bresp),
+        .s_axil_bvalid (bvalid),
+        .s_axil_bready (bready),
+        .s_axil_araddr (araddr[15:0]),
+        .s_axil_arprot (arprot),
+        .s_axil_arvalid (arvalid),
+        .s_axil_arready (arready),
+        .s_axil_rdata (rdata),
+        .s_axil_rresp (rresp),
+        .s_axil_rvalid (rvalid),
+        .s_axil_rready (rready)
+);
+
+    initial begin  
         clk = 0;
         rst = 1;
-        #2 rst = 0;
+        irq = 0;
+        #2;
+        rst = 0;
+        #15000;
+        irq = 1;
+        #1000;
+        irq = 0;
     end
     
     always #5 clk = ~clk;
-
-    assign irq = mem[4095] < 3;
-
-    always_ff @(posedge clk) begin
-        case (ctrl)
-            MEM_CTRL_READ_BYTE: begin
-                dout[ 7: 0] <= mem[addr + 0];
-                dout[15: 8] <= 0;
-                dout[23:16] <= 0;
-                dout[31:24] <= 0;
-            end
-            MEM_CTRL_READ_HALF: begin
-                dout[ 7: 0] <= mem[addr + 0];
-                dout[15: 8] <= mem[addr + 1];
-                dout[23:16] <= 0;
-                dout[31:24] <= 0;
-            end
-            MEM_CTRL_READ_WORD: begin
-                dout[ 7: 0] <= mem[addr + 0];
-                dout[15: 8] <= mem[addr + 1];
-                dout[23:16] <= mem[addr + 2];
-                dout[31:24] <= mem[addr + 3];
-            end
-            MEM_CTRL_STORE_BYTE: begin
-                mem[addr + 0] <= din[ 7: 0];
-            end
-            MEM_CTRL_STORE_HALF: begin
-                mem[addr + 0] <= din[ 7: 0];
-                mem[addr + 1] <= din[15: 8];
-            end
-            MEM_CTRL_STORE_WORD: begin
-                mem[addr + 0] <= din[ 7: 0];
-                mem[addr + 1] <= din[15: 8];
-                mem[addr + 2] <= din[23:16];
-                mem[addr + 3] <= din[31:24];
-            end
-        endcase 
-    end
 
 endmodule
 

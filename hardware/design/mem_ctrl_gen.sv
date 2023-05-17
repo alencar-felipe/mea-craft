@@ -4,7 +4,7 @@
 
 module mem_ctrl_gen(
     input word_t inst,
-    output word_t mem_ctrl
+    output mem_ctrl_t mem_ctrl
 );
     always_comb begin
         case (inst[6:0])
@@ -26,7 +26,7 @@ module mem_ctrl_gen(
                         mem_ctrl = MEM_CTRL_READ_HALF;
                     end
                     default: begin
-                        mem_ctrl = 0;
+                        mem_ctrl = MEM_CTRL_NONE;
                     end
                 endcase
             end
@@ -48,12 +48,12 @@ module mem_ctrl_gen(
                         mem_ctrl = MEM_CTRL_STORE_HALF;
                     end
                     default: begin
-                        mem_ctrl = 0;
+                        mem_ctrl = MEM_CTRL_NONE;
                     end
                 endcase
             end
             default: begin
-                mem_ctrl = 0;
+                mem_ctrl = MEM_CTRL_NONE;
             end
         endcase
     end;

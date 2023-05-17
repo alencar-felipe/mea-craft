@@ -108,6 +108,7 @@ typedef enum word_t {
 } alu_ctrl_t;
 
 typedef enum word_t {
+    MEM_CTRL_NONE,
     MEM_CTRL_READ_BYTE,
     MEM_CTRL_READ_HALF,
     MEM_CTRL_READ_WORD,
@@ -115,11 +116,5 @@ typedef enum word_t {
     MEM_CTRL_STORE_HALF,
     MEM_CTRL_STORE_WORD
 } mem_ctrl_t;
-
-typedef enum {
-    UNIT_SEL_NONE,
-    UNIT_SEL_ALU,
-    UNIT_SEL_MEM
-} unit_sel_t;
 
 `endif

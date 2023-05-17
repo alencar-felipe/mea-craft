@@ -1,0 +1,3 @@
+[submodule "hardware/libs/verilog-axi"]
+	path = hardware/libs/verilog-axi
+	url = git@github.com:alexforencich/verilog-axi.git

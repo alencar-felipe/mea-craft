@@ -4,7 +4,7 @@
 
 module alu_ctrl_gen(
     input word_t inst,
-    output word_t alu_ctrl
+    output alu_ctrl_t alu_ctrl
 );
 
     always_comb begin
@@ -29,7 +29,7 @@ module alu_ctrl_gen(
                     alu_ctrl = ALU_CTRL_SGEU;
                 end
                 default: begin
-                    alu_ctrl = 0;
+                    alu_ctrl = ALU_CTRL_PASS;
                 end
             endcase
             

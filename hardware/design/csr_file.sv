@@ -1,14 +1,14 @@
 `include "types.sv"
 
-module csr_file (
+module csr_file #(
+    parameter word_t MHARTID = 0
+) (
     input logic clk,
     input logic rst,
     input logic write_en,
     input csr_addr_t addr,
-    input word_t din,
-    output word_t dout,
-
-    input word_t mhartid,
+    input word_t in,
+    output word_t out,
     output word_t mstatus
 );
 
@@ -30,10 +30,10 @@ module csr_file (
     always_comb begin
         integer i;
 
-        dout = 0;
+        out = 0;
         for(i = 0; i <= 6; i++) begin
             if(addr == map[i]) begin
-                dout = data[i];
+                out = data[i];
             end
         end
     end
@@ -46,12 +46,12 @@ module csr_file (
                 data[i] <= 0;
             end
 
-            data[6] <= mhartid;
+            data[6] <= MHARTID;
         end
         else if (write_en) begin
             for(i = 0; i <= 6; i++) begin
                 if(addr == map[i]) begin
-                    data[i] <= din;
+                    data[i] <= in;
                 end
             end
         end
