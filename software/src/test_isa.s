@@ -1,4 +1,4 @@
-.section .text
+.section .init
 .globl test_isa
 
 test_isa:
@@ -12,8 +12,7 @@ test_isa_lui:
 
 test_isa_auipc:
     auipc t0, 1                         // t0 = test_isa_auipc + 0x1000
-    lui t1, %hi(test_isa_auipc)         // t1 = text_auipc + 0x1000
-    addi t1, t1, %lo(test_isa_auipc)
+    la t1, test_isa_auipc               // t1 = text_auipc + 0x1000
     addi t2, x0, 1
     slli t2, t2, 12
     add t1, t1, t2

@@ -4,6 +4,9 @@ LD = ld.lld
 OBJCOPY = llvm-objcopy
 OBJDUMP = llvm-objdump
 
+# Define scripts
+AXIL_ROM_GEN = ../scripts/axil_rom_gen.py
+
 # Define linker script path
 LDSCRIPT = linker.ld
 
@@ -27,14 +30,20 @@ OBJS = $(ASM_OBJS) $(C_OBJS)
 
 # Targets
 ELF_TARGET = $(BUILD_DIR)/build.elf
-BIN_TARGET = $(BUILD_DIR)/build.bin
 TXT_TARGET = $(BUILD_DIR)/build.txt
+SOFTWARE_BIN_TARGET = $(BUILD_DIR)/software.bin
+BOOTLDR_BIN_TARGET = $(BUILD_DIR)/bootldr.bin
+VERILOG_TARGET = $(BUILD_DIR)/rom_bootldr.v
 
 # Create build directory if it doesn't exist
 $(shell mkdir -p $(BUILD_DIR))
 
 # Default target
-all: $(ELF_TARGET) $(BIN_TARGET) $(TXT_TARGET)
+all:	$(ELF_TARGET) \
+	 	$(TXT_TARGET) \
+		$(SOFTWARE_BIN_TARGET) \
+		$(BOOTLDR_BIN_TARGET) \
+		$(VERILOG_TARGET)
 
 # Compile C source files into object files
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
@@ -48,13 +57,21 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.s
 $(ELF_TARGET): $(OBJS) $(LDSCRIPT)
 	$(LD) $(LDFLAGS) $(OBJS) -o $@
 
-# Convert the ELF file to a binary file
-$(BIN_TARGET): $(ELF_TARGET)
-	$(OBJCOPY) -O binary $^ $@
-
 # Convert the ELF file into a ASM file
 $(TXT_TARGET): $(ELF_TARGET)
 	$(OBJDUMP) -D $(ELF_TARGET) > $(TXT_TARGET)
+	
+# Convert the ELF file to a binary file
+$(SOFTWARE_BIN_TARGET): $(ELF_TARGET)
+	$(OBJCOPY) --remove-section=.init -O binary $^ $@
+
+# Convert the ELF file to a binary file
+$(BOOTLDR_BIN_TARGET): $(ELF_TARGET)
+	$(OBJCOPY) --only-section=.init -O binary $^ $@
+
+# Convert the binary file into a Verilog ROM
+$(VERILOG_TARGET): $(BOOTLDR_BIN_TARGET)
+	$(AXIL_ROM_GEN) $^ -m rom_bootldr -o $@
 
 # Clean up object files and executable
 clean:

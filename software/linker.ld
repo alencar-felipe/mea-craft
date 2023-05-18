@@ -1,23 +1,24 @@
 MEMORY
 {
-    ram (rwx) : ORIGIN = 0x00000000, LENGTH = 4096
+    rom (rx)    : ORIGIN = 0x00000000, LENGTH = 4096
+    ram (rwx)   : ORIGIN = 0x10000000, LENGTH = 65536
 }
 
-ENTRY(irq_handler)
+ENTRY(bootldr)
 
 __heap_size = 1024;
 __stack_size = 1024;
 
 SECTIONS
-{
+{   
     .init :
-    {
+    {   
         *(.init)
-    } > ram
+    } > rom 
 
     .text :
     {
-        *(.text)
+        *(.text*)
     } > ram
 
     .rodata :
@@ -61,5 +62,5 @@ SECTIONS
 
         . = ALIGN(4);
         _eheap = .;
-    } > ram
+    } > ram  
 }

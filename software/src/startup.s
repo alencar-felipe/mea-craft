@@ -1,5 +1,5 @@
-.section .init
-.globl irq_handler
+.section .text
+#.globl irq_handler
 
 irq_handler:
     csrrw x0, mscratch, t0          // mscratch = t0
@@ -50,10 +50,6 @@ loop_start:
     addi t0, t0, 4
     j loop_start
 loop_end:
-    
-    /* Execute ISA test. */
-
-    jal test_isa
     
     /* Setup interruptions */
 

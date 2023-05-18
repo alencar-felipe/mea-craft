@@ -23,6 +23,12 @@
 - [An Introduction to RV32I Interrupts and Traps](https://www.youtube.com/watch?v=l7JIry6PEX4)
 - [RISC-V Interrupts](https://five-embeddev.com/quickref/interrupts.html)
 
+### Advanced eXtensible Interface
+
+- [AXI Basics](https://www.youtube.com/watch?v=1zw1HBsjDH8&list=PLkqJVNOiuuHtNrVaNK4O1BSgczja4obeW)
+- [verilog-axi](https://github.com/alexforencich/verilog-axi)
+
 ### Floating-point Arithmetic
 
 - [berkeley-softfloat-3](https://github.com/ucb-bar/berkeley-softfloat-3)
+- [Berkeley HardFloat](http://www.jhauser.us/arithmetic/HardFloat.html)
