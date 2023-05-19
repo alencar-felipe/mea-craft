@@ -2,7 +2,7 @@
 
 /* verilator lint_off UNUSED */
 
-module core # (
+module core #(
     parameter word_t MHARTID = 0
 ) (
     input logic clk,
@@ -551,15 +551,15 @@ module core # (
     always_comb begin
         case (mem_ctrl)
             MEM_CTRL_READ_BYTE: begin                
-                mem_out[7:0] = rdata[7:0];
+                mem_out = {24'b0, rdata[7:0]};
             end
                 
             MEM_CTRL_READ_HALF: begin
-                mem_out[15:0] = rdata[15:0];
+                mem_out = {16'b0, rdata[15:0]};
             end
 
             MEM_CTRL_READ_WORD: begin
-                mem_out[31:0] = rdata[31:0];
+                mem_out = rdata;
             end
 
             MEM_CTRL_STORE_BYTE: begin
@@ -621,32 +621,23 @@ module core # (
             MEM_CTRL_STORE_BYTE,
             MEM_CTRL_STORE_HALF,
             MEM_CTRL_STORE_WORD: begin
-                if (!curr.mem_addr_ok) begin
-                    mem_done = 0;
-
-                    next.mem_addr_ok = awready;
-                    next.mem_data_ok = wready;
-
-                    awvalid = 1;
-                    wvalid = 1;
-                end
-                else if (!curr.mem_data_ok) begin
-                    mem_done = 0;
-
-                    next.mem_addr_ok = 1;
-                    next.mem_data_ok = wready;
-
-                    awvalid = 0;
-                    wvalid = 1;
-                end
-                else begin
+                if (curr.mem_addr_ok & curr.mem_data_ok) begin
                     mem_done = 1;
-
-                    next.mem_addr_ok = 0;
-                    next.mem_data_ok = 0;
 
                     awvalid = 0;
                     wvalid = 0;
+
+                    next.mem_addr_ok = 0;
+                    next.mem_data_ok = 0;
+                end
+                else begin
+                    mem_done = 0;
+                    
+                    awvalid = !curr.mem_addr_ok;
+                    wvalid = !curr.mem_data_ok;
+
+                    next.mem_addr_ok = curr.mem_addr_ok | awready;
+                    next.mem_data_ok = curr.mem_data_ok | wready;
                 end
 
                 arvalid = 0;

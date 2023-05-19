@@ -1,19 +1,15 @@
 #include <stdint.h>
 
+char *msg = "Felipe";
+
 int main()
 {
-    int a, b, tmp;
+    char *ptr = msg;
 
-    a = 0;
-    b = 1;
-
-    for(int i = 2; i < 10; i++) {
-        tmp = b;
-        b = a + b;
-        a = tmp;    
+    while(*ptr != '\0') {
+        *((volatile uint8_t *)(0x30000000)) = *ptr;
+        ptr++;     
     }
 
-    *((volatile uint32_t *)(4091)) = b;
-
-    return b;
+    return 0;
 }

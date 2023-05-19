@@ -23,7 +23,7 @@ SECTIONS
 
     .rodata :
     {
-        *(.rodata)
+        *(.rodata*)
     } > ram
 
     .data :

@@ -29,7 +29,7 @@ test_isa_jal:
 
 test_isa_jalr:
     auipc t1, 0                         // t1 = pc
-    jalr t0, t1, 13                     // t0 = pc + 4; pc = (x2 + 13) & ~1; 
+    jalr t0, t1, 13                     // t0 = pc + 4; pc = (t1 + 13) & ~1; 
     ebreak                              // should not run
     addi t1, t1, 8                      // t1 = t1 + 8
     beq t0, t0, 8                       // assert t1 == t2

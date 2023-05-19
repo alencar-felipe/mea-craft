@@ -1,7 +1,9 @@
 module top (
     input logic clk,
     input logic rst,
-    output logic [31: 0] core_awaddr
+
+    output logic uart_tx,
+    input logic uart_rx
 );
     logic irq;
 
@@ -65,7 +67,7 @@ module top (
     logic         rom_bootldr_rvalid;
     logic         rom_bootldr_rready;
 
-    logic [31: 0] ram_awaddr;
+    logic [15: 0] ram_awaddr;
     logic [ 2: 0] ram_awprot;
     logic         ram_awvalid;
     logic         ram_awready;
@@ -76,7 +78,7 @@ module top (
     logic [ 1: 0] ram_bresp;
     logic         ram_bvalid;
     logic         ram_bready;
-    logic [31: 0] ram_araddr;
+    logic [15: 0] ram_araddr;
     logic [ 2: 0] ram_arprot;
     logic         ram_arvalid;
     logic         ram_arready;
@@ -85,7 +87,7 @@ module top (
     logic         ram_rvalid;
     logic         ram_rready;
 
-    logic [31: 0] frame_awaddr;
+    logic [15: 0] frame_awaddr;
     logic [ 2: 0] frame_awprot;
     logic         frame_awvalid;
     logic         frame_awready;
@@ -96,7 +98,7 @@ module top (
     logic [ 1: 0] frame_bresp;
     logic         frame_bvalid;
     logic         frame_bready;
-    logic [31: 0] frame_araddr;
+    logic [15: 0] frame_araddr;
     logic [ 2: 0] frame_arprot;
     logic         frame_arvalid;
     logic         frame_arready;
@@ -105,25 +107,25 @@ module top (
     logic         frame_rvalid;
     logic         frame_rready;
 
-    logic [31: 0] periph_awaddr;
-    logic [ 2: 0] periph_awprot;
-    logic         periph_awvalid;
-    logic         periph_awready;
-    logic [31: 0] periph_wdata;
-    logic [ 3: 0] periph_wstrb;
-    logic         periph_wvalid;
-    logic         periph_wready;
-    logic [ 1: 0] periph_bresp;
-    logic         periph_bvalid;
-    logic         periph_bready;
-    logic [31: 0] periph_araddr;
-    logic [ 2: 0] periph_arprot;
-    logic         periph_arvalid;
-    logic         periph_arready;
-    logic [31: 0] periph_rdata;
-    logic [ 1: 0] periph_rresp;
-    logic         periph_rvalid;
-    logic         periph_rready;
+    logic [31: 0] peripherals_awaddr;
+    logic [ 2: 0] peripherals_awprot;
+    logic         peripherals_awvalid;
+    logic         peripherals_awready;
+    logic [31: 0] peripherals_wdata;
+    logic [ 3: 0] peripherals_wstrb;
+    logic         peripherals_wvalid;
+    logic         peripherals_wready;
+    logic [ 1: 0] peripherals_bresp;
+    logic         peripherals_bvalid;
+    logic         peripherals_bready;
+    logic [31: 0] peripherals_araddr;
+    logic [ 2: 0] peripherals_arprot;
+    logic         peripherals_arvalid;
+    logic         peripherals_arready;
+    logic [31: 0] peripherals_rdata;
+    logic [ 1: 0] peripherals_rresp;
+    logic         peripherals_rvalid;
+    logic         peripherals_rready;
 
     core core (
         .clk (clk),
@@ -165,43 +167,18 @@ module top (
     assign gpu_arvalid = 0;
     assign gpu_rready = 1;
 
-/*
-    output logic [31: 0] awaddr,
-    output logic [ 2: 0] awprot,
-    output logic         awvalid,
-    output logic [31: 0] wdata,
-    output logic [ 3: 0] wstrb,
-    output logic         wvalid,
-    output logic         bready,
-    output logic [31: 0] araddr,
-    output logic [ 2: 0] arprot,
-    output logic         arvalid,
-    output logic         rready
-*/
-
-/*
-    input  logic         awready,
-    input  logic         wready,
-    input  logic [ 1: 0] bresp,
-    input  logic         bvalid,
-    input  logic         arready,
-    input  logic [31: 0] rdata,
-    input  logic [ 1: 0] rresp,
-    input  logic         rvalid,
-*/
-
     rom_bootldr rom_bootldr (
         .clk (clk),
         .rst (rst),
 
-        .s_axil_araddr (rom_bootldr_araddr),
-        .s_axil_arprot (rom_bootldr_arprot),
-        .s_axil_arvalid (rom_bootldr_arvalid),
-        .s_axil_arready (rom_bootldr_arready),
-        .s_axil_rdata (rom_bootldr_rdata),
-        .s_axil_rresp (rom_bootldr_rresp),
-        .s_axil_rvalid (rom_bootldr_rvalid),
-        .s_axil_rready (rom_bootldr_rready)
+        .araddr (rom_bootldr_araddr),
+        .arprot (rom_bootldr_arprot),
+        .arvalid (rom_bootldr_arvalid),
+        .arready (rom_bootldr_arready),
+        .rdata (rom_bootldr_rdata),
+        .rresp (rom_bootldr_rresp),
+        .rvalid (rom_bootldr_rvalid),
+        .rready (rom_bootldr_rready)
     );
 
     assign rom_bootldr_awready = 1;
@@ -209,7 +186,7 @@ module top (
     assign rom_bootldr_bresp = 0;
     assign rom_bootldr_bvalid = 0;
 
-    axil_ram #(
+    ram #(
         .DATA_WIDTH (32),
         .ADDR_WIDTH (15),
         .STRB_WIDTH (32/8)
@@ -217,65 +194,83 @@ module top (
         .clk (clk),
         .rst (rst),
 
-        .s_axil_awaddr (ram_awaddr),
-        .s_axil_awprot (ram_awprot),
-        .s_axil_awvalid (ram_awvalid),
-        .s_axil_awready (ram_awready),
-        .s_axil_wdata (ram_wdata),
-        .s_axil_wstrb (ram_wstrb),
-        .s_axil_wvalid (ram_wvalid),
-        .s_axil_wready (ram_wready),
-        .s_axil_bresp (ram_bresp),
-        .s_axil_bvalid (ram_bvalid),
-        .s_axil_bready (ram_bready),
-        .s_axil_araddr (ram_araddr),
-        .s_axil_arprot (ram_arprot),
-        .s_axil_arvalid (ram_arvalid),
-        .s_axil_arready (ram_arready),
-        .s_axil_rdata (ram_rdata),
-        .s_axil_rresp (ram_rresp),
-        .s_axil_rvalid (ram_rvalid),
-        .s_axil_rready (ram_rready)
+        .awaddr (ram_awaddr),
+        .awprot (ram_awprot),
+        .awvalid (ram_awvalid),
+        .awready (ram_awready),
+        .wdata (ram_wdata),
+        .wstrb (ram_wstrb),
+        .wvalid (ram_wvalid),
+        .wready (ram_wready),
+        .bresp (ram_bresp),
+        .bvalid (ram_bvalid),
+        .bready (ram_bready),
+        .araddr (ram_araddr),
+        .arprot (ram_arprot),
+        .arvalid (ram_arvalid),
+        .arready (ram_arready),
+        .rdata (ram_rdata),
+        .rresp (ram_rresp),
+        .rvalid (ram_rvalid),
+        .rready (ram_rready)
     );
 
-    axil_ram #(
+    ram #(
         .DATA_WIDTH (12),
-        .ADDR_WIDTH (20),
+        .ADDR_WIDTH (19),
         .STRB_WIDTH (12/4)
     ) frame (
         .clk (clk),
         .rst (rst),
 
-        .s_axil_awaddr (frame_awaddr),
-        .s_axil_awprot (frame_awprot),
-        .s_axil_awvalid (frame_awvalid),
-        .s_axil_awready (frame_awready),
-        .s_axil_wdata (frame_wdata),
-        .s_axil_wstrb (frame_wstrb),
-        .s_axil_wvalid (frame_wvalid),
-        .s_axil_wready (frame_wready),
-        .s_axil_bresp (frame_bresp),
-        .s_axil_bvalid (frame_bvalid),
-        .s_axil_bready (frame_bready),
-        .s_axil_araddr (frame_araddr),
-        .s_axil_arprot (frame_arprot),
-        .s_axil_arvalid (frame_arvalid),
-        .s_axil_arready (frame_arready),
-        .s_axil_rdata (frame_rdata),
-        .s_axil_rresp (frame_rresp),
-        .s_axil_rvalid (frame_rvalid),
-        .s_axil_rready (frame_rready)
+        .awaddr (frame_awaddr),
+        .awprot (frame_awprot),
+        .awvalid (frame_awvalid),
+        .awready (frame_awready),
+        .wdata (frame_wdata),
+        .wstrb (frame_wstrb),
+        .wvalid (frame_wvalid),
+        .wready (frame_wready),
+        .bresp (frame_bresp),
+        .bvalid (frame_bvalid),
+        .bready (frame_bready),
+        .araddr (frame_araddr),
+        .arprot (frame_arprot),
+        .arvalid (frame_arvalid),
+        .arready (frame_arready),
+        .rdata (frame_rdata),
+        .rresp (frame_rresp),
+        .rvalid (frame_rvalid),
+        .rready (frame_rready)
     );
 
-    assign periph_awready = 1;
-    assign periph_wready = 1;
-    assign periph_bresp = 0;
-    assign periph_bvalid = 0;
-    assign periph_arready = 1;
-    assign periph_rready = 1;
-    assign periph_rdata = 0;
-    assign periph_rresp = 0;
-    assign periph_rvalid = 0;
+    peripherals peripherals (
+        .clk (clk),
+        .rst (rst),
+
+        .awaddr (peripherals_awaddr),
+        .awprot (peripherals_awprot),
+        .awvalid (peripherals_awvalid),
+        .awready (peripherals_awready),
+        .wdata (peripherals_wdata),
+        .wstrb (peripherals_wstrb),
+        .wvalid (peripherals_wvalid),
+        .wready (peripherals_wready),
+        .bresp (peripherals_bresp),
+        .bvalid (peripherals_bvalid),
+        .bready (peripherals_bready),
+        .araddr (peripherals_araddr),
+        .arprot (peripherals_arprot),
+        .arvalid (peripherals_arvalid),
+        .arready (peripherals_arready),
+        .rdata (peripherals_rdata),
+        .rresp (peripherals_rresp),
+        .rvalid (peripherals_rvalid),
+        .rready (peripherals_rready),
+
+        .uart_tx (uart_tx),
+        .uart_rx (uart_rx)
+    );
 
     axil_crossbar_wrap_2x4 #(
         .M00_BASE_ADDR (32'h00000000),  // rom
@@ -386,25 +381,25 @@ module top (
         .m02_axil_rvalid (frame_rvalid),
         .m02_axil_rready (frame_rready),
 
-        .m03_axil_awaddr (periph_awaddr),
-        .m03_axil_awprot (periph_awprot),
-        .m03_axil_awvalid (periph_awvalid),
-        .m03_axil_awready (periph_awready),
-        .m03_axil_wdata (periph_wdata),
-        .m03_axil_wstrb (periph_wstrb),
-        .m03_axil_wvalid (periph_wvalid),
-        .m03_axil_wready (periph_wready),
-        .m03_axil_bresp (periph_bresp),
-        .m03_axil_bvalid (periph_bvalid),
-        .m03_axil_bready (periph_bready),
-        .m03_axil_araddr (periph_araddr),
-        .m03_axil_arprot (periph_arprot),
-        .m03_axil_arvalid (periph_arvalid),
-        .m03_axil_arready (periph_arready),
-        .m03_axil_rdata (periph_rdata),
-        .m03_axil_rresp (periph_rresp),
-        .m03_axil_rvalid (periph_rvalid),
-        .m03_axil_rready (periph_rready)
+        .m03_axil_awaddr (peripherals_awaddr),
+        .m03_axil_awprot (peripherals_awprot),
+        .m03_axil_awvalid (peripherals_awvalid),
+        .m03_axil_awready (peripherals_awready),
+        .m03_axil_wdata (peripherals_wdata),
+        .m03_axil_wstrb (peripherals_wstrb),
+        .m03_axil_wvalid (peripherals_wvalid),
+        .m03_axil_wready (peripherals_wready),
+        .m03_axil_bresp (peripherals_bresp),
+        .m03_axil_bvalid (peripherals_bvalid),
+        .m03_axil_bready (peripherals_bready),
+        .m03_axil_araddr (peripherals_araddr),
+        .m03_axil_arprot (peripherals_arprot),
+        .m03_axil_arvalid (peripherals_arvalid),
+        .m03_axil_arready (peripherals_arready),
+        .m03_axil_rdata (peripherals_rdata),
+        .m03_axil_rresp (peripherals_rresp),
+        .m03_axil_rvalid (peripherals_rvalid),
+        .m03_axil_rready (peripherals_rready)
     );
 
 endmodule
