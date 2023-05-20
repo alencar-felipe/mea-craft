@@ -167,7 +167,8 @@ def generate(input_file, output_file='axil_rom.v', module_name='axil_rom',
     for i in range(0, len(data), word_width):
         word = 0
         for j in range(word_width):
-            word += data[i + j] << 8*j
+            if i + j < len(data):
+                word |= data[i + j] << 8*j
         words += [word]
 
     verilog = template.render(

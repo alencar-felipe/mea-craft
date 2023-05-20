@@ -1,39 +1,34 @@
-module uart #(
-    parameter CLK_FREQ  = 100000000,
-    parameter BAUD_RATE = 9600,
-    parameter DATA_BITS = 8,
-    parameter STOP_BITS = 1
+module gpio #(
+    parameter ADDR_WIDTH = 1,
+    parameter DATA_WIDTH = 32,
+    parameter STRB_WIDTH = (DATA_WIDTH/8)
 ) (
     input  logic        clk,
     input  logic        rst,
 
-    input  logic [0:0]  awaddr,
-    input  logic [2:0]  awprot,
-    input  logic        awvalid,
-    output logic        awready,
-    input  logic [31:0] wdata,
-    input  logic [3:0]  wstrb,
-    input  logic        wvalid,
-    output logic        wready,
-    output logic [1:0]  bresp,
-    output logic        bvalid,
-    input  logic        bready,
-    input  logic [0:0]  araddr,
-    input  logic [2:0]  arprot,
-    input  logic        arvalid,
-    output logic        arready,
-    output logic [31:0] rdata,
-    output logic [1:0]  rresp,
-    output logic        rvalid,
-    input  logic        rready,
+    input  logic [ADDR_WIDTH-1:0] awaddr,
+    input  logic [2:0]            awprot,
+    input  logic                  awvalid,
+    output logic                  awready,
+    input  logic [DATA_WIDTH-1:0] wdata,
+    input  logic [3:0]            wstrb,
+    input  logic                  wvalid,
+    output logic                  wready,
+    output logic [1:0]            bresp,
+    output logic                  bvalid,
+    input  logic                  bready,
+    input  logic [ADDR_WIDTH:0]   araddr,
+    input  logic [2:0]            arprot,
+    input  logic                  arvalid,
+    output logic                  arready,
+    output logic [DATA_WIDTH-1:0] rdata,
+    output logic [1:0]            rresp,
+    output logic                  rvalid,
+    input  logic                  rready,
 
-    output logic        tx,
-    input  logic        rx
+    output logic [DATA_WIDTH-1:0] out,
+    input  logic [DATA_WIDTH-1:0] in
 );
-    parameter DATA_WIDTH = 32;
-    parameter ADDR_WIDTH = 1;
-    parameter STRB_WIDTH = (DATA_WIDTH/8);
-
     typedef struct packed {
         logic addr_ok;
         logic data_ok;

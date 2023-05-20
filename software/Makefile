@@ -6,6 +6,7 @@ OBJDUMP = llvm-objdump
 
 # Define scripts
 AXIL_ROM_GEN = ../scripts/axil_rom_gen.py
+FLASHER = ../scripts/flasher.py
 
 # Define linker script path
 LDSCRIPT = linker.ld
@@ -34,6 +35,9 @@ TXT_TARGET = $(BUILD_DIR)/build.txt
 SOFTWARE_BIN_TARGET = $(BUILD_DIR)/software.bin
 BOOTLDR_BIN_TARGET = $(BUILD_DIR)/bootldr.bin
 ROM_TARGET = $(BUILD_DIR)/axil_rom_bootldr.sv
+
+# Serial port
+SERIAL_PORT := /dev/ttyUSB1
 
 # Create build directory if it doesn't exist
 $(shell mkdir -p $(BUILD_DIR))
@@ -73,9 +77,12 @@ $(BOOTLDR_BIN_TARGET): $(ELF_TARGET)
 $(ROM_TARGET): $(BOOTLDR_BIN_TARGET)
 	$(AXIL_ROM_GEN) $^ -m axil_rom_bootldr -a 12 -o $@
 
+flash: $(SOFTWARE_BIN_TARGET)
+	$(FLASHER) $^ $(SERIAL_PORT)
+
 # Clean up object files and executable
 clean:
 	rm -rf $(BUILD_DIR)
 
 # Define phony targets
-.PHONY: all run clean
+.PHONY: all run flash clean

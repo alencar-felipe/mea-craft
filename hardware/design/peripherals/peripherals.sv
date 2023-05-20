@@ -25,234 +25,104 @@ module peripherals (
     output logic         uart_tx,
     input  logic         uart_rx
 );
-    parameter UART_ADDR = 24'h000000;
 
-    typedef enum logic [1:0] {
-        RESP_OKAY = 2'b00,
-        RESP_DECERR = 2'b01,
-        RESP_SLVERR = 2'b10,
-        RESP_EXOKAY = 2'b11
-    } resp_t;
-
-    typedef enum {
-        WRITE_STEP_ADDR,
-        WRITE_STEP_DATA,
-        WRITE_STEP_EXEC,
-        WRITE_STEP_RESP
-    } write_step_t;
-
-    typedef struct packed {
-        write_step_t step;
-        logic [23: 0] addr;
-        logic [31: 0] data;
-        logic [ 3: 0] strb;
-        logic [ 1: 0] resp;
-    } write_state_t;
-
-    typedef enum {
-        READ_STEP_ADDR,
-        READ_STEP_EXEC,
-        READ_STEP_DATA
-    } read_step_t;
-
-    typedef struct packed {
-        read_step_t step;
-        logic [23: 0] addr;
-        logic [31: 0] data;
-        logic [ 1: 0] resp;
-    } read_state_t;
-
-    logic [7:0] uart_din;
-    logic uart_din_valid;
-    logic uart_din_ready;
-    logic [7:0] uart_dout;
-    logic uart_dout_valid;
-    logic uart_dout_ready;
-
-    write_state_t write_curr;
-    write_state_t write_next;
-
-    read_state_t read_curr;
-    read_state_t read_next;
+    logic [0:0]  uart_awaddr;
+    logic [2:0]  uart_awprot;
+    logic        uart_awvalid;
+    logic        uart_awready;
+    logic [31:0] uart_wdata;
+    logic [3:0]  uart_wstrb;
+    logic        uart_wvalid;
+    logic        uart_wready;
+    logic [1:0]  uart_bresp;
+    logic        uart_bvalid;
+    logic        uart_bready;
+    logic [0:0]  uart_araddr;
+    logic [2:0]  uart_arprot;
+    logic        uart_arvalid;
+    logic        uart_arready;
+    logic [31:0] uart_rdata;
+    logic [1:0]  uart_rresp;
+    logic        uart_rvalid;
+    logic        uart_rready;
 
     uart uart (
         .clk (clk),
         .rst (rst),
-        .din (uart_din),
-        .din_valid (uart_din_valid),
-        .din_ready (uart_din_ready),
-        .dout (uart_dout),
-        .dout_valid (uart_dout_valid),
-        .dout_ready (uart_dout_ready),
+
+        .awaddr (uart_awaddr),
+        .awprot (uart_awprot),
+        .awvalid (uart_awvalid),
+        .awready (uart_awready),
+        .wdata (uart_wdata),
+        .wstrb (uart_wstrb),
+        .wvalid (uart_wvalid),
+        .wready (uart_wready),
+        .bresp (uart_bresp),
+        .bvalid (uart_bvalid),
+        .bready (uart_bready),
+        .araddr (uart_araddr),
+        .arprot (uart_arprot),
+        .arvalid (uart_arvalid),
+        .arready (uart_arready),
+        .rdata (uart_rdata),
+        .rresp (uart_rresp),
+        .rvalid (uart_rvalid),
+        .rready (uart_rready),
+
         .tx (uart_tx),
         .rx (uart_rx)
     );
 
-    always_ff @(posedge clk, posedge rst) begin
-        if (rst) begin
-            write_curr.step <= WRITE_STEP_ADDR;
-            write_curr.addr <= 0;
-            write_curr.data <= 0;
-            write_curr.strb <= 0;
-            write_curr.resp <= 0;
-        end
-        else begin
-            write_curr <= write_next;
-        end
-    end
+    axil_interconnect_wrap_1x1 #(
+        .DATA_WIDTH (32),
+        .ADDR_WIDTH (24),
+        .STRB_WIDTH (32/8),
+        .M00_BASE_ADDR (0),
+        .M00_ADDR_WIDTH ({1{32'd16}})
+    ) axil_interconnect (
+        .clk (clk),
+        .rst (rst),
+        
+        .s00_axil_awaddr (awaddr),
+        .s00_axil_awprot (awprot),
+        .s00_axil_awvalid (awvalid),
+        .s00_axil_awready (awready),
+        .s00_axil_wdata (wdata),
+        .s00_axil_wstrb (wstrb),
+        .s00_axil_wvalid (wvalid),
+        .s00_axil_wready (wready),
+        .s00_axil_bresp (bresp),
+        .s00_axil_bvalid (bvalid),
+        .s00_axil_bready (bready),
+        .s00_axil_araddr (araddr),
+        .s00_axil_arprot (arprot),
+        .s00_axil_arvalid (arvalid),
+        .s00_axil_arready (arready),
+        .s00_axil_rdata (rdata),
+        .s00_axil_rresp (rresp),
+        .s00_axil_rvalid (rvalid),
+        .s00_axil_rready (rready),
 
-    always_comb begin
-
-        /* First, set everything to the default value. */
-
-        awready = 0;
-        wready = 0;
-        bvalid = 0;
-        bresp = 0;
-
-        write_next.step = write_curr.step;
-        write_next.addr = write_curr.addr;
-        write_next.data = write_curr.data;
-        write_next.strb = write_curr.strb;
-        write_next.resp = write_curr.resp;
-
-        uart_din = 0;
-        uart_din_valid = 0;
-
-        /* Now, make changes as required on a case-by-case basis. */
-
-        case (write_curr.step)
-            
-            // WRITE_STEP_ADDR
-            default: begin
-                awready = 1;
-                
-                write_next.addr = awaddr;
-
-                if (awvalid) begin
-                    write_next.step = WRITE_STEP_DATA;
-                end
-            end
-
-            WRITE_STEP_DATA: begin
-                wready = 1;
-
-                write_next.data = wdata;
-                write_next.strb = wstrb;
-
-                if (wvalid) begin
-                    write_next.step = WRITE_STEP_EXEC;
-                end
-            end
-
-            WRITE_STEP_EXEC: case (write_curr.addr)
-                    
-                UART_ADDR: begin
-                    uart_din = write_curr.data;
-                    uart_din_valid = 1;
-                    
-                    write_next.resp = RESP_OKAY;
-
-                    if (uart_din_ready) begin
-                        write_next.step = WRITE_STEP_RESP;
-                    end
-                end
-
-                default: begin
-                    write_next.step = WRITE_STEP_RESP;
-                    write_next.resp = RESP_DECERR;
-                end
-
-            endcase
-
-            WRITE_STEP_RESP: begin
-                bvalid = 1;
-                bresp = write_curr.resp;
-
-                if (bready) begin
-                    write_next.step = WRITE_STEP_ADDR;
-                end
-            end
-
-        endcase
-
-    end
-
-    always_ff @(posedge clk, posedge rst) begin
-        if (rst) begin
-            read_curr.step <= READ_STEP_ADDR;
-            read_curr.addr <= 0;
-            read_curr.data <= 0;
-            read_curr.resp <= 0;
-        end
-        else begin
-            read_curr <= read_next;
-        end
-    end
-
-    always_comb begin
-
-        /* First, set everything to the default value. */
-
-        arready = 0;
-        rdata = 0;
-        rresp = 0;
-        rvalid = 0;
-
-        read_next.step = read_curr.step;
-        read_next.addr = read_curr.addr;
-        read_next.data = read_curr.data;
-        read_next.resp = read_curr.data;
-
-        uart_dout_ready = 0;
-
-        /* Now, make changes as required on a case-by-case basis. */
-
-        case (read_curr.step)
-
-            // READ_STEP_ADDR
-            default: begin
-                arready = 1;
-                
-                read_next.addr = araddr;
-
-                if (arvalid) begin
-                    read_next.step = READ_STEP_EXEC;
-                end
-            end
-
-            READ_STEP_EXEC: case (read_curr.addr)
-                    
-                UART_ADDR: begin
-                    uart_dout_ready = 1;
-
-                    read_next.data = uart_dout;
-                    read_next.resp = RESP_OKAY;
-
-                    if (uart_dout_valid) begin
-                        read_next.step = READ_STEP_DATA;
-                    end
-                end
-
-                default: begin
-                    read_next.step = READ_STEP_DATA;
-                    read_next.resp = RESP_DECERR;
-                end
-
-            endcase
-
-            WRITE_STEP_DATA: begin
-                rvalid = 1;
-                rdata = read_curr.data;
-                rresp = read_curr.resp;
-
-                if (rready) begin
-                    read_next.step = READ_STEP_ADDR;
-                end
-            end
-
-        endcase
-
-    end
-
+        .m00_axil_awaddr (uart_awaddr),
+        .m00_axil_awprot (uart_awprot),
+        .m00_axil_awvalid (uart_awvalid),
+        .m00_axil_awready (uart_awready),
+        .m00_axil_wdata (uart_wdata),
+        .m00_axil_wstrb (uart_wstrb),
+        .m00_axil_wvalid (uart_wvalid),
+        .m00_axil_wready (uart_wready),
+        .m00_axil_bresp (uart_bresp),
+        .m00_axil_bvalid (uart_bvalid),
+        .m00_axil_bready (uart_bready),
+        .m00_axil_araddr (uart_araddr),
+        .m00_axil_arprot (uart_arprot),
+        .m00_axil_arvalid (uart_arvalid),
+        .m00_axil_arready (uart_arready),
+        .m00_axil_rdata (uart_rdata),
+        .m00_axil_rresp (uart_rresp),
+        .m00_axil_rvalid (uart_rvalid),
+        .m00_axil_rready (uart_rready)
+    );
+    
 endmodule

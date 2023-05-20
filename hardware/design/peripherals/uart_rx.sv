@@ -27,12 +27,22 @@ module uart_rx #(
             data_valid <= 0;
         end
         else begin
-            if (clk_count == 0 & bit_count == 0 & rx == 0) begin
-                // start
-                clk_count <= clk_count + PERIOD/2;
-                bit_count <= bit_count + 1;
-                curr <= 0;
-                data_valid <= 0;
+            if (clk_count == 0 & bit_count == 0) begin
+                // idle
+                if (rx == 0) begin
+                    // start
+                    clk_count <= PERIOD/2;
+                    bit_count <= 0;
+                    curr <= 0;
+                    data_valid <= 0;
+                end
+                else begin
+                    // continue idle
+                    clk_count <= 0;
+                    bit_count <= 0;
+                    curr <= 0;
+                    data_valid <= 0;
+                end
             end
             else if (bit_count >= (1 + DATA_BITS + STOP_BITS)) begin
                 // end of transmission
@@ -57,10 +67,10 @@ module uart_rx #(
                 bit_count <= bit_count + 1;
                 data_valid <= 0;
 
-                if (bit_count >= 2) begin
+                if (bit_count >= 1 && bit_count < 1 + DATA_BITS) begin
                     // data bit
                     curr <= curr;
-                    curr[bit_count-2] <= rx;
+                    curr[bit_count-1] <= rx;
                 end
                 else begin
                     // start/stop/idle bit

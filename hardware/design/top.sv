@@ -147,7 +147,7 @@ module top (
     logic         frame_rvalid;
     logic         frame_rready;
 
-    logic [31: 0] peripherals_awaddr;
+    logic [23: 0] peripherals_awaddr;
     logic [ 2: 0] peripherals_awprot;
     logic         peripherals_awvalid;
     logic         peripherals_awready;
@@ -158,7 +158,7 @@ module top (
     logic [ 1: 0] peripherals_bresp;
     logic         peripherals_bvalid;
     logic         peripherals_bready;
-    logic [31: 0] peripherals_araddr;
+    logic [23: 0] peripherals_araddr;
     logic [ 2: 0] peripherals_arprot;
     logic         peripherals_arvalid;
     logic         peripherals_arready;
@@ -415,7 +415,7 @@ module top (
         .M01_BASE_ADDR (32'h10000000),  // ram
         .M02_BASE_ADDR (32'h20000000),  // frame
         .M03_BASE_ADDR (32'h30000000)   // pheripherals
-    ) axil_crossbar_wrap_2x4 (
+    ) axil_crossbar_wrap (
         .clk (clk),
         .rst (rst),
 
