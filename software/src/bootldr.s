@@ -2,6 +2,25 @@
 .globl bootldr
 
 bootldr:
+/* 
+    li t0, 0x10000001                   // t0 = mem
+    li t1, 0xDEADBEEF                   // t1 = 0xDEADBEEF
+    li t2, 0xBADC0FFE                   // t2 = 0xBADC0FFE
+
+    sw t1, 0(t0)                        // mem[0] = t1
+    sw t2, 4(t0)                        // mem[1] = t2
+
+    lw t3, 0(t0)                        // t3 = mem[0]
+    beq t3, t1, 8                       // assert t3 == t1
+    ebreak
+
+    lw t4, 4(t0)                        // t4 = mem[1]
+    beq t4, t2, 8                       // assert t4 == t1
+    ebreak
+
+    ebreak
+*/
+
     la sp, _estack                  // Set the stack pointer.
     jal test_isa                    // Execute ISA test.
 

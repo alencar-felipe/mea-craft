@@ -66,61 +66,72 @@ test_isa_branch:
     ebreak                              // should not run
 
 test_isa_mem_0:
-    lui t0, %hi(array)                  // t0 = array
-    addi t0, t0, %lo(array)              
+    li t0, 0x10000000                   // t0 = mem
+    li t1, 0xDEADBEEF                   // t1 = 0xDEADBEEF
+    li t2, 0xBADC0FFE                   // t2 = 0xBADC0FFE
 
-    lui t1, %hi(0xDEADBEEF)             // t1 = 0xDEADBEEF
-    addi t1, t1, %lo(0xDEADBEEF)
-    
-    lui t2, %hi(0xBADC0FFE)             // t2 = 0xBADC0FFE
-    addi t2, t2, %lo(0xBADC0FFE)
+    sw t1, 0(t0)                        // mem[0] = t1
+    sw t2, 4(t0)                        // mem[1] = t2
 
-    sw t1, 0(t0)                        // array[0] = t1
-    sw t2, 4(t0)                        // array[1] = t2
-
-    lw t3, 0(t0)                        // t3 = array[0]
+    lw t3, 0(t0)                        // t3 = mem[0]
     beq t3, t1, 8                       // assert t3 == t1
     ebreak
 
-    lw t4, 4(t0)                        // t4 = array[1]
+    lw t4, 4(t0)                        // t4 = mem[1]
     beq t4, t2, 8                       // assert t4 == t1
     ebreak
 
 test_isa_mem_1:
-    la t0, array                        // t0 = array
+    li t0, 0x10000001                   // t0 = mem
+    li t1, 0xDEADBEEF                   // t1 = 0xDEADBEEF
+    li t2, 0xBADC0FFE                   // t2 = 0xBADC0FFE
+
+    sw t1, 0(t0)                        // mem[0] = t1
+    sw t2, 4(t0)                        // mem[1] = t2
+
+    lw t3, 0(t0)                        // t3 = mem[0]
+    beq t3, t1, 8                       // assert t3 == t1
+    ebreak
+
+    lw t4, 4(t0)                        // t4 = mem[1]
+    beq t4, t2, 8                       // assert t4 == t1
+    ebreak
+
+test_isa_mem_2:
+    li t0, 0x10000002                   // t0 = mem
     li t1, 0xDEADBEEF                   // t1 = 0xDEADBEEF
     li t2, 0x000000EF                   // t2 = 0x000000EF
     li t3, 0xFFFFFFEF                   // t3 = 0xFFFFFFEF
     li t4, 0x0000BEEF                   // t4 = 0x0000BEEF
     li t5, 0xFFFFBEEF                   // t5 = 0xFFFFBEEF
 
-    sw x0, 0(t0)                        // array[0] = 0
-    sb t1, 0(t0)                        // array[0] = 0xEF
+    sw x0, 0(t0)                        // mem[0] = 0
+    sb t1, 0(t0)                        // mem[0] = 0xEF
 
-    lw t6, 0(t0)                        // t6 = array[0]
+    lw t6, 0(t0)                        // t6 = mem[0]
     beq t6, t2, 8                       // assert t6 == t2
     ebreak
     
-    lb t6, 0(t0)                        // t6 = sext(array[0][7:0])
+    lb t6, 0(t0)                        // t6 = sext(mem[0][7:0])
     beq t6, t3, 8                       // assert t6 == t3
     ebreak
 
-    lbu t6, 0(t0)                       // t6 = array_b[0][7:0]
+    lbu t6, 0(t0)                       // t6 = mem_b[0][7:0]
     beq t6, t2, 8                       // assert t6 == t2
     ebreak
     
-    sw x0, 0(t0)                        // array[0] = 0
-    sh t1, 0(t0)                        // array[0] = 0xBEEF
+    sw x0, 0(t0)                        // mem[0] = 0
+    sh t1, 0(t0)                        // mem[0] = 0xBEEF
     
-    lw t6, 0(t0)                        // t6 = array[0]
+    lw t6, 0(t0)                        // t6 = mem[0]
     beq t6, t4, 8                       // assert t6 == t4
     ebreak
 
-    lh t6, 0(t0)                        // t6 = sext(array[0][15:0])
+    lh t6, 0(t0)                        // t6 = sext(mem[0][15:0])
     beq t6, t5, 8                       // assert t6 == t5
     ebreak
 
-    lhu t6, 0(t0)                       // t6 = array[0][31:0]
+    lhu t6, 0(t0)                       // t6 = mem[0][31:0]
     beq t6, t4, 8                       // assert t6 == t4
     ebreak
 
@@ -235,8 +246,3 @@ test_isa_op:
 
 test_isa_end:
     ret
-    
-.section .data
-array:
-    .word 0
-    .word 0

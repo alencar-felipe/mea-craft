@@ -67,7 +67,7 @@ module top (
     logic         rom_bootldr_rvalid;
     logic         rom_bootldr_rready;
 
-    logic [15: 0] ram_awaddr;
+    logic [14: 0] ram_awaddr;
     logic [ 2: 0] ram_awprot;
     logic         ram_awvalid;
     logic         ram_awready;
@@ -78,7 +78,7 @@ module top (
     logic [ 1: 0] ram_bresp;
     logic         ram_bvalid;
     logic         ram_bready;
-    logic [15: 0] ram_araddr;
+    logic [14: 0] ram_araddr;
     logic [ 2: 0] ram_arprot;
     logic         ram_arvalid;
     logic         ram_arready;
@@ -86,6 +86,26 @@ module top (
     logic [ 1: 0] ram_rresp;
     logic         ram_rvalid;
     logic         ram_rready;
+
+    logic [14: 0] ram_aligner_awaddr;
+    logic [ 2: 0] ram_aligner_awprot;
+    logic         ram_aligner_awvalid;
+    logic         ram_aligner_awready;
+    logic [31: 0] ram_aligner_wdata;
+    logic [ 3: 0] ram_aligner_wstrb;
+    logic         ram_aligner_wvalid;
+    logic         ram_aligner_wready;
+    logic [ 1: 0] ram_aligner_bresp;
+    logic         ram_aligner_bvalid;
+    logic         ram_aligner_bready;
+    logic [14: 0] ram_aligner_araddr;
+    logic [ 2: 0] ram_aligner_arprot;
+    logic         ram_aligner_arvalid;
+    logic         ram_aligner_arready;
+    logic [31: 0] ram_aligner_rdata;
+    logic [ 1: 0] ram_aligner_rresp;
+    logic         ram_aligner_rvalid;
+    logic         ram_aligner_rready;
 
     logic [15: 0] frame_awaddr;
     logic [ 2: 0] frame_awprot;
@@ -186,7 +206,7 @@ module top (
     assign rom_bootldr_bresp = 0;
     assign rom_bootldr_bvalid = 0;
 
-    ram #(
+    axil_ram #(
         .DATA_WIDTH (32),
         .ADDR_WIDTH (15),
         .STRB_WIDTH (32/8)
@@ -194,28 +214,77 @@ module top (
         .clk (clk),
         .rst (rst),
 
-        .awaddr (ram_awaddr),
-        .awprot (ram_awprot),
-        .awvalid (ram_awvalid),
-        .awready (ram_awready),
-        .wdata (ram_wdata),
-        .wstrb (ram_wstrb),
-        .wvalid (ram_wvalid),
-        .wready (ram_wready),
-        .bresp (ram_bresp),
-        .bvalid (ram_bvalid),
-        .bready (ram_bready),
-        .araddr (ram_araddr),
-        .arprot (ram_arprot),
-        .arvalid (ram_arvalid),
-        .arready (ram_arready),
-        .rdata (ram_rdata),
-        .rresp (ram_rresp),
-        .rvalid (ram_rvalid),
-        .rready (ram_rready)
+        .s_axil_awaddr (ram_awaddr),
+        .s_axil_awprot (ram_awprot),
+        .s_axil_awvalid (ram_awvalid),
+        .s_axil_awready (ram_awready),
+        .s_axil_wdata (ram_wdata),
+        .s_axil_wstrb (ram_wstrb),
+        .s_axil_wvalid (ram_wvalid),
+        .s_axil_wready (ram_wready),
+        .s_axil_bresp (ram_bresp),
+        .s_axil_bvalid (ram_bvalid),
+        .s_axil_bready (ram_bready),
+        .s_axil_araddr (ram_araddr),
+        .s_axil_arprot (ram_arprot),
+        .s_axil_arvalid (ram_arvalid),
+        .s_axil_arready (ram_arready),
+        .s_axil_rdata (ram_rdata),
+        .s_axil_rresp (ram_rresp),
+        .s_axil_rvalid (ram_rvalid),
+        .s_axil_rready (ram_rready)
     );
 
-    ram #(
+    aligner #(
+        .DATA_WIDTH (32),
+        .ADDR_WIDTH (15),
+        .STRB_WIDTH (32/8)
+    ) ram_aligner (
+        .clk (clk),
+        .rst (rst),
+
+        .s_awaddr (ram_aligner_awaddr),
+        .s_awprot (ram_aligner_awprot),
+        .s_awvalid (ram_aligner_awvalid),
+        .s_awready (ram_aligner_awready),
+        .s_wdata (ram_aligner_wdata),
+        .s_wstrb (ram_aligner_wstrb),
+        .s_wvalid (ram_aligner_wvalid),
+        .s_wready (ram_aligner_wready),
+        .s_bresp (ram_aligner_bresp),
+        .s_bvalid (ram_aligner_bvalid),
+        .s_bready (ram_aligner_bready),
+        .s_araddr (ram_aligner_araddr),
+        .s_arprot (ram_aligner_arprot),
+        .s_arvalid (ram_aligner_arvalid),
+        .s_arready (ram_aligner_arready),
+        .s_rdata (ram_aligner_rdata),
+        .s_rresp (ram_aligner_rresp),
+        .s_rvalid (ram_aligner_rvalid),
+        .s_rready (ram_aligner_rready),
+
+        .m_awaddr (ram_awaddr),
+        .m_awprot (ram_awprot),
+        .m_awvalid (ram_awvalid),
+        .m_awready (ram_awready),
+        .m_wdata (ram_wdata),
+        .m_wstrb (ram_wstrb),
+        .m_wvalid (ram_wvalid),
+        .m_wready (ram_wready),
+        .m_bresp (ram_bresp),
+        .m_bvalid (ram_bvalid),
+        .m_bready (ram_bready),
+        .m_araddr (ram_araddr),
+        .m_arprot (ram_arprot),
+        .m_arvalid (ram_arvalid),
+        .m_arready (ram_arready),
+        .m_rdata (ram_rdata),
+        .m_rresp (ram_rresp),
+        .m_rvalid (ram_rvalid),
+        .m_rready (ram_rready)
+    );
+
+    axil_ram #(
         .DATA_WIDTH (12),
         .ADDR_WIDTH (19),
         .STRB_WIDTH (12/4)
@@ -223,25 +292,25 @@ module top (
         .clk (clk),
         .rst (rst),
 
-        .awaddr (frame_awaddr),
-        .awprot (frame_awprot),
-        .awvalid (frame_awvalid),
-        .awready (frame_awready),
-        .wdata (frame_wdata),
-        .wstrb (frame_wstrb),
-        .wvalid (frame_wvalid),
-        .wready (frame_wready),
-        .bresp (frame_bresp),
-        .bvalid (frame_bvalid),
-        .bready (frame_bready),
-        .araddr (frame_araddr),
-        .arprot (frame_arprot),
-        .arvalid (frame_arvalid),
-        .arready (frame_arready),
-        .rdata (frame_rdata),
-        .rresp (frame_rresp),
-        .rvalid (frame_rvalid),
-        .rready (frame_rready)
+        .s_axil_awaddr (frame_awaddr),
+        .s_axil_awprot (frame_awprot),
+        .s_axil_awvalid (frame_awvalid),
+        .s_axil_awready (frame_awready),
+        .s_axil_wdata (frame_wdata),
+        .s_axil_wstrb (frame_wstrb),
+        .s_axil_wvalid (frame_wvalid),
+        .s_axil_wready (frame_wready),
+        .s_axil_bresp (frame_bresp),
+        .s_axil_bvalid (frame_bvalid),
+        .s_axil_bready (frame_bready),
+        .s_axil_araddr (frame_araddr),
+        .s_axil_arprot (frame_arprot),
+        .s_axil_arvalid (frame_arvalid),
+        .s_axil_arready (frame_arready),
+        .s_axil_rdata (frame_rdata),
+        .s_axil_rresp (frame_rresp),
+        .s_axil_rvalid (frame_rvalid),
+        .s_axil_rready (frame_rready)
     );
 
     peripherals peripherals (
@@ -341,25 +410,25 @@ module top (
         .m00_axil_rvalid (rom_bootldr_rvalid),
         .m00_axil_rready (rom_bootldr_rready),
 
-        .m01_axil_awaddr (ram_awaddr),
-        .m01_axil_awprot (ram_awprot),
-        .m01_axil_awvalid (ram_awvalid),
-        .m01_axil_awready (ram_awready),
-        .m01_axil_wdata (ram_wdata),
-        .m01_axil_wstrb (ram_wstrb),
-        .m01_axil_wvalid (ram_wvalid),
-        .m01_axil_wready (ram_wready),
-        .m01_axil_bresp (ram_bresp),
-        .m01_axil_bvalid (ram_bvalid),
-        .m01_axil_bready (ram_bready),
-        .m01_axil_araddr (ram_araddr),
-        .m01_axil_arprot (ram_arprot),
-        .m01_axil_arvalid (ram_arvalid),
-        .m01_axil_arready (ram_arready),
-        .m01_axil_rdata (ram_rdata),
-        .m01_axil_rresp (ram_rresp),
-        .m01_axil_rvalid (ram_rvalid),
-        .m01_axil_rready (ram_rready),
+        .m01_axil_awaddr (ram_aligner_awaddr),
+        .m01_axil_awprot (ram_aligner_awprot),
+        .m01_axil_awvalid (ram_aligner_awvalid),
+        .m01_axil_awready (ram_aligner_awready),
+        .m01_axil_wdata (ram_aligner_wdata),
+        .m01_axil_wstrb (ram_aligner_wstrb),
+        .m01_axil_wvalid (ram_aligner_wvalid),
+        .m01_axil_wready (ram_aligner_wready),
+        .m01_axil_bresp (ram_aligner_bresp),
+        .m01_axil_bvalid (ram_aligner_bvalid),
+        .m01_axil_bready (ram_aligner_bready),
+        .m01_axil_araddr (ram_aligner_araddr),
+        .m01_axil_arprot (ram_aligner_arprot),
+        .m01_axil_arvalid (ram_aligner_arvalid),
+        .m01_axil_arready (ram_aligner_arready),
+        .m01_axil_rdata (ram_aligner_rdata),
+        .m01_axil_rresp (ram_aligner_rresp),
+        .m01_axil_rvalid (ram_aligner_rvalid),
+        .m01_axil_rready (ram_aligner_rready),
 
         .m02_axil_awaddr (frame_awaddr),
         .m02_axil_awprot (frame_awprot),
