@@ -67,6 +67,26 @@ module top (
     logic         rom_bootldr_rvalid;
     logic         rom_bootldr_rready;
 
+    logic [31: 0] rom_bootldr_aligner_awaddr;
+    logic [ 2: 0] rom_bootldr_aligner_awprot;
+    logic         rom_bootldr_aligner_awvalid;
+    logic         rom_bootldr_aligner_awready;
+    logic [31: 0] rom_bootldr_aligner_wdata;
+    logic [ 3: 0] rom_bootldr_aligner_wstrb;
+    logic         rom_bootldr_aligner_wvalid;
+    logic         rom_bootldr_aligner_wready;
+    logic [ 1: 0] rom_bootldr_aligner_bresp;
+    logic         rom_bootldr_aligner_bvalid;
+    logic         rom_bootldr_aligner_bready;
+    logic [31: 0] rom_bootldr_aligner_araddr;
+    logic [ 2: 0] rom_bootldr_aligner_arprot;
+    logic         rom_bootldr_aligner_arvalid;
+    logic         rom_bootldr_aligner_arready;
+    logic [31: 0] rom_bootldr_aligner_rdata;
+    logic [ 1: 0] rom_bootldr_aligner_rresp;
+    logic         rom_bootldr_aligner_rvalid;
+    logic         rom_bootldr_aligner_rready;
+
     logic [14: 0] ram_awaddr;
     logic [ 2: 0] ram_awprot;
     logic         ram_awvalid;
@@ -187,18 +207,67 @@ module top (
     assign gpu_arvalid = 0;
     assign gpu_rready = 1;
 
-    rom_bootldr rom_bootldr (
+    axil_rom_bootldr rom_bootldr (
         .clk (clk),
         .rst (rst),
 
-        .araddr (rom_bootldr_araddr),
-        .arprot (rom_bootldr_arprot),
-        .arvalid (rom_bootldr_arvalid),
-        .arready (rom_bootldr_arready),
-        .rdata (rom_bootldr_rdata),
-        .rresp (rom_bootldr_rresp),
-        .rvalid (rom_bootldr_rvalid),
-        .rready (rom_bootldr_rready)
+        .s_axil_araddr (rom_bootldr_araddr),
+        .s_axil_arprot (rom_bootldr_arprot),
+        .s_axil_arvalid (rom_bootldr_arvalid),
+        .s_axil_arready (rom_bootldr_arready),
+        .s_axil_rdata (rom_bootldr_rdata),
+        .s_axil_rresp (rom_bootldr_rresp),
+        .s_axil_rvalid (rom_bootldr_rvalid),
+        .s_axil_rready (rom_bootldr_rready)
+    );
+
+    aligner #(
+        .DATA_WIDTH (32),
+        .ADDR_WIDTH (12),
+        .STRB_WIDTH (32/8)
+    ) rom_bootldr_aligner (
+        .clk (clk),
+        .rst (rst),
+
+        .s_awaddr (rom_bootldr_aligner_awaddr),
+        .s_awprot (rom_bootldr_aligner_awprot),
+        .s_awvalid (rom_bootldr_aligner_awvalid),
+        .s_awready (rom_bootldr_aligner_awready),
+        .s_wdata (rom_bootldr_aligner_wdata),
+        .s_wstrb (rom_bootldr_aligner_wstrb),
+        .s_wvalid (rom_bootldr_aligner_wvalid),
+        .s_wready (rom_bootldr_aligner_wready),
+        .s_bresp (rom_bootldr_aligner_bresp),
+        .s_bvalid (rom_bootldr_aligner_bvalid),
+        .s_bready (rom_bootldr_aligner_bready),
+        .s_araddr (rom_bootldr_aligner_araddr),
+        .s_arprot (rom_bootldr_aligner_arprot),
+        .s_arvalid (rom_bootldr_aligner_arvalid),
+        .s_arready (rom_bootldr_aligner_arready),
+        .s_rdata (rom_bootldr_aligner_rdata),
+        .s_rresp (rom_bootldr_aligner_rresp),
+        .s_rvalid (rom_bootldr_aligner_rvalid),
+        .s_rready (rom_bootldr_aligner_rready),
+
+        .m_awaddr (rom_bootldr_awaddr),
+        .m_awprot (rom_bootldr_awprot),
+        .m_awvalid (rom_bootldr_awvalid),
+        .m_awready (rom_bootldr_awready),
+        .m_wdata (rom_bootldr_wdata),
+        .m_wstrb (rom_bootldr_wstrb),
+        .m_wvalid (rom_bootldr_wvalid),
+        .m_wready (rom_bootldr_wready),
+        .m_bresp (rom_bootldr_bresp),
+        .m_bvalid (rom_bootldr_bvalid),
+        .m_bready (rom_bootldr_bready),
+        .m_araddr (rom_bootldr_araddr),
+        .m_arprot (rom_bootldr_arprot),
+        .m_arvalid (rom_bootldr_arvalid),
+        .m_arready (rom_bootldr_arready),
+        .m_rdata (rom_bootldr_rdata),
+        .m_rresp (rom_bootldr_rresp),
+        .m_rvalid (rom_bootldr_rvalid),
+        .m_rready (rom_bootldr_rready)
     );
 
     assign rom_bootldr_awready = 1;
@@ -390,25 +459,25 @@ module top (
         .s01_axil_rvalid (gpu_rvalid),
         .s01_axil_rready (gpu_rready),
 
-        .m00_axil_awaddr (rom_bootldr_awaddr),
-        .m00_axil_awprot (rom_bootldr_awprot),
-        .m00_axil_awvalid (rom_bootldr_awvalid),
-        .m00_axil_awready (rom_bootldr_awready),
-        .m00_axil_wdata (rom_bootldr_wdata),
-        .m00_axil_wstrb (rom_bootldr_wstrb),
-        .m00_axil_wvalid (rom_bootldr_wvalid),
-        .m00_axil_wready (rom_bootldr_wready),
-        .m00_axil_bresp (rom_bootldr_bresp),
-        .m00_axil_bvalid (rom_bootldr_bvalid),
-        .m00_axil_bready (rom_bootldr_bready),
-        .m00_axil_araddr (rom_bootldr_araddr),
-        .m00_axil_arprot (rom_bootldr_arprot),
-        .m00_axil_arvalid (rom_bootldr_arvalid),
-        .m00_axil_arready (rom_bootldr_arready),
-        .m00_axil_rdata (rom_bootldr_rdata),
-        .m00_axil_rresp (rom_bootldr_rresp),
-        .m00_axil_rvalid (rom_bootldr_rvalid),
-        .m00_axil_rready (rom_bootldr_rready),
+        .m00_axil_awaddr (rom_bootldr_aligner_awaddr),
+        .m00_axil_awprot (rom_bootldr_aligner_awprot),
+        .m00_axil_awvalid (rom_bootldr_aligner_awvalid),
+        .m00_axil_awready (rom_bootldr_aligner_awready),
+        .m00_axil_wdata (rom_bootldr_aligner_wdata),
+        .m00_axil_wstrb (rom_bootldr_aligner_wstrb),
+        .m00_axil_wvalid (rom_bootldr_aligner_wvalid),
+        .m00_axil_wready (rom_bootldr_aligner_wready),
+        .m00_axil_bresp (rom_bootldr_aligner_bresp),
+        .m00_axil_bvalid (rom_bootldr_aligner_bvalid),
+        .m00_axil_bready (rom_bootldr_aligner_bready),
+        .m00_axil_araddr (rom_bootldr_aligner_araddr),
+        .m00_axil_arprot (rom_bootldr_aligner_arprot),
+        .m00_axil_arvalid (rom_bootldr_aligner_arvalid),
+        .m00_axil_arready (rom_bootldr_aligner_arready),
+        .m00_axil_rdata (rom_bootldr_aligner_rdata),
+        .m00_axil_rresp (rom_bootldr_aligner_rresp),
+        .m00_axil_rvalid (rom_bootldr_aligner_rvalid),
+        .m00_axil_rready (rom_bootldr_aligner_rready),
 
         .m01_axil_awaddr (ram_aligner_awaddr),
         .m01_axil_awprot (ram_aligner_awprot),
