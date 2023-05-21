@@ -1,5 +1,7 @@
+// TODO: potencial bug detected on tx
+
 module uart #(
-    parameter CLK_FREQ  = 100000000,
+    parameter CLK_FREQ  = 50000000,
     parameter BAUD_RATE = 9600,
     parameter DATA_BITS = 8,
     parameter STOP_BITS = 1

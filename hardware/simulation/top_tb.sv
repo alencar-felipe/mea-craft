@@ -3,7 +3,7 @@ module top_tb;
     logic clk;
     logic rst;
     logic uart_loopback;
-    
+
     initial begin  
         clk = 0;
         rst = 1;

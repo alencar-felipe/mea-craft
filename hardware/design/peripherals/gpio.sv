@@ -1,10 +1,10 @@
 module gpio #(
-    parameter ADDR_WIDTH = 1,
+    parameter ADDR_WIDTH = 2,
     parameter DATA_WIDTH = 32,
     parameter STRB_WIDTH = (DATA_WIDTH/8)
 ) (
-    input  logic        clk,
-    input  logic        rst,
+    input  logic                  clk,
+    input  logic                  rst,
 
     input  logic [ADDR_WIDTH-1:0] awaddr,
     input  logic [2:0]            awprot,
@@ -26,14 +26,17 @@ module gpio #(
     output logic                  rvalid,
     input  logic                  rready,
 
-    output logic [DATA_WIDTH-1:0] out,
-    input  logic [DATA_WIDTH-1:0] in
+    output logic [DATA_WIDTH-1:0] out [ADDR_WIDTH-1:0],
+    input  logic [DATA_WIDTH-1:0] in [ADDR_WIDTH-1:0]
 );
+    parameter WORD_WIDTH = STRB_WIDTH; 
+    parameter WORD_SIZE = DATA_WIDTH/WORD_WIDTH;
+
     typedef struct packed {
         logic addr_ok;
         logic data_ok;
         logic resp_ok;
-        logic tx_ok;
+        logic gpio_ok;
         logic [ADDR_WIDTH-1:0] addr;
         logic [DATA_WIDTH-1:0] data;
         logic [STRB_WIDTH-1:0] strb;
@@ -47,58 +50,13 @@ module gpio #(
         logic [DATA_WIDTH-1:0] data;
     } read_state_t;
 
-    logic [DATA_BITS-1:0] din;
-    logic din_valid;
-    logic din_ready;
-
-    logic [DATA_BITS-1:0] dout;
-    logic dout_valid;
-    logic dout_ready;
-
-    logic [DATA_WIDTH-1:0] status;
-
     write_state_t w_curr;
     write_state_t w_next;
 
     read_state_t r_curr;
     read_state_t r_next;
-
-    initial begin
-        if (DATA_BITS > 32) begin
-            $error("Error: DATA_BITS > 32");
-            $finish;
-        end
-    end
-
-    uart_tx #(
-        .CLK_FREQ (CLK_FREQ),
-        .BAUD_RATE (BAUD_RATE),
-        .DATA_BITS (DATA_BITS),
-        .STOP_BITS (STOP_BITS)
-    ) uart_tx (
-        .clk (clk),
-        .rst (rst),
-        .data (dout),
-        .data_valid (dout_valid),
-        .data_ready (dout_ready),
-        .tx (tx)
-    );
-
-    uart_rx #(
-        .CLK_FREQ (CLK_FREQ),
-        .BAUD_RATE (BAUD_RATE),
-        .DATA_BITS (DATA_BITS),
-        .STOP_BITS (STOP_BITS)
-    ) uart_rx (
-        .clk (clk),
-        .rst (rst),
-        .data (din),
-        .data_valid (din_valid),
-        .data_ready (din_ready),
-        .rx (rx)
-    );
     
-    assign status = {{DATA_WIDTH-2{1'b0}}, din_valid, dout_ready};
+    logic [DATA_WIDTH-1:0] out_next [ADDR_WIDTH-1:0];
     
     /* Write */
     
@@ -107,13 +65,18 @@ module gpio #(
             w_curr.addr_ok <= 0;
             w_curr.data_ok <= 0;
             w_curr.resp_ok <= 0;
-            w_curr.tx_ok <= 0;
+            w_curr.gpio_ok <= 0;
             w_curr.addr <= 0;
             w_curr.data <= 0;
             w_curr.strb <= 0;
+
+            for (int j = 0; j < ADDR_WIDTH; j++) begin
+                out[j] <= 0;
+            end
         end
         else begin
             w_curr <= w_next;
+            out <= out_next;
         end
     end
 
@@ -126,13 +89,14 @@ module gpio #(
         bresp = 0;
         bvalid = 0;
 
-        dout = 0;
-        dout_valid = 0;
+        for (int i = 0; i < ADDR_WIDTH; i++) begin
+            out_next[i] = out[i];
+        end
 
         w_next.addr_ok = w_curr.addr_ok;
         w_next.data_ok = w_curr.data_ok;
         w_next.resp_ok = w_curr.resp_ok;
-        w_next.tx_ok = w_curr.tx_ok;
+        w_next.gpio_ok = w_curr.gpio_ok;
         w_next.addr = w_curr.addr;
         w_next.data = w_curr.data;
         w_next.strb = w_curr.strb;
@@ -161,14 +125,17 @@ module gpio #(
                 w_next.strb = wstrb;
             end
         end
-        else if (w_curr.addr == 0 && !w_curr.tx_ok) begin
-            // Transmit.
+        else if (!w_curr.gpio_ok) begin
+            // Update state.
 
-            dout_valid = !w_curr.tx_ok;
+            for (int i = 0; i < WORD_WIDTH; i++) begin
+                if (w_curr.strb[i]) begin
+                    out_next[w_curr.addr][WORD_SIZE*i +: WORD_SIZE] =
+                        w_curr.data[WORD_SIZE*i +: WORD_SIZE];
+                end
+            end
 
-            dout = w_curr.data[DATA_BITS-1:0];
-            
-            w_next.tx_ok = w_curr.tx_ok || dout_ready;
+            w_next.gpio_ok = 1;
         end
         else begin
             // Reset.
@@ -176,7 +143,7 @@ module gpio #(
             w_next.addr_ok = 0;
             w_next.data_ok = 0;
             w_next.resp_ok = 0;
-            w_next.tx_ok = 0;
+            w_next.gpio_ok = 0;
             w_next.addr = 0;
             w_next.data = 0;
             w_next.strb = 0;
@@ -207,8 +174,6 @@ module gpio #(
         rresp = 0;
         rvalid = 0;
 
-        din_ready = 0;
-
         r_next.addr_ok = r_curr.addr_ok;
         r_next.data_ok = r_curr.data_ok;
         r_next.resp_ok = r_curr.resp_ok;
@@ -230,28 +195,10 @@ module gpio #(
         end
         else if (!r_curr.data_ok) begin
             // Load correponding data.
-
-            case (r_curr.addr)
-                0: begin
-                    din_ready = !r_curr.data_ok;
-
-                    r_next.data_ok = r_curr.data_ok || din_valid;
-
-                    if(!r_curr.data_ok) begin
-                        r_next.data[DATA_BITS-1:0] = din;
-                    end
-                end
-
-                1: begin
-                    r_next.data_ok = 1;
-                    r_next.data = status;
-                end
-
-                default: begin
-                    r_next.data_ok = 1;
-                    r_next.data = 0;
-                end
-            endcase
+            
+            r_next.data = in[r_curr.addr];
+            
+            r_next.data_ok = 1;
         end 
         else if (!r_curr.resp_ok) begin
             // Send response to master.

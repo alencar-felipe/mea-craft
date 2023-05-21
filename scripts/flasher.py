@@ -32,9 +32,6 @@ def flash(file_path, serial_port, baud_rate=9600):
         ser.write(checksum_byte)
         ser.flush()
 
-        resp = ser.readline().decode().strip()
-        print(resp)
-
 def main():
     parser = argparse.ArgumentParser(description=__doc__.strip())
     parser.add_argument('file', help='Binary file path')

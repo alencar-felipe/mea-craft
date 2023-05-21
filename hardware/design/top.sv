@@ -1,11 +1,15 @@
 module top (
-    input logic clk,
-    input logic rst,
+    input logic          clk,
+    input logic          rst,
 
-    output logic uart_tx,
-    input logic uart_rx
+    output logic         uart_tx,
+    input  logic         uart_rx,
+
+    output logic [31: 0] gpio_out [1:0],
+    input  logic [31: 0] gpio_in  [1:0]
 );
     logic irq;
+    logic dclk;
 
     logic [31: 0] core_awaddr;
     logic [ 2: 0] core_awprot;
@@ -167,8 +171,16 @@ module top (
     logic         peripherals_rvalid;
     logic         peripherals_rready;
 
-    core core (
+    clkdiv #(
+        .DIV (2)
+    ) clkdiv (
         .clk (clk),
+        .rst (rst),
+        .out (dclk)
+    );
+
+    core core (
+        .clk (dclk),
         .rst (rst),
         .irq (irq),
 
@@ -208,7 +220,7 @@ module top (
     assign gpu_rready = 1;
 
     axil_rom_bootldr rom_bootldr (
-        .clk (clk),
+        .clk (dclk),
         .rst (rst),
 
         .s_axil_araddr (rom_bootldr_araddr),
@@ -226,7 +238,7 @@ module top (
         .ADDR_WIDTH (12),
         .STRB_WIDTH (32/8)
     ) rom_bootldr_aligner (
-        .clk (clk),
+        .clk (dclk),
         .rst (rst),
 
         .s_awaddr (rom_bootldr_aligner_awaddr),
@@ -280,7 +292,7 @@ module top (
         .ADDR_WIDTH (15),
         .STRB_WIDTH (32/8)
     ) ram (
-        .clk (clk),
+        .clk (dclk),
         .rst (rst),
 
         .s_axil_awaddr (ram_awaddr),
@@ -309,7 +321,7 @@ module top (
         .ADDR_WIDTH (15),
         .STRB_WIDTH (32/8)
     ) ram_aligner (
-        .clk (clk),
+        .clk (dclk),
         .rst (rst),
 
         .s_awaddr (ram_aligner_awaddr),
@@ -358,7 +370,7 @@ module top (
         .ADDR_WIDTH (19),
         .STRB_WIDTH (12/4)
     ) frame (
-        .clk (clk),
+        .clk (dclk),
         .rst (rst),
 
         .s_axil_awaddr (frame_awaddr),
@@ -383,7 +395,7 @@ module top (
     );
 
     peripherals peripherals (
-        .clk (clk),
+        .clk (dclk),
         .rst (rst),
 
         .awaddr (peripherals_awaddr),
@@ -407,7 +419,10 @@ module top (
         .rready (peripherals_rready),
 
         .uart_tx (uart_tx),
-        .uart_rx (uart_rx)
+        .uart_rx (uart_rx),
+
+        .gpio_out (gpio_out),
+        .gpio_in  (gpio_in)
     );
 
     axil_crossbar_wrap_2x4 #(
@@ -416,7 +431,7 @@ module top (
         .M02_BASE_ADDR (32'h20000000),  // frame
         .M03_BASE_ADDR (32'h30000000)   // pheripherals
     ) axil_crossbar_wrap (
-        .clk (clk),
+        .clk (dclk),
         .rst (rst),
 
         .s00_axil_awaddr (core_awaddr),

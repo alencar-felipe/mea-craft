@@ -23,7 +23,10 @@ module peripherals (
     input  logic         rready,
 
     output logic         uart_tx,
-    input  logic         uart_rx
+    input  logic         uart_rx,
+
+    output logic [31: 0] gpio_out [1:0],
+    input  logic [31: 0] gpio_in  [1:0]
 );
 
     logic [0:0]  uart_awaddr;
@@ -45,6 +48,26 @@ module peripherals (
     logic [1:0]  uart_rresp;
     logic        uart_rvalid;
     logic        uart_rready;
+
+    logic [0:0]  gpio_awaddr;
+    logic [2:0]  gpio_awprot;
+    logic        gpio_awvalid;
+    logic        gpio_awready;
+    logic [31:0] gpio_wdata;
+    logic [3:0]  gpio_wstrb;
+    logic        gpio_wvalid;
+    logic        gpio_wready;
+    logic [1:0]  gpio_bresp;
+    logic        gpio_bvalid;
+    logic        gpio_bready;
+    logic [0:0]  gpio_araddr;
+    logic [2:0]  gpio_arprot;
+    logic        gpio_arvalid;
+    logic        gpio_arready;
+    logic [31:0] gpio_rdata;
+    logic [1:0]  gpio_rresp;
+    logic        gpio_rvalid;
+    logic        gpio_rready;
 
     uart uart (
         .clk (clk),
@@ -74,12 +97,42 @@ module peripherals (
         .rx (uart_rx)
     );
 
-    axil_interconnect_wrap_1x1 #(
+    gpio gpio (
+        .clk (clk),
+        .rst (rst),
+
+        .awaddr (gpio_awaddr),
+        .awprot (gpio_awprot),
+        .awvalid (gpio_awvalid),
+        .awready (gpio_awready),
+        .wdata (gpio_wdata),
+        .wstrb (gpio_wstrb),
+        .wvalid (gpio_wvalid),
+        .wready (gpio_wready),
+        .bresp (gpio_bresp),
+        .bvalid (gpio_bvalid),
+        .bready (gpio_bready),
+        .araddr (gpio_araddr),
+        .arprot (gpio_arprot),
+        .arvalid (gpio_arvalid),
+        .arready (gpio_arready),
+        .rdata (gpio_rdata),
+        .rresp (gpio_rresp),
+        .rvalid (gpio_rvalid),
+        .rready (gpio_rready),
+
+        .out (gpio_out),
+        .in (gpio_in)
+    );
+
+    axil_interconnect_wrap_1x2 #(
         .DATA_WIDTH (32),
         .ADDR_WIDTH (24),
         .STRB_WIDTH (32/8),
-        .M00_BASE_ADDR (0),
-        .M00_ADDR_WIDTH ({1{32'd16}})
+        .M00_BASE_ADDR (24'h000000),
+        .M00_ADDR_WIDTH ({1{32'd16}}),
+        .M01_BASE_ADDR (24'h010000),
+        .M01_ADDR_WIDTH ({1{32'd16}})
     ) axil_interconnect (
         .clk (clk),
         .rst (rst),
@@ -122,7 +175,27 @@ module peripherals (
         .m00_axil_rdata (uart_rdata),
         .m00_axil_rresp (uart_rresp),
         .m00_axil_rvalid (uart_rvalid),
-        .m00_axil_rready (uart_rready)
+        .m00_axil_rready (uart_rready),
+
+        .m01_axil_awaddr (gpio_awaddr),
+        .m01_axil_awprot (gpio_awprot),
+        .m01_axil_awvalid (gpio_awvalid),
+        .m01_axil_awready (gpio_awready),
+        .m01_axil_wdata (gpio_wdata),
+        .m01_axil_wstrb (gpio_wstrb),
+        .m01_axil_wvalid (gpio_wvalid),
+        .m01_axil_wready (gpio_wready),
+        .m01_axil_bresp (gpio_bresp),
+        .m01_axil_bvalid (gpio_bvalid),
+        .m01_axil_bready (gpio_bready),
+        .m01_axil_araddr (gpio_araddr),
+        .m01_axil_arprot (gpio_arprot),
+        .m01_axil_arvalid (gpio_arvalid),
+        .m01_axil_arready (gpio_arready),
+        .m01_axil_rdata (gpio_rdata),
+        .m01_axil_rresp (gpio_rresp),
+        .m01_axil_rvalid (gpio_rvalid),
+        .m01_axil_rready (gpio_rready)
     );
     
 endmodule
