@@ -1,5 +1,5 @@
 module basys3 (
-    input  logic         clk,
+    input  logic clk,
     
     input  logic [15: 0] sw,
     
@@ -9,23 +9,23 @@ module basys3 (
     output logic         dp,
     output logic [ 3: 0] an,
 
-    input  logic         btn_c,
-    input  logic         btn_u,
-    input  logic         btn_l,
-    input  logic         btn_r,
-    input  logic         btn_d,
+    input  logic btn_c,
+    input  logic btn_u,
+    input  logic btn_l,
+    input  logic btn_r,
+    input  logic btn_d,
 
-    output logic [ 3: 0] vga_r,
-    output logic [ 3: 0] vga_g,
-    output logic [ 3: 0] vga_b,
+    output logic [ 3: 0] vga_red,
+    output logic [ 3: 0] vga_green,
+    output logic [ 3: 0] vga_blue,
     output logic         vga_hsync,
     output logic         vga_vsync,
 
-    output logic         uart_tx,
-    input  logic         uart_rx,
+    output logic uart_tx,
+    input  logic uart_rx,
 
-    input  logic         ps2_clk,
-    input  logic         ps2_data
+    input  logic ps2_clk,
+    input  logic ps2_data
 );
 
     logic [31: 0] gpio_out [1:0];
@@ -46,7 +46,13 @@ module basys3 (
         .uart_rx (uart_rx),
 
         .gpio_out (gpio_out),
-        .gpio_in  (gpio_in)
+        .gpio_in  (gpio_in),
+
+        .vga_red   (vga_red),
+        .vga_green (vga_green),
+        .vga_blue  (vga_blue),
+        .vga_hsync (vga_hsync),
+        .vga_vsync (vga_vsync)
     );
 
 

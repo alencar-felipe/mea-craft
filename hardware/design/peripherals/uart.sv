@@ -1,4 +1,4 @@
-// TODO: potencial bug detected on tx
+// TODO: potencial bug detected on tx (duplicated chars)
 
 module uart #(
     parameter CLK_FREQ  = 50000000,

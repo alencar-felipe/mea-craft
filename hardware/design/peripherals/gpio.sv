@@ -29,8 +29,8 @@ module gpio #(
     output logic [DATA_WIDTH-1:0] out [ADDR_WIDTH-1:0],
     input  logic [DATA_WIDTH-1:0] in [ADDR_WIDTH-1:0]
 );
-    parameter WORD_WIDTH = STRB_WIDTH; 
-    parameter WORD_SIZE = DATA_WIDTH/WORD_WIDTH;
+    localparam WORD_WIDTH = STRB_WIDTH; 
+    localparam WORD_SIZE = DATA_WIDTH/WORD_WIDTH;
 
     typedef struct packed {
         logic addr_ok;

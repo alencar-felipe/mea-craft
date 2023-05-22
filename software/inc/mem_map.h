@@ -5,7 +5,7 @@
 #define ROM_BASE            (0x00000000)
 #define RAM_BASE            (0x10000000)
 #define RAM_BASE            (0x10000000)
-#define FRAME_BASE          (0x20000000)
+#define VGA_BASE            (0x20000000)
 #define PERIPHERALS_BASE    (0x30000000)
 
 #define UART_BASE           (PERIPHERALS_BASE + 0x000000)

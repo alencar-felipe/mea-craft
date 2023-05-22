@@ -158,8 +158,8 @@ def cube(pos, rot, scl):
     return triangles
     
 if __name__ == '__main__':
-    w = 640
-    h = 480
+    w = 320
+    h = 240
 
     camera = np.zeros(1, dtype=camera_dt)[0]
     camera['near'] = 1

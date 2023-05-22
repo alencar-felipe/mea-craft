@@ -6,7 +6,13 @@ module top (
     input  logic         uart_rx,
 
     output logic [31: 0] gpio_out [1:0],
-    input  logic [31: 0] gpio_in  [1:0]
+    input  logic [31: 0] gpio_in  [1:0],
+
+    output logic [ 3: 0] vga_red,
+    output logic [ 3: 0] vga_green,
+    output logic [ 3: 0] vga_blue,
+    output logic         vga_hsync,
+    output logic         vga_vsync
 );
     logic irq;
     logic dclk;
@@ -30,6 +36,26 @@ module top (
     logic [ 1: 0] core_rresp;
     logic         core_rvalid;
     logic         core_rready;
+
+    logic [31: 0] core_aligner_awaddr;
+    logic [ 2: 0] core_aligner_awprot;
+    logic         core_aligner_awvalid;
+    logic         core_aligner_awready;
+    logic [31: 0] core_aligner_wdata;
+    logic [ 3: 0] core_aligner_wstrb;
+    logic         core_aligner_wvalid;
+    logic         core_aligner_wready;
+    logic [ 1: 0] core_aligner_bresp;
+    logic         core_aligner_bvalid;
+    logic         core_aligner_bready;
+    logic [31: 0] core_aligner_araddr;
+    logic [ 2: 0] core_aligner_arprot;
+    logic         core_aligner_arvalid;
+    logic         core_aligner_arready;
+    logic [31: 0] core_aligner_rdata;
+    logic [ 1: 0] core_aligner_rresp;
+    logic         core_aligner_rvalid;
+    logic         core_aligner_rready;
 
     logic [31: 0] gpu_awaddr;
     logic [ 2: 0] gpu_awprot;
@@ -71,26 +97,6 @@ module top (
     logic         rom_bootldr_rvalid;
     logic         rom_bootldr_rready;
 
-    logic [31: 0] rom_bootldr_aligner_awaddr;
-    logic [ 2: 0] rom_bootldr_aligner_awprot;
-    logic         rom_bootldr_aligner_awvalid;
-    logic         rom_bootldr_aligner_awready;
-    logic [31: 0] rom_bootldr_aligner_wdata;
-    logic [ 3: 0] rom_bootldr_aligner_wstrb;
-    logic         rom_bootldr_aligner_wvalid;
-    logic         rom_bootldr_aligner_wready;
-    logic [ 1: 0] rom_bootldr_aligner_bresp;
-    logic         rom_bootldr_aligner_bvalid;
-    logic         rom_bootldr_aligner_bready;
-    logic [31: 0] rom_bootldr_aligner_araddr;
-    logic [ 2: 0] rom_bootldr_aligner_arprot;
-    logic         rom_bootldr_aligner_arvalid;
-    logic         rom_bootldr_aligner_arready;
-    logic [31: 0] rom_bootldr_aligner_rdata;
-    logic [ 1: 0] rom_bootldr_aligner_rresp;
-    logic         rom_bootldr_aligner_rvalid;
-    logic         rom_bootldr_aligner_rready;
-
     logic [14: 0] ram_awaddr;
     logic [ 2: 0] ram_awprot;
     logic         ram_awvalid;
@@ -111,45 +117,25 @@ module top (
     logic         ram_rvalid;
     logic         ram_rready;
 
-    logic [14: 0] ram_aligner_awaddr;
-    logic [ 2: 0] ram_aligner_awprot;
-    logic         ram_aligner_awvalid;
-    logic         ram_aligner_awready;
-    logic [31: 0] ram_aligner_wdata;
-    logic [ 3: 0] ram_aligner_wstrb;
-    logic         ram_aligner_wvalid;
-    logic         ram_aligner_wready;
-    logic [ 1: 0] ram_aligner_bresp;
-    logic         ram_aligner_bvalid;
-    logic         ram_aligner_bready;
-    logic [14: 0] ram_aligner_araddr;
-    logic [ 2: 0] ram_aligner_arprot;
-    logic         ram_aligner_arvalid;
-    logic         ram_aligner_arready;
-    logic [31: 0] ram_aligner_rdata;
-    logic [ 1: 0] ram_aligner_rresp;
-    logic         ram_aligner_rvalid;
-    logic         ram_aligner_rready;
-
-    logic [15: 0] frame_awaddr;
-    logic [ 2: 0] frame_awprot;
-    logic         frame_awvalid;
-    logic         frame_awready;
-    logic [31: 0] frame_wdata;
-    logic [ 3: 0] frame_wstrb;
-    logic         frame_wvalid;
-    logic         frame_wready;
-    logic [ 1: 0] frame_bresp;
-    logic         frame_bvalid;
-    logic         frame_bready;
-    logic [15: 0] frame_araddr;
-    logic [ 2: 0] frame_arprot;
-    logic         frame_arvalid;
-    logic         frame_arready;
-    logic [31: 0] frame_rdata;
-    logic [ 1: 0] frame_rresp;
-    logic         frame_rvalid;
-    logic         frame_rready;
+    logic [23: 0] vga_awaddr;
+    logic [ 2: 0] vga_awprot;
+    logic         vga_awvalid;
+    logic         vga_awready;
+    logic [31: 0] vga_wdata;
+    logic [ 3: 0] vga_wstrb;
+    logic         vga_wvalid;
+    logic         vga_wready;
+    logic [ 1: 0] vga_bresp;
+    logic         vga_bvalid;
+    logic         vga_bready;
+    logic [23: 0] vga_araddr;
+    logic [ 2: 0] vga_arprot;
+    logic         vga_arvalid;
+    logic         vga_arready;
+    logic [31: 0] vga_rdata;
+    logic [ 1: 0] vga_rresp;
+    logic         vga_rvalid;
+    logic         vga_rready;
 
     logic [23: 0] peripherals_awaddr;
     logic [ 2: 0] peripherals_awprot;
@@ -205,6 +191,55 @@ module top (
         .rready (core_rready)
     );
 
+    aligner #(
+        .DATA_WIDTH (32),
+        .ADDR_WIDTH (32),
+        .STRB_WIDTH (32/8)
+    ) core_aligner (
+        .clk (dclk),
+        .rst (rst),
+
+        .s_awaddr  (core_awaddr),
+        .s_awprot  (core_awprot),
+        .s_awvalid (core_awvalid),
+        .s_awready (core_awready),
+        .s_wdata   (core_wdata),
+        .s_wstrb   (core_wstrb),
+        .s_wvalid  (core_wvalid),
+        .s_wready  (core_wready),
+        .s_bresp   (core_bresp),
+        .s_bvalid  (core_bvalid),
+        .s_bready  (core_bready),
+        .s_araddr  (core_araddr),
+        .s_arprot  (core_arprot),
+        .s_arvalid (core_arvalid),
+        .s_arready (core_arready),
+        .s_rdata   (core_rdata),
+        .s_rresp   (core_rresp),
+        .s_rvalid  (core_rvalid),
+        .s_rready  (core_rready),
+
+        .m_awaddr  (core_aligner_awaddr),
+        .m_awprot  (core_aligner_awprot),
+        .m_awvalid (core_aligner_awvalid),
+        .m_awready (core_aligner_awready),
+        .m_wdata   (core_aligner_wdata),
+        .m_wstrb   (core_aligner_wstrb),
+        .m_wvalid  (core_aligner_wvalid),
+        .m_wready  (core_aligner_wready),
+        .m_bresp   (core_aligner_bresp),
+        .m_bvalid  (core_aligner_bvalid),
+        .m_bready  (core_aligner_bready),
+        .m_araddr  (core_aligner_araddr),
+        .m_arprot  (core_aligner_arprot),
+        .m_arvalid (core_aligner_arvalid),
+        .m_arready (core_aligner_arready),
+        .m_rdata   (core_aligner_rdata),
+        .m_rresp   (core_aligner_rresp),
+        .m_rvalid  (core_aligner_rvalid),
+        .m_rready  (core_aligner_rready)
+    );
+
     assign irq = 0;
 
     assign gpu_awaddr = 0;
@@ -223,63 +258,14 @@ module top (
         .clk (dclk),
         .rst (rst),
 
-        .s_axil_araddr (rom_bootldr_araddr),
-        .s_axil_arprot (rom_bootldr_arprot),
+        .s_axil_araddr  (rom_bootldr_araddr),
+        .s_axil_arprot  (rom_bootldr_arprot),
         .s_axil_arvalid (rom_bootldr_arvalid),
         .s_axil_arready (rom_bootldr_arready),
-        .s_axil_rdata (rom_bootldr_rdata),
-        .s_axil_rresp (rom_bootldr_rresp),
-        .s_axil_rvalid (rom_bootldr_rvalid),
-        .s_axil_rready (rom_bootldr_rready)
-    );
-
-    aligner #(
-        .DATA_WIDTH (32),
-        .ADDR_WIDTH (12),
-        .STRB_WIDTH (32/8)
-    ) rom_bootldr_aligner (
-        .clk (dclk),
-        .rst (rst),
-
-        .s_awaddr (rom_bootldr_aligner_awaddr),
-        .s_awprot (rom_bootldr_aligner_awprot),
-        .s_awvalid (rom_bootldr_aligner_awvalid),
-        .s_awready (rom_bootldr_aligner_awready),
-        .s_wdata (rom_bootldr_aligner_wdata),
-        .s_wstrb (rom_bootldr_aligner_wstrb),
-        .s_wvalid (rom_bootldr_aligner_wvalid),
-        .s_wready (rom_bootldr_aligner_wready),
-        .s_bresp (rom_bootldr_aligner_bresp),
-        .s_bvalid (rom_bootldr_aligner_bvalid),
-        .s_bready (rom_bootldr_aligner_bready),
-        .s_araddr (rom_bootldr_aligner_araddr),
-        .s_arprot (rom_bootldr_aligner_arprot),
-        .s_arvalid (rom_bootldr_aligner_arvalid),
-        .s_arready (rom_bootldr_aligner_arready),
-        .s_rdata (rom_bootldr_aligner_rdata),
-        .s_rresp (rom_bootldr_aligner_rresp),
-        .s_rvalid (rom_bootldr_aligner_rvalid),
-        .s_rready (rom_bootldr_aligner_rready),
-
-        .m_awaddr (rom_bootldr_awaddr),
-        .m_awprot (rom_bootldr_awprot),
-        .m_awvalid (rom_bootldr_awvalid),
-        .m_awready (rom_bootldr_awready),
-        .m_wdata (rom_bootldr_wdata),
-        .m_wstrb (rom_bootldr_wstrb),
-        .m_wvalid (rom_bootldr_wvalid),
-        .m_wready (rom_bootldr_wready),
-        .m_bresp (rom_bootldr_bresp),
-        .m_bvalid (rom_bootldr_bvalid),
-        .m_bready (rom_bootldr_bready),
-        .m_araddr (rom_bootldr_araddr),
-        .m_arprot (rom_bootldr_arprot),
-        .m_arvalid (rom_bootldr_arvalid),
-        .m_arready (rom_bootldr_arready),
-        .m_rdata (rom_bootldr_rdata),
-        .m_rresp (rom_bootldr_rresp),
-        .m_rvalid (rom_bootldr_rvalid),
-        .m_rready (rom_bootldr_rready)
+        .s_axil_rdata   (rom_bootldr_rdata),
+        .s_axil_rresp   (rom_bootldr_rresp),
+        .s_axil_rvalid  (rom_bootldr_rvalid),
+        .s_axil_rready  (rom_bootldr_rready)
     );
 
     assign rom_bootldr_awready = 1;
@@ -295,128 +281,83 @@ module top (
         .clk (dclk),
         .rst (rst),
 
-        .s_axil_awaddr (ram_awaddr),
-        .s_axil_awprot (ram_awprot),
+        .s_axil_awaddr  (ram_awaddr),
+        .s_axil_awprot  (ram_awprot),
         .s_axil_awvalid (ram_awvalid),
         .s_axil_awready (ram_awready),
-        .s_axil_wdata (ram_wdata),
-        .s_axil_wstrb (ram_wstrb),
-        .s_axil_wvalid (ram_wvalid),
-        .s_axil_wready (ram_wready),
-        .s_axil_bresp (ram_bresp),
-        .s_axil_bvalid (ram_bvalid),
-        .s_axil_bready (ram_bready),
-        .s_axil_araddr (ram_araddr),
-        .s_axil_arprot (ram_arprot),
+        .s_axil_wdata   (ram_wdata),
+        .s_axil_wstrb   (ram_wstrb),
+        .s_axil_wvalid  (ram_wvalid),
+        .s_axil_wready  (ram_wready),
+        .s_axil_bresp   (ram_bresp),
+        .s_axil_bvalid  (ram_bvalid),
+        .s_axil_bready  (ram_bready),
+        .s_axil_araddr  (ram_araddr),
+        .s_axil_arprot  (ram_arprot),
         .s_axil_arvalid (ram_arvalid),
         .s_axil_arready (ram_arready),
-        .s_axil_rdata (ram_rdata),
-        .s_axil_rresp (ram_rresp),
-        .s_axil_rvalid (ram_rvalid),
-        .s_axil_rready (ram_rready)
+        .s_axil_rdata   (ram_rdata),
+        .s_axil_rresp   (ram_rresp),
+        .s_axil_rvalid  (ram_rvalid),
+        .s_axil_rready  (ram_rready)
     );
 
-    aligner #(
+    vga #(
         .DATA_WIDTH (32),
-        .ADDR_WIDTH (15),
+        .ADDR_WIDTH (23),
         .STRB_WIDTH (32/8)
-    ) ram_aligner (
-        .clk (dclk),
-        .rst (rst),
+    ) vga (
+        .clk     (dclk),
+        .rst     (rst),
 
-        .s_awaddr (ram_aligner_awaddr),
-        .s_awprot (ram_aligner_awprot),
-        .s_awvalid (ram_aligner_awvalid),
-        .s_awready (ram_aligner_awready),
-        .s_wdata (ram_aligner_wdata),
-        .s_wstrb (ram_aligner_wstrb),
-        .s_wvalid (ram_aligner_wvalid),
-        .s_wready (ram_aligner_wready),
-        .s_bresp (ram_aligner_bresp),
-        .s_bvalid (ram_aligner_bvalid),
-        .s_bready (ram_aligner_bready),
-        .s_araddr (ram_aligner_araddr),
-        .s_arprot (ram_aligner_arprot),
-        .s_arvalid (ram_aligner_arvalid),
-        .s_arready (ram_aligner_arready),
-        .s_rdata (ram_aligner_rdata),
-        .s_rresp (ram_aligner_rresp),
-        .s_rvalid (ram_aligner_rvalid),
-        .s_rready (ram_aligner_rready),
+        .awaddr  (vga_awaddr),
+        .awprot  (vga_awprot),
+        .awvalid (vga_awvalid),
+        .awready (vga_awready),
+        .wdata   (vga_wdata),
+        .wstrb   (vga_wstrb),
+        .wvalid  (vga_wvalid),
+        .wready  (vga_wready),
+        .bresp   (vga_bresp),
+        .bvalid  (vga_bvalid),
+        .bready  (vga_bready),
 
-        .m_awaddr (ram_awaddr),
-        .m_awprot (ram_awprot),
-        .m_awvalid (ram_awvalid),
-        .m_awready (ram_awready),
-        .m_wdata (ram_wdata),
-        .m_wstrb (ram_wstrb),
-        .m_wvalid (ram_wvalid),
-        .m_wready (ram_wready),
-        .m_bresp (ram_bresp),
-        .m_bvalid (ram_bvalid),
-        .m_bready (ram_bready),
-        .m_araddr (ram_araddr),
-        .m_arprot (ram_arprot),
-        .m_arvalid (ram_arvalid),
-        .m_arready (ram_arready),
-        .m_rdata (ram_rdata),
-        .m_rresp (ram_rresp),
-        .m_rvalid (ram_rvalid),
-        .m_rready (ram_rready)
+        .red     (vga_red),
+        .green   (vga_green),
+        .blue    (vga_blue),
+
+        .hsync   (vga_hsync),
+        .vsync   (vga_vsync)
     );
 
-    axil_ram #(
-        .DATA_WIDTH (12),
-        .ADDR_WIDTH (19),
-        .STRB_WIDTH (12/4)
-    ) frame (
-        .clk (dclk),
-        .rst (rst),
-
-        .s_axil_awaddr (frame_awaddr),
-        .s_axil_awprot (frame_awprot),
-        .s_axil_awvalid (frame_awvalid),
-        .s_axil_awready (frame_awready),
-        .s_axil_wdata (frame_wdata),
-        .s_axil_wstrb (frame_wstrb),
-        .s_axil_wvalid (frame_wvalid),
-        .s_axil_wready (frame_wready),
-        .s_axil_bresp (frame_bresp),
-        .s_axil_bvalid (frame_bvalid),
-        .s_axil_bready (frame_bready),
-        .s_axil_araddr (frame_araddr),
-        .s_axil_arprot (frame_arprot),
-        .s_axil_arvalid (frame_arvalid),
-        .s_axil_arready (frame_arready),
-        .s_axil_rdata (frame_rdata),
-        .s_axil_rresp (frame_rresp),
-        .s_axil_rvalid (frame_rvalid),
-        .s_axil_rready (frame_rready)
-    );
+    assign vga_arready = 1;
+    assign vga_rdata = 0;
+    assign vga_rresp = 0;
+    assign vga_rvalid = 1;
 
     peripherals peripherals (
         .clk (dclk),
         .rst (rst),
 
-        .awaddr (peripherals_awaddr),
-        .awprot (peripherals_awprot),
+        .awaddr  (peripherals_awaddr),
+        .awprot  (peripherals_awprot),
         .awvalid (peripherals_awvalid),
         .awready (peripherals_awready),
-        .wdata (peripherals_wdata),
-        .wstrb (peripherals_wstrb),
-        .wvalid (peripherals_wvalid),
-        .wready (peripherals_wready),
-        .bresp (peripherals_bresp),
-        .bvalid (peripherals_bvalid),
-        .bready (peripherals_bready),
-        .araddr (peripherals_araddr),
-        .arprot (peripherals_arprot),
+        .wdata   (peripherals_wdata),
+        .wstrb   (peripherals_wstrb),
+        .wvalid  (peripherals_wvalid),
+        .wready  (peripherals_wready),
+        .bresp   (peripherals_bresp),
+        .bvalid  (peripherals_bvalid),
+        .bready  (peripherals_bready),
+        .araddr  (peripherals_araddr),
+        .arprot  (peripherals_arprot),
         .arvalid (peripherals_arvalid),
         .arready (peripherals_arready),
-        .rdata (peripherals_rdata),
-        .rresp (peripherals_rresp),
-        .rvalid (peripherals_rvalid),
-        .rready (peripherals_rready),
+        .rdata   (peripherals_rdata),
+        .rresp   (peripherals_rresp),
+        .rvalid  (peripherals_rvalid),
+        .rready  (peripherals_rready),
 
         .uart_tx (uart_tx),
         .uart_rx (uart_rx),
@@ -428,31 +369,31 @@ module top (
     axil_crossbar_wrap_2x4 #(
         .M00_BASE_ADDR (32'h00000000),  // rom
         .M01_BASE_ADDR (32'h10000000),  // ram
-        .M02_BASE_ADDR (32'h20000000),  // frame
+        .M02_BASE_ADDR (32'h20000000),  // vga
         .M03_BASE_ADDR (32'h30000000)   // pheripherals
     ) axil_crossbar_wrap (
         .clk (dclk),
         .rst (rst),
 
-        .s00_axil_awaddr (core_awaddr),
-        .s00_axil_awprot (core_awprot),
-        .s00_axil_awvalid (core_awvalid),
-        .s00_axil_awready (core_awready),
-        .s00_axil_wdata (core_wdata),
-        .s00_axil_wstrb (core_wstrb),
-        .s00_axil_wvalid (core_wvalid),
-        .s00_axil_wready (core_wready),
-        .s00_axil_bresp (core_bresp),
-        .s00_axil_bvalid (core_bvalid),
-        .s00_axil_bready (core_bready),
-        .s00_axil_araddr (core_araddr),
-        .s00_axil_arprot (core_arprot),
-        .s00_axil_arvalid (core_arvalid),
-        .s00_axil_arready (core_arready),
-        .s00_axil_rdata (core_rdata),
-        .s00_axil_rresp (core_rresp),
-        .s00_axil_rvalid (core_rvalid),
-        .s00_axil_rready (core_rready),
+        .s00_axil_awaddr (core_aligner_awaddr),
+        .s00_axil_awprot (core_aligner_awprot),
+        .s00_axil_awvalid (core_aligner_awvalid),
+        .s00_axil_awready (core_aligner_awready),
+        .s00_axil_wdata (core_aligner_wdata),
+        .s00_axil_wstrb (core_aligner_wstrb),
+        .s00_axil_wvalid (core_aligner_wvalid),
+        .s00_axil_wready (core_aligner_wready),
+        .s00_axil_bresp (core_aligner_bresp),
+        .s00_axil_bvalid (core_aligner_bvalid),
+        .s00_axil_bready (core_aligner_bready),
+        .s00_axil_araddr (core_aligner_araddr),
+        .s00_axil_arprot (core_aligner_arprot),
+        .s00_axil_arvalid (core_aligner_arvalid),
+        .s00_axil_arready (core_aligner_arready),
+        .s00_axil_rdata (core_aligner_rdata),
+        .s00_axil_rresp (core_aligner_rresp),
+        .s00_axil_rvalid (core_aligner_rvalid),
+        .s00_axil_rready (core_aligner_rready),
 
         .s01_axil_awaddr (gpu_awaddr),
         .s01_axil_awprot (gpu_awprot),
@@ -474,65 +415,65 @@ module top (
         .s01_axil_rvalid (gpu_rvalid),
         .s01_axil_rready (gpu_rready),
 
-        .m00_axil_awaddr (rom_bootldr_aligner_awaddr),
-        .m00_axil_awprot (rom_bootldr_aligner_awprot),
-        .m00_axil_awvalid (rom_bootldr_aligner_awvalid),
-        .m00_axil_awready (rom_bootldr_aligner_awready),
-        .m00_axil_wdata (rom_bootldr_aligner_wdata),
-        .m00_axil_wstrb (rom_bootldr_aligner_wstrb),
-        .m00_axil_wvalid (rom_bootldr_aligner_wvalid),
-        .m00_axil_wready (rom_bootldr_aligner_wready),
-        .m00_axil_bresp (rom_bootldr_aligner_bresp),
-        .m00_axil_bvalid (rom_bootldr_aligner_bvalid),
-        .m00_axil_bready (rom_bootldr_aligner_bready),
-        .m00_axil_araddr (rom_bootldr_aligner_araddr),
-        .m00_axil_arprot (rom_bootldr_aligner_arprot),
-        .m00_axil_arvalid (rom_bootldr_aligner_arvalid),
-        .m00_axil_arready (rom_bootldr_aligner_arready),
-        .m00_axil_rdata (rom_bootldr_aligner_rdata),
-        .m00_axil_rresp (rom_bootldr_aligner_rresp),
-        .m00_axil_rvalid (rom_bootldr_aligner_rvalid),
-        .m00_axil_rready (rom_bootldr_aligner_rready),
+        .m00_axil_awaddr (rom_bootldr_awaddr),
+        .m00_axil_awprot (rom_bootldr_awprot),
+        .m00_axil_awvalid (rom_bootldr_awvalid),
+        .m00_axil_awready (rom_bootldr_awready),
+        .m00_axil_wdata (rom_bootldr_wdata),
+        .m00_axil_wstrb (rom_bootldr_wstrb),
+        .m00_axil_wvalid (rom_bootldr_wvalid),
+        .m00_axil_wready (rom_bootldr_wready),
+        .m00_axil_bresp (rom_bootldr_bresp),
+        .m00_axil_bvalid (rom_bootldr_bvalid),
+        .m00_axil_bready (rom_bootldr_bready),
+        .m00_axil_araddr (rom_bootldr_araddr),
+        .m00_axil_arprot (rom_bootldr_arprot),
+        .m00_axil_arvalid (rom_bootldr_arvalid),
+        .m00_axil_arready (rom_bootldr_arready),
+        .m00_axil_rdata (rom_bootldr_rdata),
+        .m00_axil_rresp (rom_bootldr_rresp),
+        .m00_axil_rvalid (rom_bootldr_rvalid),
+        .m00_axil_rready (rom_bootldr_rready),
 
-        .m01_axil_awaddr (ram_aligner_awaddr),
-        .m01_axil_awprot (ram_aligner_awprot),
-        .m01_axil_awvalid (ram_aligner_awvalid),
-        .m01_axil_awready (ram_aligner_awready),
-        .m01_axil_wdata (ram_aligner_wdata),
-        .m01_axil_wstrb (ram_aligner_wstrb),
-        .m01_axil_wvalid (ram_aligner_wvalid),
-        .m01_axil_wready (ram_aligner_wready),
-        .m01_axil_bresp (ram_aligner_bresp),
-        .m01_axil_bvalid (ram_aligner_bvalid),
-        .m01_axil_bready (ram_aligner_bready),
-        .m01_axil_araddr (ram_aligner_araddr),
-        .m01_axil_arprot (ram_aligner_arprot),
-        .m01_axil_arvalid (ram_aligner_arvalid),
-        .m01_axil_arready (ram_aligner_arready),
-        .m01_axil_rdata (ram_aligner_rdata),
-        .m01_axil_rresp (ram_aligner_rresp),
-        .m01_axil_rvalid (ram_aligner_rvalid),
-        .m01_axil_rready (ram_aligner_rready),
+        .m01_axil_awaddr (ram_awaddr),
+        .m01_axil_awprot (ram_awprot),
+        .m01_axil_awvalid (ram_awvalid),
+        .m01_axil_awready (ram_awready),
+        .m01_axil_wdata (ram_wdata),
+        .m01_axil_wstrb (ram_wstrb),
+        .m01_axil_wvalid (ram_wvalid),
+        .m01_axil_wready (ram_wready),
+        .m01_axil_bresp (ram_bresp),
+        .m01_axil_bvalid (ram_bvalid),
+        .m01_axil_bready (ram_bready),
+        .m01_axil_araddr (ram_araddr),
+        .m01_axil_arprot (ram_arprot),
+        .m01_axil_arvalid (ram_arvalid),
+        .m01_axil_arready (ram_arready),
+        .m01_axil_rdata (ram_rdata),
+        .m01_axil_rresp (ram_rresp),
+        .m01_axil_rvalid (ram_rvalid),
+        .m01_axil_rready (ram_rready),
 
-        .m02_axil_awaddr (frame_awaddr),
-        .m02_axil_awprot (frame_awprot),
-        .m02_axil_awvalid (frame_awvalid),
-        .m02_axil_awready (frame_awready),
-        .m02_axil_wdata (frame_wdata),
-        .m02_axil_wstrb (frame_wstrb),
-        .m02_axil_wvalid (frame_wvalid),
-        .m02_axil_wready (frame_wready),
-        .m02_axil_bresp (frame_bresp),
-        .m02_axil_bvalid (frame_bvalid),
-        .m02_axil_bready (frame_bready),
-        .m02_axil_araddr (frame_araddr),
-        .m02_axil_arprot (frame_arprot),
-        .m02_axil_arvalid (frame_arvalid),
-        .m02_axil_arready (frame_arready),
-        .m02_axil_rdata (frame_rdata),
-        .m02_axil_rresp (frame_rresp),
-        .m02_axil_rvalid (frame_rvalid),
-        .m02_axil_rready (frame_rready),
+        .m02_axil_awaddr (vga_awaddr),
+        .m02_axil_awprot (vga_awprot),
+        .m02_axil_awvalid (vga_awvalid),
+        .m02_axil_awready (vga_awready),
+        .m02_axil_wdata (vga_wdata),
+        .m02_axil_wstrb (vga_wstrb),
+        .m02_axil_wvalid (vga_wvalid),
+        .m02_axil_wready (vga_wready),
+        .m02_axil_bresp (vga_bresp),
+        .m02_axil_bvalid (vga_bvalid),
+        .m02_axil_bready (vga_bready),
+        .m02_axil_araddr (vga_araddr),
+        .m02_axil_arprot (vga_arprot),
+        .m02_axil_arvalid (vga_arvalid),
+        .m02_axil_arready (vga_arready),
+        .m02_axil_rdata (vga_rdata),
+        .m02_axil_rresp (vga_rresp),
+        .m02_axil_rvalid (vga_rvalid),
+        .m02_axil_rready (vga_rready),
 
         .m03_axil_awaddr (peripherals_awaddr),
         .m03_axil_awprot (peripherals_awprot),
