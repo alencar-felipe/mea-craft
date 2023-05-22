@@ -13,10 +13,10 @@ int main()
         uint32_t k = VGA_BASE;
         for(int j = 0; j < 240; j++) {
             for(int i = 0; i < 320; i++, k += 4) {
-                if (j % 8 > 4) {
-                    WRITE_WORD(k, 0x00000FFF);
-                } else {
+                if ((i % 8 >= 4) ^ (j % 8 >= 4)) {
                     WRITE_WORD(k, 0x000000F0);
+                } else {
+                    WRITE_WORD(k, 0x00000F00);
                 }
             }
         }

@@ -96,7 +96,7 @@ module vga #(
     );
 
     always_comb begin
-        windex = awaddr[INDEX_WIDTH-1:2];
+        windex = awaddr[(INDEX_WIDTH-1)+2:2];
         wcolor = wdata[COLOR_WIDTH-1:0];
 
         if (visible) begin
