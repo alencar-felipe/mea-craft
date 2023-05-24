@@ -10,18 +10,19 @@ int main()
     //WRITE_WORD(GPIO_A, 0xFFFFFFFF);
 
     while(1) {
+        uint32_t c = READ_HALF(GPIO_A);
         uint32_t k = VGA_BASE;
         for(int j = 0; j < 240; j++) {
             for(int i = 0; i < 320; i++, k += 4) {
                 if ((i % 8 >= 4) ^ (j % 8 >= 4)) {
-                    WRITE_WORD(k, 0x000000F0);
+                    WRITE_WORD(k, c);
                 } else {
-                    WRITE_WORD(k, 0x00000F00);
+                    WRITE_WORD(k, ~c);
                 }
             }
         }
 
-        WRITE_HALF(GPIO_A, READ_HALF(GPIO_A));
+        WRITE_HALF(GPIO_A, c);
 
         for(int i = 0; msg[i] != '\0'; i++) {
             WRITE_BYTE(UART_DATA, msg[i]);

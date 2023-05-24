@@ -1,7 +1,7 @@
 import numpy as np
 
 int_dt = np.int32
-real_dt = np.float32
+real_dt = np.float16
 color_dt = np.dtype('uint8')
 
 camera_dt = np.dtype([
