@@ -57,6 +57,7 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.s
 	$(CC) $(CFLAGS) -c $< -o $@
 
+# TODO: and include files as dependency
 # Link the object files into an ELF file
 $(ELF_TARGET): $(OBJS) $(LDSCRIPT)
 	$(LD) $(LDFLAGS) $(OBJS) -o $@

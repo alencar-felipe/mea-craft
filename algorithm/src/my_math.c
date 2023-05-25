@@ -11,7 +11,7 @@ m4_t m4_mul(m4_t *a, m4_t *b)
         for (j = 0; j < 4; j++) {
             res.x[i][j] = 0;
             for (k = 0; k < 4; k++) {
-                res.x[i][j] += a->x[i][k] * b->x[k][j];
+                res.x[i][j] += fmul(a->x[i][k], b->x[k][j]);
             }
         }
     }
@@ -19,20 +19,21 @@ m4_t m4_mul(m4_t *a, m4_t *b)
     return res;
 }
 
-v4_t m4_v4_mul(m4_t *a, v4_t *b) {
+v4_t m4_v4_mul(m4_t *a, v4_t *b)
+{
     v4_t res;
 
     for (int i = 0; i < 4; i++) {
         res.x[i] = 0;
         for (int j = 0; j < 4; j++) {
-            res.x[i] += a->x[i][j] * b->x[j];
+            res.x[i] += fmul(a->x[i][j], b->x[j]);
         }
     }
 
     return res;
 }
 
-fixed_t fixed_sin(fixed_t x) {
+fixed_t fsin(fixed_t x) {
     if (x > 0) {
         return fixed_core_sin(x);
     } else {
@@ -40,19 +41,21 @@ fixed_t fixed_sin(fixed_t x) {
     }
 }
 
-fixed_t fixed_cos(fixed_t x) {
-    return fixed_sin(x + FIXED_PI/2);
+fixed_t fcos(fixed_t x) 
+{
+    return fsin(x + PI/2);
 }
 
-fixed_t fixed_core_sin(fixed_t x) {
-    x /= 2 * FIXED_PI;
-    x -= (x >> FIXED_FRAC_BITS) << FIXED_FRAC_BITS; // remove integer part
+fixed_t fixed_core_sin(fixed_t x) 
+{
+    x = fdiv(x, 2*PI);    
+    x &= (0xFFFFFFFF >> FIXED_BIT); // remove integer part
 
-    if (x <= 0.5) {
-        fixed_t t = 2 * x * (2 * x - 1);
-        return (FIXED_PI * t) / ((FIXED_PI - 4) * t - 1);
+    if (x <= ONE/2) {
+        fixed_t t = 2*fmul(x, (2*x - ONE));
+        return fdiv(fmul(PI, t), fmul(PI - 4*ONE, t) - ONE);
     } else {
-        fixed_t t = 2 * (1 - x) * (1 - 2 * x);
-        return -(FIXED_PI * t) / ((FIXED_PI - 4) * t - 1);
+        fixed_t t = 2*fmul(ONE - x, ONE - 2*x);
+        return -fdiv(fmul(PI, t), fmul(PI - 4*ONE, t) - ONE);
     }
 }

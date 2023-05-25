@@ -11,10 +11,11 @@ INC_DIR = inc
 BUILD_DIR = build
 
 # Define sources
-C_SRCS = $(wildcard $(SRC_DIR)/*.c)
+SRCS = $(wildcard $(SRC_DIR)/*.c)
+INCS = $(wildcard $(SRC_DIR)/*.h)
 
 # Define objects
-C_OBJS = $(patsubst $(SRC_DIR)/%.c, $(BUILD_DIR)/%.o, $(C_SRCS))
+OBJS = $(patsubst $(SRC_DIR)/%.c, $(BUILD_DIR)/%.o, $(SRCS))
 
 # Targets
 TARGET = $(BUILD_DIR)/build
@@ -30,8 +31,8 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) -I$(INC_DIR) -c $< -o $@
 
 # Link the object files into an ELF file
-$(TARGET): $(C_OBJS)
-	$(CC) $(LDFLAGS) $(C_OBJS) -o $@
+$(TARGET): $(OBJS) $(INCS)
+	$(CC) $(LDFLAGS) $(OBJS) -o $@
 
 run: $(TARGET)
 	$(BUILD_DIR)/build

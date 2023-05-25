@@ -2,15 +2,15 @@
 
 fixed_t edge(v4_t *a, v4_t *b, v4_t *c)
 {
-    return (c->x[0] - a->x[0]) * (b->x[1] - a->x[1]) -
-        (c->x[1] - a->x[1]) * (b->x[0] - a->x[0]);
+    return fmul(c->x[0] - a->x[0], b->x[1] - a->x[1]) -
+        fmul(c->x[1] - a->x[1], b->x[0] - a->x[0]);
 }
     
 void render_triangle(
     triangle_t *triangle,
     m4_t *world_to_screen,
-    uint16_t *texture,
-    uint16_t *raster
+    uint8_t *texture,
+    uint8_t *raster
 )
 {
     int i, j;
@@ -29,35 +29,35 @@ void render_triangle(
         t[i] = triangle->texture[i];
 
         // world to screen
-        v[i] =  m4_v4_mul(world_to_screen, &v[i]);
+        v[i] = m4_v4_mul(world_to_screen, &v[i]);
         
         // finish perspective
         w = v[i].x[2];
-        v[i].x[0] /= w;
-        v[i].x[1] /= w;
+        v[i].x[0] = fdiv(v[i].x[0], w);
+        v[i].x[1] = fdiv(v[i].x[1], w);
         v[i].x[2] = -w;
 
         // to raster space
-        v[i].x[0] = (v[i].x[0] + 1) * (RASTER_WIDTH/2);
-        v[i].x[1] = (RASTER_HEIGHT/2) - v[i].x[1]*(RASTER_WIDTH/2);
+        v[i].x[0] = (v[i].x[0] + ONE)*(RASTER_WIDTH/2);
+        v[i].x[1] = (RASTER_HEIGHT/2)*ONE - v[i].x[1]*(RASTER_WIDTH/2);
 
         // divide texture coordinate by z
-        t[i].x[0] /= v[i].x[2];
-        t[i].x[1] /= v[i].x[2];
+        t[i].x[0] = fdiv(t[i].x[0], v[i].x[2]);
+        t[i].x[1] = fdiv(t[i].x[1], v[i].x[2]);
     }
 
     // compute limits
-    xmin = MIN(MIN(v[0].x[0], v[1].x[0]), v[2].x[0]);
-    xmax = MAX(MAX(v[0].x[0], v[1].x[0]), v[2].x[0]);
-    ymin = MIN(MIN(v[0].x[1], v[1].x[1]), v[2].x[1]);
-    ymax = MAX(MAX(v[0].x[1], v[1].x[1]), v[2].x[1]);
+    xmin = MIN(MIN(v[0].x[0], v[1].x[0]), v[2].x[0]) >> FIXED_BIT;
+    xmax = MAX(MAX(v[0].x[0], v[1].x[0]), v[2].x[0]) >> FIXED_BIT;
+    ymin = MIN(MIN(v[0].x[1], v[1].x[1]), v[2].x[1]) >> FIXED_BIT;
+    ymax = MAX(MAX(v[0].x[1], v[1].x[1]), v[2].x[1]) >> FIXED_BIT;
     
     area = edge(&v[0], &v[1], &v[2]);
 
     for(j = ymin; j <= ymax; j++) {
         for(i = xmin; i <= xmax; i++) {
-            pixel.x[0] = i + 0.5*FIXED_ONE/2;
-            pixel.x[1] = j + 0.5*FIXED_ONE/2;
+            pixel.x[0] = (i*ONE) + 0.5*ONE;
+            pixel.x[1] = (j*ONE) + 0.5*ONE;
 
             w0 = edge(&v[1], &v[2], &pixel);
             w1 = edge(&v[2], &v[0], &pixel);
@@ -68,25 +68,27 @@ void render_triangle(
                 continue;
             }
 
-            w0 /= area;
-            w1 /= area;
-            w2 /= area;
+            w0 = fdiv(w0, area);
+            w1 = fdiv(w1, area);
+            w2 = fdiv(w2, area);
 
-            z = FIXED_ONE / ( w0/v[0].x[2] + w1/v[1].x[2] + w2/v[2].x[2] );
+            z = fdiv(ONE, fdiv(w0, v[0].x[2]) + fdiv(w1, v[1].x[2]) + fdiv(w2, v[2].x[2]));
 
             // interpolate point baricentric coordinates
-            tu = t[0].x[0]*w0 + t[1].x[0]*w1 + t[2].x[0]*w2;
-            tv = t[0].x[1]*w0 + t[1].x[1]*w1 + t[2].x[1]*w2;
-
-            tu *= z * TEXTURE_WIDTH;
-            tv *= z * TEXTURE_HEIGHT;
+            tu = fmul(t[0].x[0], w0) + fmul(t[1].x[0], w1) + fmul(t[2].x[0], w2);
+            tv = fmul(t[0].x[1], w0) + fmul(t[1].x[1], w1) + fmul(t[2].x[1], w2);
+            
+            tu = fmul(tu, z) * TEXTURE_WIDTH;
+            tv = fmul(tv, z) * TEXTURE_HEIGHT;
 
             // fixed to int
-            tu = tu >> FIXED_FRAC_BITS; 
-            tv = tv >> FIXED_FRAC_BITS;
+            tu = tu >> FIXED_BIT; 
+            tv = tv >> FIXED_BIT;
 
             if (tu >= 0 && tu < TEXTURE_WIDTH && tv >= 0 && tv < TEXTURE_HEIGHT) {
-                raster[i + j*RASTER_WIDTH] = texture[tu + tv*TEXTURE_WIDTH];
+                for(int k = 0; k < 3; k++) {
+                    raster[3*(i + j*RASTER_WIDTH) + k] = texture[3*(tu + tv*TEXTURE_WIDTH) + k];
+                }
             }
         }
     }

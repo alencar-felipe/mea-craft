@@ -8,4 +8,5 @@
 #define FILE_HEADER_SIZE (14)
 #define INFO_HEADER_SIZE (40)
 
-void save_bitmap(char *file_path, uint32_t *raster, uint32_t width, uint32_t height);
+void save_bitmap(char *file_path, uint8_t *raster, uint32_t width, uint32_t height);
+void load_bitmap(char *file_path, uint8_t *raster, uint32_t width, uint32_t height);
