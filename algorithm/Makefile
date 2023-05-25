@@ -12,7 +12,7 @@ BUILD_DIR = build
 
 # Define sources
 SRCS = $(wildcard $(SRC_DIR)/*.c)
-INCS = $(wildcard $(SRC_DIR)/*.h)
+INCS = $(wildcard $(INC_DIR)/*.h)
 
 # Define objects
 OBJS = $(patsubst $(SRC_DIR)/%.c, $(BUILD_DIR)/%.o, $(SRCS))
@@ -27,7 +27,7 @@ $(shell mkdir -p $(BUILD_DIR))
 all: $(TARGET)
 
 # Compile C source files into object files
-$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c $(INCS)
 	$(CC) $(CFLAGS) -I$(INC_DIR) -c $< -o $@
 
 # Link the object files into an ELF file

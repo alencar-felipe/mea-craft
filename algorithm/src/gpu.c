@@ -78,8 +78,8 @@ void render_triangle(
             tu = fmul(t[0].x[0], w0) + fmul(t[1].x[0], w1) + fmul(t[2].x[0], w2);
             tv = fmul(t[0].x[1], w0) + fmul(t[1].x[1], w1) + fmul(t[2].x[1], w2);
             
-            tu = fmul(tu, z) * TEXTURE_WIDTH;
-            tv = fmul(tv, z) * TEXTURE_HEIGHT;
+            tu = fmul(tu, z);
+            tv = fmul(tv, z);
 
             // fixed to int
             tu = tu >> FIXED_BIT; 

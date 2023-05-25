@@ -7,7 +7,7 @@
 #define FIXED_BIT (8)
 #define ONE (1 << FIXED_BIT)
 
-typedef int64_t fixed_t;
+typedef int32_t fixed_t;
 
 typedef struct __attribute__((packed)) {
     fixed_t x[2];

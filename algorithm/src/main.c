@@ -10,7 +10,7 @@ uint8_t texture[TEXTURE_WIDTH*TEXTURE_HEIGHT*3];
 
 camera_t camera = {
     {{0, 0, 0}},
-    {{0, 0, 0}},
+    {{0, 0, PI/10}},
     ONE
 };
 
@@ -18,27 +18,24 @@ const fixed_t z = 2*ONE;
 
 triangle_t triangle1 = {
     { {{0, 0, z}}, {{ONE, 0, z}}, {{0, ONE, z}} },
-    { {{0, 0}}, {{ONE, 0}}, {{0, ONE}} }
+    { {{0, 0}}, {{15*ONE, 0}}, {{0, 15*ONE}} }
 };
 
 triangle_t triangle2 = {
     { {{ONE, 0, z}}, {{ONE, ONE, z}}, {{0, ONE, z}} },
-    { {{ONE, 0}}, {{ONE, ONE}}, {{0, ONE}} }
+    { {{15*ONE, 0}}, {{15*ONE, 15*ONE}}, {{0, 15*ONE}} }
 };
-
 
 int main() 
 {
     load_bitmap("texture.bmp", texture, TEXTURE_WIDTH, TEXTURE_HEIGHT);
-    
-    memset (raster,0xFF,RASTER_WIDTH*RASTER_HEIGHT*3);
 
     m4_t w2s = world_to_screen(&camera);
 
     render_triangle(&triangle1, &w2s, texture, raster);
     render_triangle(&triangle2, &w2s, texture, raster);
 
-    save_bitmap("raster.bmp", raster, RASTER_WIDTH, RASTER_HEIGHT);
+    save_bitmap("./build/raster.bmp", raster, RASTER_WIDTH, RASTER_HEIGHT);
     return 0;
 }
 
