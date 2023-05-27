@@ -1,33 +1,28 @@
 #include <stdint.h>
 
 #include "mem_map.h"
-
-char *msg = "Hello, World\n";
+#include "small_printf.h"
 
 int main()
 {
+    
+    
 
-    //WRITE_WORD(GPIO_A, 0xFFFFFFFF);
+    uint32_t c = 0;
+
+    WRITE_WORD(GPIO_A, 0xFFFFFFFF);
+
+    while(!READ_WORD(GPIO_A));
+
+    WRITE_WORD(GPIO_A, 0);
 
     while(1) {
-        uint32_t c = READ_HALF(GPIO_A);
-        uint32_t k = VGA_BASE;
-        for(int j = 0; j < 240; j++) {
-            for(int i = 0; i < 320; i++, k += 4) {
-                if ((i % 8 >= 4) ^ (j % 8 >= 4)) {
-                    WRITE_WORD(k, c);
-                } else {
-                    WRITE_WORD(k, ~c);
-                }
-            }
-        }
-
-        WRITE_HALF(GPIO_A, c);
-
-        for(int i = 0; msg[i] != '\0'; i++) {
-            WRITE_BYTE(UART_DATA, msg[i]);
-            for (volatile int j = 0; j < 1000; j++);
-        }          
+        WRITE_WORD(GPIO_A, c);
+        //WRITE_BYTE(UART_DATA,'F');
+        
+        c++;
+        
+        printf("%d\n", c);
     }
 
     return 0;

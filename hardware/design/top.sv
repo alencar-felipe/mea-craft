@@ -12,10 +12,16 @@ module top (
     output logic [ 3: 0] vga_green,
     output logic [ 3: 0] vga_blue,
     output logic         vga_hsync,
-    output logic         vga_vsync
+    output logic         vga_vsync,
+
+    input ps2_clk,
+    input ps2_data
 );
-    logic irq;
     logic dclk;
+    logic drst;
+
+    logic core_irq;
+    logic ps2_irq;
 
     logic [31: 0] core_awaddr;
     logic [ 2: 0] core_awprot;
@@ -160,15 +166,16 @@ module top (
     clkdiv #(
         .DIV (2)
     ) clkdiv (
-        .clk (clk),
-        .rst (rst),
-        .out (dclk)
+        .clk_in (clk),
+        .rst_in (rst),
+        .clk_out (dclk),
+        .rst_out (drst)
     );
 
     core core (
         .clk (dclk),
-        .rst (rst),
-        .irq (irq),
+        .rst (drst),
+        .irq (core_irq),
 
         .awaddr (core_awaddr),
         .awprot (core_awprot),
@@ -197,7 +204,7 @@ module top (
         .STRB_WIDTH (32/8)
     ) core_aligner (
         .clk (dclk),
-        .rst (rst),
+        .rst (drst),
 
         .s_awaddr  (core_awaddr),
         .s_awprot  (core_awprot),
@@ -240,7 +247,7 @@ module top (
         .m_rready  (core_aligner_rready)
     );
 
-    assign irq = 0;
+    assign core_irq = 0;
 
     assign gpu_awaddr = 0;
     assign gpu_awprot = 0;
@@ -256,7 +263,7 @@ module top (
 
     axil_rom_bootldr rom_bootldr (
         .clk (dclk),
-        .rst (rst),
+        .rst (drst),
 
         .s_axil_araddr  (rom_bootldr_araddr),
         .s_axil_arprot  (rom_bootldr_arprot),
@@ -271,7 +278,7 @@ module top (
     assign rom_bootldr_awready = 1;
     assign rom_bootldr_wready = 1;
     assign rom_bootldr_bresp = 0;
-    assign rom_bootldr_bvalid = 0;
+    assign rom_bootldr_bvalid = 1;
 
     axil_ram #(
         .DATA_WIDTH (32),
@@ -279,7 +286,7 @@ module top (
         .STRB_WIDTH (32/8)
     ) ram (
         .clk (dclk),
-        .rst (rst),
+        .rst (drst),
 
         .s_axil_awaddr  (ram_awaddr),
         .s_axil_awprot  (ram_awprot),
@@ -302,34 +309,10 @@ module top (
         .s_axil_rready  (ram_rready)
     );
 
-    vga #(
-        .DATA_WIDTH (32),
-        .ADDR_WIDTH (23),
-        .STRB_WIDTH (32/8)
-    ) vga (
-        .clk     (dclk),
-        .rst     (rst),
-
-        .awaddr  (vga_awaddr),
-        .awprot  (vga_awprot),
-        .awvalid (vga_awvalid),
-        .awready (vga_awready),
-        .wdata   (vga_wdata),
-        .wstrb   (vga_wstrb),
-        .wvalid  (vga_wvalid),
-        .wready  (vga_wready),
-        .bresp   (vga_bresp),
-        .bvalid  (vga_bvalid),
-        .bready  (vga_bready),
-
-        .red     (vga_red),
-        .green   (vga_green),
-        .blue    (vga_blue),
-
-        .hsync   (vga_hsync),
-        .vsync   (vga_vsync)
-    );
-
+    assign vga_awready = 1;
+    assign vga_wready = 1;
+    assign vga_bresp = 0;
+    assign vga_bvalid = 1;
     assign vga_arready = 1;
     assign vga_rdata = 0;
     assign vga_rresp = 0;
@@ -337,7 +320,7 @@ module top (
 
     peripherals peripherals (
         .clk (dclk),
-        .rst (rst),
+        .rst (drst),
 
         .awaddr  (peripherals_awaddr),
         .awprot  (peripherals_awprot),
@@ -363,7 +346,11 @@ module top (
         .uart_rx (uart_rx),
 
         .gpio_out (gpio_out),
-        .gpio_in  (gpio_in)
+        .gpio_in  (gpio_in),
+
+        .ps2_clk (ps2_clk),
+        .ps2_data (ps2_data),
+        .ps2_irq (ps2_irq)
     );
 
     axil_crossbar_wrap_2x4 #(
@@ -373,7 +360,7 @@ module top (
         .M03_BASE_ADDR (32'h30000000)   // pheripherals
     ) axil_crossbar_wrap (
         .clk (dclk),
-        .rst (rst),
+        .rst (drst),
 
         .s00_axil_awaddr (core_aligner_awaddr),
         .s00_axil_awprot (core_aligner_awprot),

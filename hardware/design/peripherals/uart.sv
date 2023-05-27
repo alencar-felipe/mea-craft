@@ -32,9 +32,9 @@ module uart #(
     output logic        tx,
     input  logic        rx
 );
-    parameter DATA_WIDTH = 32;
-    parameter ADDR_WIDTH = 1;
-    parameter STRB_WIDTH = (DATA_WIDTH/8);
+    localparam DATA_WIDTH = 32;
+    localparam ADDR_WIDTH = 1;
+    localparam STRB_WIDTH = (DATA_WIDTH/8);
 
     typedef struct packed {
         logic addr_ok;
@@ -109,7 +109,7 @@ module uart #(
     
     /* Write */
     
-    always_ff @(posedge clk, posedge rst) begin
+    always_ff @(posedge clk) begin
         if (rst) begin
             w_curr.addr_ok <= 0;
             w_curr.data_ok <= 0;
@@ -193,7 +193,7 @@ module uart #(
 
     /* Read */
 
-    always_ff @(posedge clk, posedge rst) begin
+    always_ff @(posedge clk) begin
         if (rst) begin
             r_curr.addr_ok <= 0;
             r_curr.data_ok <= 0;

@@ -25,7 +25,7 @@ module vga_counter #(
     shortint i;
     shortint j;
 
-    always_ff @(posedge clk, posedge rst) begin
+    always_ff @(posedge clk) begin
         if (rst) begin
             i <= 0;
             j <= 0;

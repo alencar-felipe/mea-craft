@@ -12,7 +12,7 @@ FLASHER = ../scripts/flasher.py
 LDSCRIPT = linker.ld
 
 # Define compiler flags
-CFLAGS = --target=riscv32 -march=rv32i -Wall -Werror
+CFLAGS = --target=riscv32 -march=rv32i -Wall -Werror -O3
 LDFLAGS = -T $(LDSCRIPT)
 
 # Define directories
@@ -23,6 +23,7 @@ BUILD_DIR = build
 # Define sources
 ASM_SRCS = $(wildcard $(SRC_DIR)/*.s)
 C_SRCS = $(wildcard $(SRC_DIR)/*.c)
+C_INCS = $(wildcard $(INC_DIR)/*.h)
 
 # Define objects
 ASM_OBJS = $(patsubst $(SRC_DIR)/%.s, $(BUILD_DIR)/%.o, $(ASM_SRCS))
@@ -36,9 +37,6 @@ SOFTWARE_BIN_TARGET = $(BUILD_DIR)/software.bin
 BOOTLDR_BIN_TARGET = $(BUILD_DIR)/bootldr.bin
 ROM_TARGET = $(BUILD_DIR)/axil_rom_bootldr.sv
 
-# Serial port
-SERIAL_PORT := /dev/ttyUSB1
-
 # Create build directory if it doesn't exist
 $(shell mkdir -p $(BUILD_DIR))
 
@@ -50,14 +48,13 @@ all:	$(ELF_TARGET) \
 		$(ROM_TARGET)
 
 # Compile C source files into object files
-$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c $(C_INCS)
 	$(CC) $(CFLAGS) -I$(INC_DIR) -c $< -o $@
 
 # Compile ASM source files into object files
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.s
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# TODO: and include files as dependency
 # Link the object files into an ELF file
 $(ELF_TARGET): $(OBJS) $(LDSCRIPT)
 	$(LD) $(LDFLAGS) $(OBJS) -o $@
@@ -86,4 +83,4 @@ clean:
 	rm -rf $(BUILD_DIR)
 
 # Define phony targets
-.PHONY: all run flash clean
+.PHONY: all flash clean

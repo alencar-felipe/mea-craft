@@ -52,7 +52,10 @@ module basys3 (
         .vga_green (vga_green),
         .vga_blue  (vga_blue),
         .vga_hsync (vga_hsync),
-        .vga_vsync (vga_vsync)
+        .vga_vsync (vga_vsync),
+
+        .ps2_clk (ps2_clk),
+        .ps2_data (ps2_data)
     );
 
 

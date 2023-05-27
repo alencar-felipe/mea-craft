@@ -18,7 +18,7 @@ module reg_file (
 
     initial data[0] = 0;
 
-    always_ff @(posedge clk, posedge rst) begin
+    always_ff @(posedge clk) begin
         integer i;
 
         if (rst) begin

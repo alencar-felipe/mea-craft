@@ -97,7 +97,7 @@ module aligner #(
 
     /* Write */
     
-    always_ff @(posedge clk, posedge rst) begin
+    always_ff @(posedge clk) begin
         if (rst) begin
             w_curr.s_addr_ok <= 0;
             w_curr.s_data_ok <= 0;
@@ -241,7 +241,7 @@ module aligner #(
 
     /* Read */
 
-    always_ff @(posedge clk, posedge rst) begin
+    always_ff @(posedge clk) begin
         if (rst) begin
             r_curr.s_addr_ok <= 0;
             r_curr.m_addr_ok <= 0;

@@ -19,7 +19,7 @@ module uart_rx #(
     
     assign data = curr;
 
-    always_ff @(posedge clk, posedge rst) begin
+    always_ff @(posedge clk) begin
         if(rst) begin
             clk_count <= 0;
             bit_count <= 0;

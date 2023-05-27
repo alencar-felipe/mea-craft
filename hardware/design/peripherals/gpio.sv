@@ -60,7 +60,7 @@ module gpio #(
     
     /* Write */
     
-    always_ff @(posedge clk, posedge rst) begin
+    always_ff @(posedge clk) begin
         if (rst) begin
             w_curr.addr_ok <= 0;
             w_curr.data_ok <= 0;
@@ -153,7 +153,7 @@ module gpio #(
 
     /* Read */
 
-    always_ff @(posedge clk, posedge rst) begin
+    always_ff @(posedge clk) begin
         if (rst) begin
             r_curr.addr_ok <= 0;
             r_curr.data_ok <= 0;

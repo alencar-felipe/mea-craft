@@ -7,7 +7,7 @@ module top_tb;
     initial begin  
         clk = 0;
         rst = 1;
-        #2;
+        #40;
         rst = 0;
     end
     

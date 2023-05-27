@@ -38,7 +38,7 @@ module csr_file #(
         end
     end
 
-    always_ff @(posedge clk, posedge rst) begin
+    always_ff @(posedge clk) begin
         integer i;
 
         if (rst) begin

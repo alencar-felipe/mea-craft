@@ -156,7 +156,7 @@ module core #(
         .immed (immed)
     );
 
-    always_ff @(posedge clk, posedge rst) begin
+    always_ff @(posedge clk) begin
         if(rst) begin
             curr.ic <= 0;
             curr.pc <= 0;

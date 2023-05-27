@@ -22,9 +22,13 @@ module peripherals (
     output logic         rvalid,
     input  logic         rready,
 
-    output logic         uart_tx,
-    input  logic         uart_rx,
+    output logic uart_tx,
+    input  logic uart_rx,
 
+    input  logic ps2_clk,
+    input  logic ps2_data,
+    output logic ps2_irq,
+    
     output logic [31: 0] gpio_out [1:0],
     input  logic [31: 0] gpio_in  [1:0]
 );
@@ -69,6 +73,26 @@ module peripherals (
     logic        gpio_rvalid;
     logic        gpio_rready;
 
+    logic [0:0]  ps2_awaddr;
+    logic [2:0]  ps2_awprot;
+    logic        ps2_awvalid;
+    logic        ps2_awready;
+    logic [31:0] ps2_wdata;
+    logic [3:0]  ps2_wstrb;
+    logic        ps2_wvalid;
+    logic        ps2_wready;
+    logic [1:0]  ps2_bresp;
+    logic        ps2_bvalid;
+    logic        ps2_bready;
+    logic [0:0]  ps2_araddr;
+    logic [2:0]  ps2_arprot;
+    logic        ps2_arvalid;
+    logic        ps2_arready;
+    logic [31:0] ps2_rdata;
+    logic [1:0]  ps2_rresp;
+    logic        ps2_rvalid;
+    logic        ps2_rready;
+
     uart uart (
         .clk (clk),
         .rst (rst),
@@ -96,6 +120,30 @@ module peripherals (
         .tx (uart_tx),
         .rx (uart_rx)
     );
+
+    ps2 ps2 (
+        .clk (clk),
+        .rst (rst),
+
+        .araddr (ps2_araddr),
+        .arprot (ps2_arprot),
+        .arvalid (ps2_arvalid),
+        .arready (ps2_arready),
+        .rdata (ps2_rdata),
+        .rresp (ps2_rresp),
+        .rvalid (ps2_rvalid),
+        .rready (ps2_rready),
+
+        .irq (ps2_irq),
+
+        .ps2_clk (ps2_clk),
+        .ps2_data (ps2_data)
+    );
+
+    assign ps2_awready = 1;
+    assign ps2_wready = 1;
+    assign ps2_bresp = 0;
+    assign ps2_bvalid = 1;
 
     gpio gpio (
         .clk (clk),
@@ -125,14 +173,16 @@ module peripherals (
         .in (gpio_in)
     );
 
-    axil_interconnect_wrap_1x2 #(
+    axil_interconnect_wrap_1x3 #(
         .DATA_WIDTH (32),
         .ADDR_WIDTH (24),
         .STRB_WIDTH (32/8),
         .M00_BASE_ADDR (24'h000000),
         .M00_ADDR_WIDTH ({1{32'd16}}),
         .M01_BASE_ADDR (24'h010000),
-        .M01_ADDR_WIDTH ({1{32'd16}})
+        .M01_ADDR_WIDTH ({1{32'd16}}),
+        .M02_BASE_ADDR (24'h020000),
+        .M02_ADDR_WIDTH ({1{32'd16}})
     ) axil_interconnect (
         .clk (clk),
         .rst (rst),
@@ -195,7 +245,27 @@ module peripherals (
         .m01_axil_rdata (gpio_rdata),
         .m01_axil_rresp (gpio_rresp),
         .m01_axil_rvalid (gpio_rvalid),
-        .m01_axil_rready (gpio_rready)
+        .m01_axil_rready (gpio_rready),
+
+        .m02_axil_awaddr (ps2_awaddr),
+        .m02_axil_awprot (ps2_awprot),
+        .m02_axil_awvalid (ps2_awvalid),
+        .m02_axil_awready (ps2_awready),
+        .m02_axil_wdata (ps2_wdata),
+        .m02_axil_wstrb (ps2_wstrb),
+        .m02_axil_wvalid (ps2_wvalid),
+        .m02_axil_wready (ps2_wready),
+        .m02_axil_bresp (ps2_bresp),
+        .m02_axil_bvalid (ps2_bvalid),
+        .m02_axil_bready (ps2_bready),
+        .m02_axil_araddr (ps2_araddr),
+        .m02_axil_arprot (ps2_arprot),
+        .m02_axil_arvalid (ps2_arvalid),
+        .m02_axil_arready (ps2_arready),
+        .m02_axil_rdata (ps2_rdata),
+        .m02_axil_rresp (ps2_rresp),
+        .m02_axil_rvalid (ps2_rvalid),
+        .m02_axil_rready (ps2_rready)
     );
     
 endmodule

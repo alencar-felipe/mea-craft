@@ -38,7 +38,7 @@ module vga_ram #(
     
     /* Write */
     
-    always_ff @(posedge clk, posedge rst) begin
+    always_ff @(posedge clk) begin
         if (rst) begin
             w_curr.addr_ok <= 0;
             w_curr.data_ok <= 0;
@@ -121,7 +121,7 @@ module vga_ram #(
 
     /* Read */
 
-    always_ff @(posedge clk, posedge rst) begin
+    always_ff @(posedge clk) begin
         if (rst) begin
             rdata <= 0;
         end

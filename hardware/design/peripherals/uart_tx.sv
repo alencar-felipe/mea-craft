@@ -19,7 +19,7 @@ module uart_tx #(
     integer unsigned bit_count;
     logic [DATA_BITS-1:0] curr;
 
-    always_ff @(posedge clk, posedge rst) begin
+    always_ff @(posedge clk) begin
         if (rst | (!data_valid)) begin
             clk_count <= 0;
             bit_count <= 0;

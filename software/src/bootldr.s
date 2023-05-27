@@ -22,10 +22,21 @@ bootldr:
     /* Execute ISA test. */
 
     jal test_isa                    // Call test_isa
+    mv s0, a0                       // s0 = a0
 
     /* Print bootloader greating. */
 
     la a0, greatings                // a0 = greating
+    jal puts                        // puts(a0)
+
+    /* Go into distress if ISA test failed. */
+    
+    beq s0, x0, 8                   // if(s0 != 0)
+    jal distress                    // distress(a0)
+
+    /* Print waiting binary message. */
+    
+    la a0, waiting_binary           // a0 = waiting_binary
     jal puts                        // puts(a0)
 
     /* Read data size. */
@@ -51,7 +62,7 @@ bootldr:
 
     beq a0, s0, _bootldr_fail_end   // if (a0 == s0)
 _bootldr_fail_start:
-    la a0, failure                  // a0 = failure
+    la a0, checksum_fail            // a0 = failure
     jal puts                        // puts(a0)
     ebreak                          // "halt"
 _bootldr_fail_end:
@@ -66,6 +77,23 @@ _bootldr_fail_end:
 
     li t0, RAM                      // Load RAM address into t0.
     jalr x0, t0, 0                  // Jump to address in t0.
+
+/* ========================================================================== */
+/*
+ * @brief Prints test_isa_fail and then the raw error code in a loop
+ * @param a0: error code
+ */
+distress:
+    mv t0, a0                       // t0 = a0
+    la a0, test_isa_fail            // a0 = test_isa_fail
+    jal puts                        // puts(a0)
+
+    li t1, UART                     // t1 = UART
+_distress_start:                    
+    sb t0, 0(t1)                    // *t1 = t0
+    j _distress_start               // while(true)
+_distress_end:
+    ret                             // return (wont happen)
 
 /* ========================================================================== */
 
@@ -151,10 +179,16 @@ _read_loop_end:
 /* ========================================================================== */
 
 greatings:
-    .asciz "Greetings from Bootloader. Waiting for binary data. \n"
+    .asciz "Greetings from Bootloader. \n"
+
+waiting_binary:
+    .asciz "Waiting for binary data. \n"
 
 success:
     .asciz "Data received. Jumping to 0x10000000. \n"
 
-failure:
+test_isa_fail:
+    .asciz "Test ISA failed. Halting. \n"
+
+checksum_fail:
     .asciz "Checksum failed. Halting. \n"
