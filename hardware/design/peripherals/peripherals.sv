@@ -28,70 +28,70 @@ module peripherals (
     input  logic ps2_clk,
     input  logic ps2_data,
     output logic ps2_irq,
-    
+
     output logic [31: 0] gpio_out [1:0],
     input  logic [31: 0] gpio_in  [1:0]
 );
 
-    logic [0:0]  uart_awaddr;
-    logic [2:0]  uart_awprot;
-    logic        uart_awvalid;
-    logic        uart_awready;
-    logic [31:0] uart_wdata;
-    logic [3:0]  uart_wstrb;
-    logic        uart_wvalid;
-    logic        uart_wready;
-    logic [1:0]  uart_bresp;
-    logic        uart_bvalid;
-    logic        uart_bready;
-    logic [0:0]  uart_araddr;
-    logic [2:0]  uart_arprot;
-    logic        uart_arvalid;
-    logic        uart_arready;
-    logic [31:0] uart_rdata;
-    logic [1:0]  uart_rresp;
-    logic        uart_rvalid;
-    logic        uart_rready;
+    logic [15: 0] uart_awaddr;
+    logic [ 2: 0] uart_awprot;
+    logic         uart_awvalid;
+    logic         uart_awready;
+    logic [31: 0] uart_wdata;
+    logic [ 3: 0] uart_wstrb;
+    logic         uart_wvalid;
+    logic         uart_wready;
+    logic [ 1: 0] uart_bresp;
+    logic         uart_bvalid;
+    logic         uart_bready;
+    logic [15: 0] uart_araddr;
+    logic [ 2: 0] uart_arprot;
+    logic         uart_arvalid;
+    logic         uart_arready;
+    logic [31: 0] uart_rdata;
+    logic [ 1: 0] uart_rresp;
+    logic         uart_rvalid;
+    logic         uart_rready;
 
-    logic [0:0]  gpio_awaddr;
-    logic [2:0]  gpio_awprot;
-    logic        gpio_awvalid;
-    logic        gpio_awready;
-    logic [31:0] gpio_wdata;
-    logic [3:0]  gpio_wstrb;
-    logic        gpio_wvalid;
-    logic        gpio_wready;
-    logic [1:0]  gpio_bresp;
-    logic        gpio_bvalid;
-    logic        gpio_bready;
-    logic [0:0]  gpio_araddr;
-    logic [2:0]  gpio_arprot;
-    logic        gpio_arvalid;
-    logic        gpio_arready;
-    logic [31:0] gpio_rdata;
-    logic [1:0]  gpio_rresp;
-    logic        gpio_rvalid;
-    logic        gpio_rready;
+    logic [15: 0] gpio_awaddr;
+    logic [ 2: 0] gpio_awprot;
+    logic         gpio_awvalid;
+    logic         gpio_awready;
+    logic [31: 0] gpio_wdata;
+    logic [ 3: 0] gpio_wstrb;
+    logic         gpio_wvalid;
+    logic         gpio_wready;
+    logic [ 1: 0] gpio_bresp;
+    logic         gpio_bvalid;
+    logic         gpio_bready;
+    logic [15: 0] gpio_araddr;
+    logic [ 2: 0] gpio_arprot;
+    logic         gpio_arvalid;
+    logic         gpio_arready;
+    logic [31: 0] gpio_rdata;
+    logic [ 1: 0] gpio_rresp;
+    logic         gpio_rvalid;
+    logic         gpio_rready;
 
-    logic [0:0]  ps2_awaddr;
-    logic [2:0]  ps2_awprot;
-    logic        ps2_awvalid;
-    logic        ps2_awready;
-    logic [31:0] ps2_wdata;
-    logic [3:0]  ps2_wstrb;
-    logic        ps2_wvalid;
-    logic        ps2_wready;
-    logic [1:0]  ps2_bresp;
-    logic        ps2_bvalid;
-    logic        ps2_bready;
-    logic [0:0]  ps2_araddr;
-    logic [2:0]  ps2_arprot;
-    logic        ps2_arvalid;
-    logic        ps2_arready;
-    logic [31:0] ps2_rdata;
-    logic [1:0]  ps2_rresp;
-    logic        ps2_rvalid;
-    logic        ps2_rready;
+    logic [15: 0] ps2_awaddr;
+    logic [ 2: 0] ps2_awprot;
+    logic         ps2_awvalid;
+    logic         ps2_awready;
+    logic [31: 0] ps2_wdata;
+    logic [ 3: 0] ps2_wstrb;
+    logic         ps2_wvalid;
+    logic         ps2_wready;
+    logic [ 1: 0] ps2_bresp;
+    logic         ps2_bvalid;
+    logic         ps2_bready;
+    logic [15: 0] ps2_araddr;
+    logic [ 2: 0] ps2_arprot;
+    logic         ps2_arvalid;
+    logic         ps2_arready;
+    logic [31: 0] ps2_rdata;
+    logic [ 1: 0] ps2_rresp;
+    logic         ps2_rvalid;
+    logic         ps2_rready;
 
     uart uart (
         .clk (clk),

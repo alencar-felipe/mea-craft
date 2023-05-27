@@ -10,6 +10,7 @@
 
 #define UART_BASE           (PERIPHERALS_BASE + 0x000000)
 #define GPIO_BASE           (PERIPHERALS_BASE + 0x010000)
+#define PS2_BASE            (PERIPHERALS_BASE + 0x020000)
 
 #define UART_DATA           (UART_BASE + 0x0000)
 #define UART_STS            (UART_BASE + 0x0004)
@@ -38,6 +39,15 @@
 
 #define GPIO_A_LED_POS      (0)
 #define GPIO_A_LED_MSK      (0xFFFF << GPIO_A_LED_POS)
+
+#define PS2_FRAME           (PS2_BASE + 0x0000)
+#define PS2_STS             (PS2_BASE + 0x0004)
+
+#define PS2_FRAME_POS       (0)
+#define PS2_FRAME_MSK       (0xFF << PS2_FRAME_POS)
+
+#define PS2_STS_POS         (0)
+#define PS2_STS_MSK         (1 << PS2_STS_POS)
 
 #define WRITE_WORD(ADDR, WORD) (*((volatile uint32_t *)(ADDR)) = (uint32_t) (WORD))
 #define WRITE_HALF(ADDR, HALF) (*((volatile uint16_t *)(ADDR)) = (uint16_t) (HALF))

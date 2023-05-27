@@ -12,7 +12,7 @@ FLASHER = ../scripts/flasher.py
 LDSCRIPT = linker.ld
 
 # Define compiler flags
-CFLAGS = --target=riscv32 -march=rv32i -Wall -O3
+CFLAGS = --target=riscv32 -march=rv32i -Wall -Werror -O3
 LDFLAGS = -T $(LDSCRIPT)
 
 # Define directories

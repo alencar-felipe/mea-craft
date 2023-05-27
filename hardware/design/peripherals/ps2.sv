@@ -2,14 +2,14 @@ module ps2(
     input  logic clk,
     input  logic rst,
 
-    input  logic [0:0]  araddr,
-    input  logic [2:0]  arprot,
-    input  logic        arvalid,
-    output logic        arready,
-    output logic [31:0] rdata,
-    output logic [1:0]  rresp,
-    output logic        rvalid,
-    input  logic        rready,
+    input  logic [15: 0] araddr,
+    input  logic [ 2: 0] arprot,
+    input  logic         arvalid,
+    output logic         arready,
+    output logic [31: 0] rdata,
+    output logic [ 1: 0] rresp,
+    output logic         rvalid,
+    input  logic         rready,
 
     output logic irq,
 
@@ -17,7 +17,7 @@ module ps2(
     input  logic ps2_data
 );
     localparam AXIL_DATA_WIDTH = 32;
-    localparam AXIL_ADDR_WIDTH = 1;
+    localparam AXIL_ADDR_WIDTH = 16;
 
     typedef struct packed {
         logic addr_ok;
@@ -106,7 +106,7 @@ module ps2(
             if(frame_valid && frame_ready) begin
                 frame_valid <= 0;
             end
-            
+
         end
     end
 
@@ -168,7 +168,7 @@ module ps2(
                     end
                 end
 
-                1: begin
+                4: begin
                     r_next.data_ok = 1;
                     r_next.data = status;
                 end
