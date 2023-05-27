@@ -63,26 +63,6 @@ module top (
     logic         core_aligner_rvalid;
     logic         core_aligner_rready;
 
-    logic [31: 0] gpu_awaddr;
-    logic [ 2: 0] gpu_awprot;
-    logic         gpu_awvalid;
-    logic         gpu_awready;
-    logic [31: 0] gpu_wdata;
-    logic [ 3: 0] gpu_wstrb;
-    logic         gpu_wvalid;
-    logic         gpu_wready;
-    logic [ 1: 0] gpu_bresp;
-    logic         gpu_bvalid;
-    logic         gpu_bready;
-    logic [31: 0] gpu_araddr;
-    logic [ 2: 0] gpu_arprot;
-    logic         gpu_arvalid;
-    logic         gpu_arready;
-    logic [31: 0] gpu_rdata;
-    logic [ 1: 0] gpu_rresp;
-    logic         gpu_rvalid;
-    logic         gpu_rready;
-
     logic [31: 0] rom_bootldr_awaddr;
     logic [ 2: 0] rom_bootldr_awprot;
     logic         rom_bootldr_awvalid;
@@ -123,25 +103,25 @@ module top (
     logic         ram_rvalid;
     logic         ram_rready;
 
-    logic [23: 0] vga_awaddr;
-    logic [ 2: 0] vga_awprot;
-    logic         vga_awvalid;
-    logic         vga_awready;
-    logic [31: 0] vga_wdata;
-    logic [ 3: 0] vga_wstrb;
-    logic         vga_wvalid;
-    logic         vga_wready;
-    logic [ 1: 0] vga_bresp;
-    logic         vga_bvalid;
-    logic         vga_bready;
-    logic [23: 0] vga_araddr;
-    logic [ 2: 0] vga_arprot;
-    logic         vga_arvalid;
-    logic         vga_arready;
-    logic [31: 0] vga_rdata;
-    logic [ 1: 0] vga_rresp;
-    logic         vga_rvalid;
-    logic         vga_rready;
+    logic [23: 0] gpu_awaddr;
+    logic [ 2: 0] gpu_awprot;
+    logic         gpu_awvalid;
+    logic         gpu_awready;
+    logic [31: 0] gpu_wdata;
+    logic [ 3: 0] gpu_wstrb;
+    logic         gpu_wvalid;
+    logic         gpu_wready;
+    logic [ 1: 0] gpu_bresp;
+    logic         gpu_bvalid;
+    logic         gpu_bready;
+    logic [23: 0] gpu_araddr;
+    logic [ 2: 0] gpu_arprot;
+    logic         gpu_arvalid;
+    logic         gpu_arready;
+    logic [31: 0] gpu_rdata;
+    logic [ 1: 0] gpu_rresp;
+    logic         gpu_rvalid;
+    logic         gpu_rready;
 
     logic [23: 0] peripherals_awaddr;
     logic [ 2: 0] peripherals_awprot;
@@ -249,18 +229,6 @@ module top (
 
     assign core_irq = 0;
 
-    assign gpu_awaddr = 0;
-    assign gpu_awprot = 0;
-    assign gpu_awvalid = 0;
-    assign gpu_wdata = 0;
-    assign gpu_wstrb = 0;
-    assign gpu_wvalid = 0;
-    assign gpu_bready = 1;
-    assign gpu_araddr = 0;
-    assign gpu_arprot = 0;
-    assign gpu_arvalid = 0;
-    assign gpu_rready = 1;
-
     axil_rom_bootldr rom_bootldr (
         .clk (dclk),
         .rst (drst),
@@ -309,15 +277,34 @@ module top (
         .s_axil_rready  (ram_rready)
     );
 
-    assign vga_awready = 1;
-    assign vga_wready = 1;
-    assign vga_bresp = 0;
-    assign vga_bvalid = 1;
-    assign vga_arready = 1;
-    assign vga_rdata = 0;
-    assign vga_rresp = 0;
-    assign vga_rvalid = 1;
+    gpu #(
+        .DATA_WIDTH (32),
+        .ADDR_WIDTH (24),
+        .STRB_WIDTH (32/8)
+    ) gpu (
+        .clk (dclk), // 50 MHz
+        .rst (drst),
 
+        .awaddr  (gpu_awaddr),
+        .awprot  (gpu_awprot),
+        .awvalid (gpu_awvalid),
+        .awready (gpu_awready),
+        .wdata   (gpu_wdata),
+        .wstrb   (gpu_wstrb),
+        .wvalid  (gpu_wvalid),
+        .wready  (gpu_wready),
+        .bresp   (gpu_bresp),
+        .bvalid  (gpu_bvalid),
+        .bready  (gpu_bready),
+
+        .red   (vga_red),
+        .green (vga_green),
+        .blue  (vga_blue),
+
+        .hsync (vga_hsync),
+        .vsync (vga_vsync)
+    );
+    
     peripherals peripherals (
         .clk (dclk),
         .rst (drst),
@@ -353,10 +340,10 @@ module top (
         .ps2_irq (ps2_irq)
     );
 
-    axil_crossbar_wrap_2x4 #(
+    axil_crossbar_wrap_1x4 #(
         .M00_BASE_ADDR (32'h00000000),  // rom
         .M01_BASE_ADDR (32'h10000000),  // ram
-        .M02_BASE_ADDR (32'h20000000),  // vga
+        .M02_BASE_ADDR (32'h20000000),  // gpu
         .M03_BASE_ADDR (32'h30000000)   // pheripherals
     ) axil_crossbar_wrap (
         .clk (dclk),
@@ -381,26 +368,6 @@ module top (
         .s00_axil_rresp (core_aligner_rresp),
         .s00_axil_rvalid (core_aligner_rvalid),
         .s00_axil_rready (core_aligner_rready),
-
-        .s01_axil_awaddr (gpu_awaddr),
-        .s01_axil_awprot (gpu_awprot),
-        .s01_axil_awvalid (gpu_awvalid),
-        .s01_axil_awready (gpu_awready),
-        .s01_axil_wdata (gpu_wdata),
-        .s01_axil_wstrb (gpu_wstrb),
-        .s01_axil_wvalid (gpu_wvalid),
-        .s01_axil_wready (gpu_wready),
-        .s01_axil_bresp (gpu_bresp),
-        .s01_axil_bvalid (gpu_bvalid),
-        .s01_axil_bready (gpu_bready),
-        .s01_axil_araddr (gpu_araddr),
-        .s01_axil_arprot (gpu_arprot),
-        .s01_axil_arvalid (gpu_arvalid),
-        .s01_axil_arready (gpu_arready),
-        .s01_axil_rdata (gpu_rdata),
-        .s01_axil_rresp (gpu_rresp),
-        .s01_axil_rvalid (gpu_rvalid),
-        .s01_axil_rready (gpu_rready),
 
         .m00_axil_awaddr (rom_bootldr_awaddr),
         .m00_axil_awprot (rom_bootldr_awprot),
@@ -442,25 +409,25 @@ module top (
         .m01_axil_rvalid (ram_rvalid),
         .m01_axil_rready (ram_rready),
 
-        .m02_axil_awaddr (vga_awaddr),
-        .m02_axil_awprot (vga_awprot),
-        .m02_axil_awvalid (vga_awvalid),
-        .m02_axil_awready (vga_awready),
-        .m02_axil_wdata (vga_wdata),
-        .m02_axil_wstrb (vga_wstrb),
-        .m02_axil_wvalid (vga_wvalid),
-        .m02_axil_wready (vga_wready),
-        .m02_axil_bresp (vga_bresp),
-        .m02_axil_bvalid (vga_bvalid),
-        .m02_axil_bready (vga_bready),
-        .m02_axil_araddr (vga_araddr),
-        .m02_axil_arprot (vga_arprot),
-        .m02_axil_arvalid (vga_arvalid),
-        .m02_axil_arready (vga_arready),
-        .m02_axil_rdata (vga_rdata),
-        .m02_axil_rresp (vga_rresp),
-        .m02_axil_rvalid (vga_rvalid),
-        .m02_axil_rready (vga_rready),
+        .m02_axil_awaddr (gpu_awaddr),
+        .m02_axil_awprot (gpu_awprot),
+        .m02_axil_awvalid (gpu_awvalid),
+        .m02_axil_awready (gpu_awready),
+        .m02_axil_wdata (gpu_wdata),
+        .m02_axil_wstrb (gpu_wstrb),
+        .m02_axil_wvalid (gpu_wvalid),
+        .m02_axil_wready (gpu_wready),
+        .m02_axil_bresp (gpu_bresp),
+        .m02_axil_bvalid (gpu_bvalid),
+        .m02_axil_bready (gpu_bready),
+        .m02_axil_araddr (gpu_araddr),
+        .m02_axil_arprot (gpu_arprot),
+        .m02_axil_arvalid (gpu_arvalid),
+        .m02_axil_arready (gpu_arready),
+        .m02_axil_rdata (gpu_rdata),
+        .m02_axil_rresp (gpu_rresp),
+        .m02_axil_rvalid (gpu_rvalid),
+        .m02_axil_rready (gpu_rready),
 
         .m03_axil_awaddr (peripherals_awaddr),
         .m03_axil_awprot (peripherals_awprot),

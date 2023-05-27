@@ -6,7 +6,9 @@ module vga_counter #(
     parameter HFP    =  16,
     parameter VSP    =   2,
     parameter VBP    =  29,
-    parameter VFP    =  10 
+    parameter VFP    =  10,
+
+    parameter INDEX_WIDTH = 32 
 ) (
     input  logic        clk, // 25 MHz
     input  logic        rst,
@@ -14,16 +16,16 @@ module vga_counter #(
     output logic        hsync,
     output logic        vsync,
 
-    output shortint x,
-    output shortint y,
+    output logic [INDEX_WIDTH-1:0] x,
+    output logic [INDEX_WIDTH-1:0] y,
 
     output logic        visible
 );
     localparam I_MAX = HSP + HBP + WIDTH + HFP - 1;
     localparam J_MAX = VSP + VBP + HEIGHT + VFP - 1;
     
-    shortint i;
-    shortint j;
+    logic [INDEX_WIDTH-1:0] i;
+    logic [INDEX_WIDTH-1:0] j;
 
     always_ff @(posedge clk) begin
         if (rst) begin
