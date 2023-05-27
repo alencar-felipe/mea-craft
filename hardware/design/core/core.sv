@@ -49,7 +49,7 @@ module core #(
         STEP_JAL,
         STEP_BRANCH,
         STEP_JUMP,
-        STEP_JUMP_REG,
+        STEP_JARL_JUMP,
         STEP_CALC_ADDR,
         STEP_LOAD,
         STEP_STORE,
@@ -243,12 +243,15 @@ module core #(
             end
 
             STEP_JAL: begin
+                next.tmp = rs1_data;
+
                 alu_ctrl = ALU_CTRL_ADD;
                 alu_in[0] = curr.pc;
                 alu_in[1] = 4;
 
                 reg_wen = 1;
                 rd_addr = isa_rd;
+                rs1_addr = isa_rs1;
                 rd_data = alu_out;
             end
 
@@ -274,15 +277,13 @@ module core #(
                 alu_in[1] = immed;
             end
 
-            STEP_JUMP_REG: begin
+            STEP_JARL_JUMP: begin
                 next.ic = 0; 
                 next.pc = {alu_out[31:1], 1'b0};
 
                 alu_ctrl = ALU_CTRL_ADD;
-                alu_in[0] = rs1_data;
+                alu_in[0] = curr.tmp;
                 alu_in[1] = immed;
-
-                rs1_addr = isa_rs1;
             end
 
             STEP_CALC_ADDR: begin
@@ -467,14 +468,12 @@ module core #(
                     default: step       = STEP_FETCH                           ;
                     1: step             = STEP_JAL                             ;
                     2: step             = STEP_JUMP                            ;
-                    3: step             = STEP_INC_PC                          ;
                 endcase
 
                 ISA_OPCODE_JALR: case (curr.ic)
                     default: step       = STEP_FETCH                           ;
                     1: step             = STEP_JAL                             ;
-                    2: step             = STEP_JUMP_REG                        ;
-                    3: step             = STEP_INC_PC                          ;
+                    2: step             = STEP_JARL_JUMP                       ;
                 endcase
 
                 ISA_OPCODE_BRANCH: case (curr.ic)
@@ -634,7 +633,7 @@ module core #(
                     mem_done = 0;
                     
                     awvalid = !curr.mem_addr_ok;
-                    wvalid = !curr.mem_data_ok;
+                    wvalid = (!curr.mem_data_ok);
 
                     next.mem_addr_ok = curr.mem_addr_ok | awready;
                     next.mem_data_ok = curr.mem_data_ok | wready;

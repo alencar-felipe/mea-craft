@@ -1,5 +1,5 @@
 .section .init
-.globl bootldr
+.globl bootldr, irq_handler
 
 .equ RAM,   0x10000000
 .equ UART,  0x30000000
@@ -10,7 +10,6 @@
  * @brief Bootloader entry point.
  */
 bootldr:
-
     /* Setup stack. */
     
     la sp, _estack                  // Set the stack pointer.

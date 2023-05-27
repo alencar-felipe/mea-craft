@@ -14,8 +14,6 @@ unsigned int __mulsi3 (unsigned int a, unsigned int b)
     return r;
 }
 
-#include "mem_map.h"
-
 unsigned int __udivsi3 (unsigned int a, unsigned int b)
 {
     unsigned int quotient;
@@ -30,4 +28,26 @@ unsigned int __udivsi3 (unsigned int a, unsigned int b)
     }
 
     return quotient;
+}
+
+int __divsi3(int dividend, int divisor) {
+    int quotient = 0;
+    int sign = 1;
+    
+    if (dividend < 0) {
+        sign = -sign;
+        dividend = -dividend;
+    }
+    
+    if (divisor < 0) {
+        sign = -sign;
+        divisor = -divisor;
+    }
+    
+    while (dividend >= divisor) {
+        dividend -= divisor;
+        quotient++;
+    }
+    
+    return sign * quotient;
 }

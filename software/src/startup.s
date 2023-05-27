@@ -1,5 +1,5 @@
 .section .text
-#.globl irq_handler
+.globl irq_handler
 
 irq_handler:
     csrrw x0, mscratch, t0          // mscratch = t0

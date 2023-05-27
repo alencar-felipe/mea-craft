@@ -1,28 +1,19 @@
 #include <stdint.h>
 
 #include "mem_map.h"
-#include "small_printf.h"
+#include "printf.h"
+
+extern int my_printf(const char *format, ...);
 
 int main()
 {
-    
-    
-
     uint32_t c = 0;
-
-    WRITE_WORD(GPIO_A, 0xFFFFFFFF);
-
-    while(!READ_WORD(GPIO_A));
-
-    WRITE_WORD(GPIO_A, 0);
 
     while(1) {
         WRITE_WORD(GPIO_A, c);
-        //WRITE_BYTE(UART_DATA,'F');
-        
+        printf("c: %d\n", (int) c);
+        for(volatile int i = 0; i < 10000; i++);
         c++;
-        
-        printf("%d\n", c);
     }
 
     return 0;

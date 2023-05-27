@@ -20,7 +20,7 @@ module mem_ctrl_gen(
                         mem_ctrl = MEM_CTRL_READ_WORD;
                     end
                     ISA_MEM_F3_BYTE_U: begin
-                        mem_ctrl = MEM_CTRL_READ_WORD;
+                        mem_ctrl = MEM_CTRL_READ_BYTE;
                     end
                     ISA_MEM_F3_HALF_U: begin
                         mem_ctrl = MEM_CTRL_READ_HALF;
