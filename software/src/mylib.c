@@ -1,25 +1,121 @@
-/*
-  Copyright 2001-2021 Georges Menie
-  https://www.menie.org/georges/embedded/small_printf_source_code.html
-  stdarg version contributed by Christian Ettinger
+#include "mylib.h"
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU Lesser General Public License as published by
-  the Free Software Foundation; either version 2 of the License, or
-  (at your option) any later version.
+typedef uint32_t size_t;
 
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU Lesser General Public License for more details.
+#define PAD_RIGHT 1
+#define PAD_ZERO 2
+#define PRINT_BUF_LEN 12 // the following should be enough for 32 bit int
 
-  You should have received a copy of the GNU Lesser General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/
+static void printchar(char **str, int c);
+static int prints(char **out, const char *string, int width, int pad);
+static int printi(char **out, int i, int b, int sg, int width, int pad, int letbase);
+static int print(char **out, const char *format, va_list args);
 
-#include <stdarg.h>
-#include "mem_map.h"
+void *memset(void *s, int c, size_t n)
+{
+    unsigned char* p = s;
+    while (n-- > 0) {
+        *p++ = (unsigned char) c;
+    }
+    return s;
+}
+
+void *memcpy(void *dest, const void *src, size_t n) 
+{
+    unsigned char* dest_char = dest;
+    const unsigned char* src_char = src;
+    while (n-- > 0) {
+        *dest_char++ = *src_char++;
+    }
+    return dest;
+}
+
+int putchar(int c)
+{
+    WRITE_BYTE(UART_DATA, c);
+    return c;
+}
+
+int puts(const char *str) {
+    int i = 0;
+    while (str[i] != '\0') {
+        putchar(str[i]);
+        i++;
+    }
+    putchar('\n');
+    return i;
+}
+
+int printf(const char *format, ...)
+{
+    va_list args;
+
+    va_start(args, format);
+    return print(0, format, args);
+}
+
+int sprintf(char *out, const char *format, ...)
+{
+    va_list args;
+
+    va_start(args, format);
+    return print(&out, format, args);
+}
+
+unsigned int __mulsi3(unsigned int a, unsigned int b)
+{
+    unsigned int r = 0;
+
+    while (a) {
+        if (a & 1) {
+	        r += b;
+        }
+        
+        a >>= 1;
+        b <<= 1;
+    }
+
+    return r;
+}
+
+unsigned int __udivsi3(unsigned int a, unsigned int b)
+{
+    unsigned int quotient;
+
+    if (b == 0) return 0xFFFFFFFF;
+
+    quotient = 0;
+
+    while (a >= b) {
+        a -= b;
+        quotient++;
+    }
+
+    return quotient;
+}
+
+int __divsi3(int dividend, int divisor)
+{
+    int quotient = 0;
+    int sign = 1;
+    
+    if (dividend < 0) {
+        sign = -sign;
+        dividend = -dividend;
+    }
+    
+    if (divisor < 0) {
+        sign = -sign;
+        divisor = -divisor;
+    }
+    
+    while (dividend >= divisor) {
+        dividend -= divisor;
+        quotient++;
+    }
+    
+    return sign * quotient;
+}
 
 static void printchar(char **str, int c)
 {
@@ -27,12 +123,9 @@ static void printchar(char **str, int c)
 		**str = c;
 		++(*str);
 	} else {
-		WRITE_BYTE(UART_DATA, c);
+        putchar(c);
 	}
 }
-
-#define PAD_RIGHT 1
-#define PAD_ZERO 2
 
 static int prints(char **out, const char *string, int width, int pad)
 {
@@ -64,10 +157,8 @@ static int prints(char **out, const char *string, int width, int pad)
 	return pc;
 }
 
-/* the following should be enough for 32 bit int */
-#define PRINT_BUF_LEN 12
-
-static int printi(char **out, int i, int b, int sg, int width, int pad, int letbase)
+static int printi(char **out, int i, int b, int sg, int width, int pad,
+	int letbase)
 {
 	char print_buf[PRINT_BUF_LEN];
 	register char *s;
@@ -110,7 +201,7 @@ static int printi(char **out, int i, int b, int sg, int width, int pad, int letb
 	return pc + prints (out, s, width, pad);
 }
 
-static int print(char **out, const char *format, va_list args )
+static int print(char **out, const char *format, va_list args)
 {
 	register int width, pad;
 	register int pc = 0;
@@ -172,20 +263,4 @@ static int print(char **out, const char *format, va_list args )
 	if (out) **out = '\0';
 	va_end( args );
 	return pc;
-}
-
-int printf(const char *format, ...)
-{
-    va_list args;
-
-    va_start( args, format );
-    return print( 0, format, args );
-}
-
-int sprintf(char *out, const char *format, ...)
-{
-    va_list args;
-
-    va_start( args, format );
-    return print( &out, format, args );
 }

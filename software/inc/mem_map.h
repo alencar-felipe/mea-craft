@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stdint.h>
+#include "mylib.h"
 
 #define ROM_BASE            (0x00000000)
 #define RAM_BASE            (0x10000000)
