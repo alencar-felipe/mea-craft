@@ -36,7 +36,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__.strip())
     parser.add_argument('file', help='Binary file path')
     parser.add_argument('port', help='Serial port name')
-    parser.add_argument('-b', '--baud-rate', type=int, default=9600,
+    parser.add_argument('-b', '--baud-rate', type=int, default=115200,
         help='Serial baud rate')
 
     args = parser.parse_args()
