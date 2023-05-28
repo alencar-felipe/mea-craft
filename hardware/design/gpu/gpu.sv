@@ -1,27 +1,22 @@
 module gpu #(
-    parameter CLUSTER_COUNT = 20,
-    parameter CLUSTER_SIZE = 10,
-    parameter TEXTURE_WIDTH = 64,
-    parameter TEXTURE_HEIGHT = 64,
-
     parameter DATA_WIDTH = 32,
     parameter ADDR_WIDTH = 24,
-    parameter STRB_WIDTH = (DATA_WIDTH/8)
+    parameter STRB_WIDTH = (DATA_WIDTH/8)    
 ) (
     input  logic clk, // 50 MHz
     input  logic rst,
 
-    input  logic [ADDR_WIDTH-1:0] awaddr,
-    input  logic [2:0]            awprot,
-    input  logic                  awvalid,
-    output logic                  awready,
-    input  logic [DATA_WIDTH-1:0] wdata,
-    input  logic [STRB_WIDTH-1:0] wstrb,
-    input  logic                  wvalid,
-    output logic                  wready,
-    output logic [1:0]            bresp,
-    output logic                  bvalid,
-    input  logic                  bready,
+    input  logic [ADDR_WIDTH-1:0] axil_awaddr,
+    input  logic [2:0]            axil_awprot,
+    input  logic                  axil_awvalid,
+    output logic                  axil_awready,
+    input  logic [DATA_WIDTH-1:0] axil_wdata,
+    input  logic [STRB_WIDTH-1:0] axil_wstrb,
+    input  logic                  axil_wvalid,
+    output logic                  axil_wready,
+    output logic [1:0]            axil_bresp,
+    output logic                  axil_bvalid,
+    input  logic                  axil_bready,
 
     output logic [3:0] red,
     output logic [3:0] green,
@@ -33,28 +28,30 @@ module gpu #(
     localparam WIDTH  = 640;
     localparam HEIGHT = 480;
     localparam COLOR_WIDTH = 12;
+    localparam INT_WIDTH = 16;
 
-    localparam INDEX_WIDTH   = ADDR_WIDTH-2;
-    localparam SHORT_WIDTH   = DATA_WIDTH/4;
-    localparam CLUSTER_WIDTH = $clog2(CLUSTER_SIZE);
+    localparam TEXTURE_WIDTH  = 64;
+    localparam TEXTURE_HEIGHT = 64;
+    localparam CLUSTER_COUNT  = 3;
+    localparam CLUSTER_SIZE   = 20;
 
     logic clk25;
     logic rst25;
     
-    logic [INDEX_WIDTH-1:0] x;
-    logic [INDEX_WIDTH-1:0] y;
+    logic [INT_WIDTH-1:0] x;
+    logic [INT_WIDTH-1:0] y;
     logic visible;
     
-    logic [COLOR_WIDTH-1:0] pixel;
-    logic [COLOR_WIDTH-1:0] cluster_pixel;
+    logic [ADDR_WIDTH-1:0] waddr;
+    logic [DATA_WIDTH-1:0] wdata;
+    logic                  wen;
 
-    logic [DATA_WIDTH-1:0]  sx  [CLUSTER_SIZE-1:0];
-    logic [DATA_WIDTH-1:0]  sy  [CLUSTER_SIZE-1:0];
-    logic [SHORT_WIDTH-1:0] stx [CLUSTER_SIZE-1:0];
-    logic [SHORT_WIDTH-1:0] sty [CLUSTER_SIZE-1:0];
-    logic [SHORT_WIDTH-1:0] stw [CLUSTER_SIZE-1:0];
-    logic [SHORT_WIDTH-1:0] sth [CLUSTER_SIZE-1:0];
-    logic [SHORT_WIDTH-1:0] ssc [CLUSTER_SIZE-1:0];
+    logic [COLOR_WIDTH-1:0] pixel;
+    logic [COLOR_WIDTH-1:0] cluster_pixel [CLUSTER_COUNT-1:0];
+    
+    logic [ADDR_WIDTH-1:0] cluster_waddr [CLUSTER_COUNT-1:0];
+    logic [INT_WIDTH-1:0]  cluster_wdata [CLUSTER_COUNT-1:0];
+    logic                  cluster_wen   [CLUSTER_COUNT-1:0];
 
     clkdiv #(
         .DIV (2)
@@ -73,7 +70,9 @@ module gpu #(
         .HFP    ( 16),
         .VSP    (  2),
         .VBP    ( 29),
-        .VFP    ( 10) 
+        .VFP    ( 10),
+
+        .INT_WIDTH (INT_WIDTH)
     ) vga_counter (
         .clk (clk25),
         .rst (rst25),
@@ -87,46 +86,64 @@ module gpu #(
         .visible (visible)
     );
 
+    axil_controller #(
+        .ADDR_WIDTH (ADDR_WIDTH),
+        .DATA_WIDTH (DATA_WIDTH),
+        .STRB_WIDTH (STRB_WIDTH)
+    ) axil_controller (
+        .clk (clk),
+        .rst (rst),
+
+        .axil_awaddr  (axil_awaddr),
+        .axil_awprot  (axil_awprot),
+        .axil_awvalid (axil_awvalid),
+        .axil_awready (axil_awready),
+        .axil_wdata   (axil_wdata),
+        .axil_wstrb   (axil_wstrb), 
+        .axil_wvalid  (axil_wvalid),
+        .axil_wready  (axil_wready),
+        .axil_bresp   (axil_bresp),
+        .axil_bvalid  (axil_bvalid),
+        .axil_bready  (axil_bready),
+
+        .waddr (waddr),
+        .wdata (wdata),
+        .wen   (wen)
+    );
+
     cluster #(
-        .CLUSTER_SIZE (CLUSTER_SIZE),
-        .TEXTURE_WIDTH (TEXTURE_WIDTH),
+        .CLUSTER_SIZE   (CLUSTER_SIZE),
+        .TEXTURE_WIDTH  (TEXTURE_WIDTH),
         .TEXTURE_HEIGHT (TEXTURE_HEIGHT),
 
-        .ADDR_WIDTH (INDEX_WIDTH),
-        .DATA_WIDTH (DATA_WIDTH),
+        .ADDR_WIDTH  (16),
+        .INT_WIDTH   (INT_WIDTH),
         .COLOR_WIDTH (COLOR_WIDTH),
-        .SHORT_WIDTH (DATA_WIDTH/4)
+        .SCALE (1)
     ) cluster ( 
         .clk (clk),
         .rst (rst),
 
-        .awaddr  (awaddr[ADDR_WIDTH-1:2]),
-        .awprot  (awprot),
-        .awvalid (awvalid),
-        .awready (awready),
-        .wdata   (wdata),
-        .wvalid  (wvalid),
-        .wready  (wready),
-        .bresp   (bresp),
-        .bvalid  (bvalid),
-        .bready  (bready),
+        .waddr (waddr[17:2]),
+        .wdata (wdata[INT_WIDTH-1:0]),
+        .wen   (wen),
 
         .x     (x),
         .y     (y),
-        .pixel (cluster_pixel),
-
-        .sx  (sx),
-        .sy  (sy),
-        .stx (stx),
-        .sty (sty),
-        .stw (stw),
-        .sth (sth),
-        .ssc (ssc)
+        .pixel (cluster_pixel[0])
     );
 
     always_comb begin
+        logic [$clog2(CLUSTER_SIZE)-1:0] k;
+
         if (visible) begin
-            pixel = cluster_pixel;
+            pixel = cluster_pixel[0];
+            /*for (k = 0; k < CLUSTER_SIZE; k++) begin
+                if(cluster_pixel[k] != 24'hFFF) begin
+                    pixel = cluster_pixel[k];
+                    break;
+                end
+            end*/
         end
         else begin
             pixel = 0;
@@ -138,40 +155,9 @@ module gpu #(
     assign blue  = pixel[ 3: 0];
 
     always_comb begin
-        logic [CLUSTER_WIDTH-1:0] k;
-
-        sx[0] = 100;
-        sy[0] = 100;
-        stx[0] = 0;
-        sty[0] = 0;
-        stw[0] = 64;
-        sth[0] = 64;
-        ssc[0] = 1;
-
-        sx[1] = 300;
-        sy[1] = 100;
-        stx[1] = 0;
-        sty[1] = 0;
-        stw[1] = 64;
-        sth[1] = 64;
-        ssc[1] = 2;
-
-        sx[2] = 100;
-        sy[2] = 300;
-        stx[2] = 0;
-        sty[2] = 0;
-        stw[2] = 64;
-        sth[2] = 64;
-        ssc[2] = 4;
-
-        for (k = 3; k < CLUSTER_SIZE; k++) begin
-            sx[k] = 0;
-            sy[k] = 0;
-            stx[k] = 0;
-            sty[k] = 0;
-            stw[k] = 0;
-            sth[k] = 0;
-            ssc[k] = 1;
+        logic [$clog2(CLUSTER_SIZE)-1:0] k;
+        for (k = 1; k < CLUSTER_SIZE; k++) begin
+            cluster_pixel[k] = 24'hFFF;
         end
     end
 
