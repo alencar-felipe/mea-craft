@@ -1,6 +1,6 @@
 module gpu #(
-    parameter CLUSTER_COUNT = 5,
-    parameter CLUSTER_SIZE = 20,
+    parameter CLUSTER_COUNT = 20,
+    parameter CLUSTER_SIZE = 10,
     parameter TEXTURE_WIDTH = 64,
     parameter TEXTURE_HEIGHT = 64,
 
@@ -34,17 +34,27 @@ module gpu #(
     localparam HEIGHT = 480;
     localparam COLOR_WIDTH = 12;
 
+    localparam INDEX_WIDTH   = ADDR_WIDTH-2;
+    localparam SHORT_WIDTH   = DATA_WIDTH/4;
+    localparam CLUSTER_WIDTH = $clog2(CLUSTER_SIZE);
+
     logic clk25;
     logic rst25;
     
-    logic [ADDR_WIDTH-1:0] x;
-    logic [ADDR_WIDTH-1:0] y;
+    logic [INDEX_WIDTH-1:0] x;
+    logic [INDEX_WIDTH-1:0] y;
     logic visible;
-
-    logic [ADDR_WIDTH-1:0] raddr;
-    logic [COLOR_WIDTH-1:0] rcolor;
     
     logic [COLOR_WIDTH-1:0] pixel;
+    logic [COLOR_WIDTH-1:0] cluster_pixel;
+
+    logic [DATA_WIDTH-1:0]  sx  [CLUSTER_SIZE-1:0];
+    logic [DATA_WIDTH-1:0]  sy  [CLUSTER_SIZE-1:0];
+    logic [SHORT_WIDTH-1:0] stx [CLUSTER_SIZE-1:0];
+    logic [SHORT_WIDTH-1:0] sty [CLUSTER_SIZE-1:0];
+    logic [SHORT_WIDTH-1:0] stw [CLUSTER_SIZE-1:0];
+    logic [SHORT_WIDTH-1:0] sth [CLUSTER_SIZE-1:0];
+    logic [SHORT_WIDTH-1:0] ssc [CLUSTER_SIZE-1:0];
 
     clkdiv #(
         .DIV (2)
@@ -77,12 +87,16 @@ module gpu #(
         .visible (visible)
     );
 
-    texture_ram #(
-        .ADDR_WIDTH   (ADDR_WIDTH-2),
-        .DATA_WIDTH   (DATA_WIDTH),
-        .COLOR_WIDTH  (COLOR_WIDTH),
-        .TEXTURE_SIZE  (TEXTURE_WIDTH*TEXTURE_HEIGHT)
-    ) texture_ram (
+    cluster #(
+        .CLUSTER_SIZE (CLUSTER_SIZE),
+        .TEXTURE_WIDTH (TEXTURE_WIDTH),
+        .TEXTURE_HEIGHT (TEXTURE_HEIGHT),
+
+        .ADDR_WIDTH (INDEX_WIDTH),
+        .DATA_WIDTH (DATA_WIDTH),
+        .COLOR_WIDTH (COLOR_WIDTH),
+        .SHORT_WIDTH (DATA_WIDTH/4)
+    ) cluster ( 
         .clk (clk),
         .rst (rst),
 
@@ -97,26 +111,67 @@ module gpu #(
         .bvalid  (bvalid),
         .bready  (bready),
 
-        .raddr (raddr),
-        .rcolor (rcolor)
+        .x     (x),
+        .y     (y),
+        .pixel (cluster_pixel),
+
+        .sx  (sx),
+        .sy  (sy),
+        .stx (stx),
+        .sty (sty),
+        .stw (stw),
+        .sth (sth),
+        .ssc (ssc)
     );
+
+    always_comb begin
+        if (visible) begin
+            pixel = cluster_pixel;
+        end
+        else begin
+            pixel = 0;
+        end
+    end
 
     assign red   = pixel[11: 8];
     assign green = pixel[ 7: 4];
     assign blue  = pixel[ 3: 0];
 
     always_comb begin
-        if (
-            (visible) &&
-            (x > 300 && x <= 364) &&
-            (y > 300 && y <= 364)
-        ) begin
-            raddr = (x-300) + (y-300)*TEXTURE_WIDTH;
-            pixel = rcolor;
-        end
-        else begin
-            raddr = 0;
-            pixel = 0; 
+        logic [CLUSTER_WIDTH-1:0] k;
+
+        sx[0] = 100;
+        sy[0] = 100;
+        stx[0] = 0;
+        sty[0] = 0;
+        stw[0] = 64;
+        sth[0] = 64;
+        ssc[0] = 1;
+
+        sx[1] = 300;
+        sy[1] = 100;
+        stx[1] = 0;
+        sty[1] = 0;
+        stw[1] = 64;
+        sth[1] = 64;
+        ssc[1] = 2;
+
+        sx[2] = 100;
+        sy[2] = 300;
+        stx[2] = 0;
+        sty[2] = 0;
+        stw[2] = 64;
+        sth[2] = 64;
+        ssc[2] = 4;
+
+        for (k = 3; k < CLUSTER_SIZE; k++) begin
+            sx[k] = 0;
+            sy[k] = 0;
+            stx[k] = 0;
+            sty[k] = 0;
+            stw[k] = 0;
+            sth[k] = 0;
+            ssc[k] = 1;
         end
     end
 

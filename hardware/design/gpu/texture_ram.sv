@@ -142,7 +142,12 @@ module texture_ram #(
             rcolor <= 0;
         end
         else begin
-            rcolor <= mem[raddr];
+            if (raddr < TEXTURE_SIZE) begin
+                rcolor <= mem[raddr];
+            end
+            else begin
+                rcolor <= 0;
+            end
         end
     end
 

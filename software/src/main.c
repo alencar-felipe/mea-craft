@@ -4,13 +4,13 @@ int main()
 {
     uint32_t c = 0;
 
-    for(int i = 0; i < 64*64; i++) {
-        WRITE_WORD(0x20000000 + i*4, 0xFFF);
-    }
-
-    for(int j = 0; j < 32; j++) {
-        for(int i = 0; i < 32; i++) {
-            WRITE_WORD(0x20000000 + (i + j*64)*4, 0xF0F);
+    for(int j = 0; j < 64; j++) {
+        for(int i = 0; i < 64; i++) {
+            uint32_t r = (16 * i) / 64;
+            uint32_t g = (16 * j) / 64;
+            uint32_t b = (16 * (i+j)) / 128;
+            uint32_t color = (r << 8) + (g << 4) + (b << 0);
+            WRITE_WORD(0x20000000 + (i + j*64)*4, color);
         }
     }
 
