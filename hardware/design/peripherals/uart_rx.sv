@@ -17,6 +17,15 @@ module uart_rx #(
     integer unsigned bit_count;
     logic [DATA_BITS-1:0] curr;
     
+    debouncer #(
+        .N (10)
+    ) ps2_data_debouncer (
+        .clk (clk),
+        .rst (rst),
+        .in (rx),
+        .out (rx_clean)
+    );
+
     assign data = curr;
 
     always_ff @(posedge clk) begin
@@ -29,7 +38,7 @@ module uart_rx #(
         else begin
             if (clk_count == 0 & bit_count == 0) begin
                 // idle
-                if (rx == 0) begin
+                if (rx_clean == 0) begin
                     // start
                     clk_count <= PERIOD/2;
                     bit_count <= 0;
@@ -70,7 +79,7 @@ module uart_rx #(
                 if (bit_count >= 1 && bit_count < 1 + DATA_BITS) begin
                     // data bit
                     curr <= curr;
-                    curr[bit_count-1] <= rx;
+                    curr[bit_count-1] <= rx_clean;
                 end
                 else begin
                     // start/stop/idle bit

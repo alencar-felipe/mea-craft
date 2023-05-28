@@ -1,8 +1,6 @@
-// TODO: potencial bug detected on tx (duplicated chars)
-
 module uart #(
     parameter CLK_FREQ  = 50000000,
-    parameter BAUD_RATE = 9600,
+    parameter BAUD_RATE = 115200,
     parameter DATA_BITS = 8,
     parameter STOP_BITS = 1
 ) (

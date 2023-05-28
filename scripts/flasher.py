@@ -25,7 +25,7 @@ def flash(file_path, serial_port, baud_rate=9600):
     checksum_byte = struct.pack('<B', checksum)
 
     # Open the serial port
-    with serial.Serial(serial_port, baud_rate, timeout=10) as ser:
+    with serial.Serial(serial_port, baud_rate, timeout=20) as ser:
         # Send the size, data, and checksum over serial
         ser.write(size_bytes)
         ser.write(data)
@@ -37,7 +37,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__.strip())
     parser.add_argument('file', help='Binary file path')
     parser.add_argument('port', help='Serial port name')
-    parser.add_argument('-b', '--baud-rate', type=int, default=9600,
+    parser.add_argument('-b', '--baud-rate', type=int, default=115200,
         help='Serial baud rate')
 
     args = parser.parse_args()

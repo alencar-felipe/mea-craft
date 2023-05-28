@@ -1,21 +1,11 @@
-module gpu_ram #(
+module texture_ram #(
     parameter ADDR_WIDTH     = 22,
     parameter DATA_WIDTH     = 32,
     parameter COLOR_WIDTH    = 12,
-
-    parameter CLUSTERS_SIZE  = 10,
-    parameter CLUSTER_SIZE   = 10,
-    parameter TEXTURE_SIZE   = 16*16,
-
-    parameter REM_SIZE       = TEXTURE_SIZE + 2*CLUSTER_SIZE,
-
-    parameter CLUSTERS_WIDTH = $clog2(CLUSTERS_SIZE),
-    parameter CLUSTER_WIDTH  = $clog2(CLUSTER_SIZE),
-    parameter TEXTURE_WIDTH  = $clog2(TEXTURE_SIZE),
-    parameter REM_WIDTH      = $clog2(REM_SIZE)
+    parameter TEXTURE_SIZE   = 64*64
 ) (
-    input  logic        clk,
-    input  logic        rst,
+    input  logic clk,
+    input  logic rst,
 
     input  logic [ADDR_WIDTH-1:0]  awaddr,
     input  logic [2:0]             awprot,
@@ -28,9 +18,8 @@ module gpu_ram #(
     output logic                   bvalid,
     input  logic                   bready,
 
-    input  logic [TEXTURE_WIDTH-1:0] rindex [CLUSTERS_SIZE-1:0],
-    output logic [COLOR_WIDTH-1:0]   rcolor [CLUSTERS_SIZE-1:0],
-    output logic [DATA_WIDTH-1:0]    rcoord [CLUSTERS_SIZE-1:0][CLUSTER_SIZE-1:0][1:0]
+    input  logic [ADDR_WIDTH-1:0]  raddr,
+    output logic [COLOR_WIDTH-1:0] rcolor
 );
 
     typedef struct packed {
@@ -42,8 +31,7 @@ module gpu_ram #(
         logic [DATA_WIDTH-1:0] data;
     } write_state_t;
 
-    logic [DATA_WIDTH-1:0]  coords   [CLUSTERS_SIZE-1:0][CLUSTER_SIZE-1:0][1:0];
-    logic [COLOR_WIDTH-1:0] textures [CLUSTERS_SIZE-1:0][TEXTURE_SIZE-1:0];
+    logic [COLOR_WIDTH-1:0] mem [TEXTURE_SIZE-1:0];
     
     write_state_t w_curr;
     write_state_t w_next;
@@ -51,8 +39,8 @@ module gpu_ram #(
     logic write_en;
 
     initial begin
-        if (2**ADDR_WIDTH < CLUSTERS_SIZE*REM_SIZE) begin
-            $error("Error: 2**ADDR_WIDTH < CLUSTERS_SIZE*REM_SIZE");
+        if (ADDR_WIDTH < $clog2(TEXTURE_SIZE)) begin
+            $error("Error: ADDR_WIDTH < $clog2(TEXTURE_SIZE)");
             $finish;
         end
 
@@ -79,21 +67,9 @@ module gpu_ram #(
     end
 
     always_ff @(posedge clk) begin
-        logic [CLUSTERS_WIDTH-1:0] cluster;
-        logic [REM_WIDTH-1:0]      rem;
-        logic [TEXTURE_WIDTH-1:0]  index;
-        
-        cluster = w_curr.addr / (REM_SIZE);
-        rem     = w_curr.addr % (REM_SIZE);
-        
-        index = rem - 2*CLUSTER_SIZE;
-
         if (write_en) begin
-            if (rem >= 2*CLUSTER_SIZE) begin
-                textures[cluster][index] <= w_curr.data[COLOR_WIDTH-1:0];
-            end
-            else begin
-                coords[cluster][rem / 2][rem % 2] <= w_curr.data;
+            if(w_curr.addr < TEXTURE_SIZE) begin
+                mem[w_curr.addr] = w_curr.data[COLOR_WIDTH-1:0];
             end
         end
     end
@@ -161,31 +137,15 @@ module gpu_ram #(
 
     /* Read */
 
-    generate
-        genvar i;
-        genvar j;
-
-        for (i = 0; i < CLUSTERS_SIZE; i++) begin
-            always_ff @(posedge clk) begin
-                if (rst) begin
-                    rcolor[i] <= 0;
-                end
-                else begin
-                    rcolor[i] <= textures[i][rindex[i]];
-                end
-            end
-
-            for (j = 0; j < CLUSTER_SIZE; j++) begin
-                always_ff @(posedge clk) begin
-                    if (rst) begin
-                        rcoord[i][j] <= {0, 0};
-                    end
-                    else begin
-                        rcoord[i][j] <= coords[i][j];
-                    end
-                end
-            end
+    always_ff @(posedge clk) begin
+        if (rst) begin
+            rcolor <= 0;
         end
-    endgenerate
+        else begin
+            rcolor <= mem[raddr];
+        end
+    end
+
+        
     
 endmodule

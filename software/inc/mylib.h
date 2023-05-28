@@ -15,6 +15,7 @@ int puts(const char *str);
 int printf(const char *format, ...);
 int sprintf(char *out, const char *format, ...);
 
-unsigned int __mulsi3 (unsigned int a, unsigned int b);
-unsigned int __udivsi3 (unsigned int a, unsigned int b);
+unsigned int __mulsi3(unsigned int a, unsigned int b);
+unsigned int __udivsi3(unsigned int a, unsigned int b);
 int __divsi3(int dividend, int divisor);
+unsigned int __umodsi3(unsigned int dividend, unsigned int divisor);

@@ -12,7 +12,8 @@ module debouncer #(
     always_ff @(posedge clk) begin
         if(rst) begin
             count <= 0;
-            in_reg <= 0;
+            in_reg <= in;
+            out <= in;
         end
         if (in == in_reg) begin
             if (count >= N) begin

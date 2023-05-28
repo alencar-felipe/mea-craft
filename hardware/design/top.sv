@@ -304,7 +304,7 @@ module top (
         .hsync (vga_hsync),
         .vsync (vga_vsync)
     );
-    
+
     peripherals peripherals (
         .clk (dclk),
         .rst (drst),
@@ -341,6 +341,7 @@ module top (
     );
 
     axil_crossbar_wrap_1x4 #(
+        .S00_ACCEPT (1),
         .M00_BASE_ADDR (32'h00000000),  // rom
         .M01_BASE_ADDR (32'h10000000),  // ram
         .M02_BASE_ADDR (32'h20000000),  // gpu
