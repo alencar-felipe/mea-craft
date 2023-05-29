@@ -4,10 +4,6 @@ MEMORY
     ram (rwx)   : ORIGIN = 0x10000000, LENGTH = 32768
 }
 
-TARGET(binary)                 /* Specify the file format of binary file. */
-INPUT("<your file name here>") /* Include binary file. */
-OUTPUT_FORMAT(default)         /* Restore the output file format. */
-
 ENTRY(bootldr)
 
 __heap_size = 1024;
@@ -28,6 +24,13 @@ SECTIONS
     .rodata :
     {
         *(.rodata*)
+    } > ram
+
+    .textures :
+    {
+        _stextures = .;
+        *(.textures)
+        _etextures = .;
     } > ram
 
     .data :

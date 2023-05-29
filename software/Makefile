@@ -6,6 +6,7 @@ OBJDUMP = llvm-objdump
 
 # Define scripts
 AXIL_ROM_GEN = ../scripts/axil_rom_gen.py
+IMGCOPY = ../scripts/imgcopy.py  
 FLASHER = ../scripts/flasher.py
 
 # Define linker script path
@@ -16,19 +17,26 @@ CFLAGS = --target=riscv32 -march=rv32i -Wall -Werror -O3
 LDFLAGS = -T $(LDSCRIPT)
 
 # Define directories
-SRC_DIR = src
 INC_DIR = inc
+RES_DIR = res
+SRC_DIR = src
+
 BUILD_DIR = build
 
 # Define sources
 ASM_SRCS = $(wildcard $(SRC_DIR)/*.s)
-C_SRCS = $(wildcard $(SRC_DIR)/*.c)
 C_INCS = $(wildcard $(INC_DIR)/*.h)
+C_SRCS = $(wildcard $(SRC_DIR)/*.c)
+TEXTURES_SRCS = $(wildcard $(RES_DIR)/*.png)
 
 # Define objects
 ASM_OBJS = $(patsubst $(SRC_DIR)/%.s, $(BUILD_DIR)/%.o, $(ASM_SRCS))
 C_OBJS = $(patsubst $(SRC_DIR)/%.c, $(BUILD_DIR)/%.o, $(C_SRCS))
-OBJS = $(ASM_OBJS) $(C_OBJS)
+TEXURES_OBJ = $(BUILD_DIR)/textures.o
+OBJS = $(ASM_OBJS) $(C_OBJS) $(TEXURES_OBJ)
+
+# Others
+TEXURES_BIN = $(BUILD_DIR)/textures.bin
 
 # Targets
 ELF_TARGET = $(BUILD_DIR)/build.elf
@@ -54,6 +62,15 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c $(C_INCS)
 # Compile ASM source files into object files
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.s
 	$(CC) $(CFLAGS) -c $< -o $@
+
+# Compile textures into binary file
+$(TEXURES_BIN): $(TEXTURES_SRCS)
+	$(IMGCOPY) $< -o $@
+
+$(TEXURES_OBJ): $(TEXURES_BIN)
+	$(OBJCOPY) -I binary -O elf32-littleriscv \
+	--rename-section .data=.textures,alloc,load,readonly \
+	$< $@
 
 # Link the object files into an ELF file
 $(ELF_TARGET): $(OBJS) $(LDSCRIPT)
