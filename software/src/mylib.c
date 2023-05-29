@@ -32,7 +32,7 @@ void *memcpy(void *dest, const void *src, size_t n)
 
 int putchar(int c)
 {
-    WRITE_BYTE(UART_DATA, c);
+	UART->data = c & 0xFF;
     return c;
 }
 

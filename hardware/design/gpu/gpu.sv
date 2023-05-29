@@ -6,7 +6,7 @@ module gpu #(
     parameter TEXTURE_WIDTH  = 64,
     parameter TEXTURE_HEIGHT = 64,
     parameter CLUSTER_COUNT  = 5,
-    parameter CLUSTER_SIZE   = 20,
+    parameter CLUSTER_SIZE   = 16,
 
     parameter integer CLUSTER_SCALE [CLUSTER_COUNT] = '{1, 2, 2, 2, 2}    
 ) (
@@ -144,7 +144,7 @@ module gpu #(
     endgenerate
 
     always_comb begin
-        logic [$clog2(CLUSTER_COUNT)-1:0] k;
+        logic [$clog2(CLUSTER_COUNT):0] k;
 
         if (visible) begin
             pixel = 0;
@@ -165,8 +165,8 @@ module gpu #(
     end
 
     always_comb begin
-        logic [$clog2(CLUSTER_COUNT)-1:0] selected;
-        logic [$clog2(CLUSTER_COUNT)-1:0] i;
+        logic [$clog2(CLUSTER_COUNT):0] selected;
+        logic [$clog2(CLUSTER_COUNT):0] i;
 
         selected      = waddr[17:2] / CLUSTER_ADDR_SIZE;
         cluster_waddr = waddr[17:2] % CLUSTER_ADDR_SIZE; 

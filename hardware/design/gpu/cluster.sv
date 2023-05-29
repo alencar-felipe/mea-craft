@@ -43,7 +43,7 @@ module cluster #(
     position_reg #(
         .ADDR_WIDTH   (ADDR_WIDTH),
         .INT_WIDTH    (16),
-        .CLUSTER_SIZE (20)
+        .CLUSTER_SIZE (CLUSTER_SIZE)
     ) position_reg (
         .clk (clk),
         .rst (rst),
@@ -98,7 +98,7 @@ module cluster #(
     end
 
     always_comb begin
-        logic [CLUSTER_WIDTH-1:0] k;
+        logic [CLUSTER_WIDTH:0] k;
         logic valid;
 
         raddr = 0;
