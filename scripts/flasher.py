@@ -33,7 +33,7 @@ def flash(file_path, serial_port, baud_rate=9600):
         ser.flush()
         print(ser.readline().decode().rstrip())
 
-def main():
+if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__.strip())
     parser.add_argument('file', help='Binary file path')
     parser.add_argument('port', help='Serial port name')
@@ -46,6 +46,3 @@ def main():
     baud_rate = args.baud_rate
 
     flash(file_path, serial_port, baud_rate)
-
-if __name__ == '__main__':
-    main()
