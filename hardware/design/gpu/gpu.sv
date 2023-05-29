@@ -1,7 +1,12 @@
 module gpu #(
     parameter DATA_WIDTH = 32,
     parameter ADDR_WIDTH = 24,
-    parameter STRB_WIDTH = (DATA_WIDTH/8)    
+    parameter STRB_WIDTH = (DATA_WIDTH/8),
+
+    parameter TEXTURE_WIDTH  = 64,
+    parameter TEXTURE_HEIGHT = 64,
+    parameter CLUSTER_COUNT  = 3,
+    parameter CLUSTER_SIZE   = 20    
 ) (
     input  logic clk, // 50 MHz
     input  logic rst,
@@ -27,13 +32,11 @@ module gpu #(
 );
     localparam WIDTH  = 640;
     localparam HEIGHT = 480;
-    localparam COLOR_WIDTH = 12;
     localparam INT_WIDTH = 16;
-
-    localparam TEXTURE_WIDTH  = 64;
-    localparam TEXTURE_HEIGHT = 64;
-    localparam CLUSTER_COUNT  = 3;
-    localparam CLUSTER_SIZE   = 20;
+    localparam COLOR_WIDTH = 12;
+    
+    localparam TEXTURE_SIZE = TEXTURE_WIDTH*TEXTURE_HEIGHT;
+    localparam CLUSTER_ADDR_SIZE = CLUSTER_SIZE*6 + TEXTURE_SIZE;
 
     logic clk25;
     logic rst25;
@@ -46,12 +49,12 @@ module gpu #(
     logic [DATA_WIDTH-1:0] wdata;
     logic                  wen;
 
-    logic [COLOR_WIDTH-1:0] pixel;
+    logic [ADDR_WIDTH-1:0]  cluster_waddr;
+    logic [DATA_WIDTH-1:0]  cluster_wdata;
     logic [COLOR_WIDTH-1:0] cluster_pixel [CLUSTER_COUNT-1:0];
-    
-    logic [ADDR_WIDTH-1:0] cluster_waddr [CLUSTER_COUNT-1:0];
-    logic [INT_WIDTH-1:0]  cluster_wdata [CLUSTER_COUNT-1:0];
-    logic                  cluster_wen   [CLUSTER_COUNT-1:0];
+    logic                   cluster_wen   [CLUSTER_COUNT-1:0];
+
+    logic [COLOR_WIDTH-1:0] pixel;
 
     clkdiv #(
         .DIV (2)
@@ -111,53 +114,69 @@ module gpu #(
         .wen   (wen)
     );
 
-    cluster #(
-        .CLUSTER_SIZE   (CLUSTER_SIZE),
-        .TEXTURE_WIDTH  (TEXTURE_WIDTH),
-        .TEXTURE_HEIGHT (TEXTURE_HEIGHT),
+    generate
+        genvar i;
+        for (i = 0; i < CLUSTER_COUNT; i++) begin 
+            cluster #(
+                .CLUSTER_SIZE   (CLUSTER_SIZE),
+                .TEXTURE_WIDTH  (TEXTURE_WIDTH),
+                .TEXTURE_HEIGHT (TEXTURE_HEIGHT),
 
-        .ADDR_WIDTH  (16),
-        .INT_WIDTH   (INT_WIDTH),
-        .COLOR_WIDTH (COLOR_WIDTH),
-        .SCALE (1)
-    ) cluster ( 
-        .clk (clk),
-        .rst (rst),
+                .ADDR_WIDTH  (16),
+                .INT_WIDTH   (INT_WIDTH),
+                .COLOR_WIDTH (COLOR_WIDTH),
+                .SCALE (1)
+            ) cluster ( 
+                .clk (clk),
+                .rst (rst),
 
-        .waddr (waddr[17:2]),
-        .wdata (wdata[INT_WIDTH-1:0]),
-        .wen   (wen),
+                .waddr (cluster_waddr),
+                .wdata (cluster_wdata),
+                .wen   (cluster_wen[i]),
 
-        .x     (x),
-        .y     (y),
-        .pixel (cluster_pixel[0])
-    );
+                .x     (x),
+                .y     (y),
+                .pixel (cluster_pixel[i])
+            );
+        end
+    endgenerate
 
     always_comb begin
         logic [$clog2(CLUSTER_SIZE)-1:0] k;
 
         if (visible) begin
             pixel = cluster_pixel[0];
-            /*for (k = 0; k < CLUSTER_SIZE; k++) begin
+            for (k = 0; k < CLUSTER_SIZE; k++) begin
                 if(cluster_pixel[k] != 24'hFFF) begin
                     pixel = cluster_pixel[k];
                     break;
                 end
-            end*/
+            end
         end
         else begin
             pixel = 0;
         end
+
+        red   = pixel[11: 8];
+        green = pixel[ 7: 4];
+        blue  = pixel[ 3: 0];
     end
 
-    assign red   = pixel[11: 8];
-    assign green = pixel[ 7: 4];
-    assign blue  = pixel[ 3: 0];
-
     always_comb begin
-        logic [$clog2(CLUSTER_SIZE)-1:0] k;
-        for (k = 1; k < CLUSTER_SIZE; k++) begin
-            cluster_pixel[k] = 24'hFFF;
+        logic [$clog2(CLUSTER_COUNT)-1:0] selected;
+        logic [$clog2(CLUSTER_COUNT)-1:0] i;
+
+        selected      = waddr[17:2] / CLUSTER_ADDR_SIZE;
+        cluster_waddr = waddr[17:2] % CLUSTER_ADDR_SIZE; 
+        cluster_wdata = wdata[INT_WIDTH-1:0];
+
+        for (i = 0; i < CLUSTER_COUNT; i++) begin
+            if(i == selected) begin
+                cluster_wen[i] = wen;
+            end
+            else begin
+                cluster_wen[i] = 0;
+            end
         end
     end
 
