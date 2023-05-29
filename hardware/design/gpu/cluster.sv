@@ -101,8 +101,9 @@ module cluster #(
         logic [CLUSTER_WIDTH-1:0] k;
         logic valid;
 
+        raddr = 0;
         valid = 0;
-
+        
         for(k = 0; k < CLUSTER_SIZE; k++) begin
             if (
                 (x >= sx[k] && x < sx[k] + stw[k]*SCALE) &&

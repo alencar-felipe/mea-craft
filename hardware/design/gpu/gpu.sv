@@ -5,10 +5,10 @@ module gpu #(
 
     parameter TEXTURE_WIDTH  = 64,
     parameter TEXTURE_HEIGHT = 64,
-    parameter CLUSTER_COUNT  = 3,
+    parameter CLUSTER_COUNT  = 5,
     parameter CLUSTER_SIZE   = 20,
 
-    parameter CLUSTER_SCALE [CLUSTER_COUNT] = '{1, 1, 1}    
+    parameter integer CLUSTER_SCALE [CLUSTER_COUNT] = '{1, 2, 2, 2, 2}    
 ) (
     input  logic clk, // 50 MHz
     input  logic rst,
@@ -144,11 +144,11 @@ module gpu #(
     endgenerate
 
     always_comb begin
-        logic [$clog2(CLUSTER_SIZE)-1:0] k;
+        logic [$clog2(CLUSTER_COUNT)-1:0] k;
 
         if (visible) begin
-            pixel = cluster_pixel[0];
-            for (k = 0; k < CLUSTER_SIZE; k++) begin
+            pixel = 0;
+            for (k = 0; k < CLUSTER_COUNT; k++) begin
                 if(cluster_pixel[k] != 24'hFFF) begin
                     pixel = cluster_pixel[k];
                     break;

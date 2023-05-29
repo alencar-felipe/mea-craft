@@ -101,10 +101,10 @@ int main()
         for(int i = 0; i < 4; i++) {
             CLUSTERS[1].sprites[i + j*4].sx = 300 + i*64;
             CLUSTERS[1].sprites[i + j*4].sy = j*64;
-            CLUSTERS[1].sprites[i + j*4].stx = 0; //(i % 2) ? 0 : 16;
+            CLUSTERS[1].sprites[i + j*4].stx = 15; //(i % 2) ? 0 : 16;
             CLUSTERS[1].sprites[i + j*4].sty = 0; //(j % 2) ? 0 : 16;
-            CLUSTERS[1].sprites[i + j*4].stw = 64; //32;
-            CLUSTERS[1].sprites[i + j*4].sth = 64; //32;
+            CLUSTERS[1].sprites[i + j*4].stw = 16; //32;
+            CLUSTERS[1].sprites[i + j*4].sth = 16; //32;
         }
     }
 
