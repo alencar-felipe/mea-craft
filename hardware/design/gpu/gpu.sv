@@ -6,7 +6,9 @@ module gpu #(
     parameter TEXTURE_WIDTH  = 64,
     parameter TEXTURE_HEIGHT = 64,
     parameter CLUSTER_COUNT  = 3,
-    parameter CLUSTER_SIZE   = 20    
+    parameter CLUSTER_SIZE   = 20,
+
+    parameter CLUSTER_SCALE [CLUSTER_COUNT] = '{1, 1, 1}    
 ) (
     input  logic clk, // 50 MHz
     input  logic rst,
@@ -125,7 +127,7 @@ module gpu #(
                 .ADDR_WIDTH  (16),
                 .INT_WIDTH   (INT_WIDTH),
                 .COLOR_WIDTH (COLOR_WIDTH),
-                .SCALE (1)
+                .SCALE (CLUSTER_SCALE[i])
             ) cluster ( 
                 .clk (clk),
                 .rst (rst),

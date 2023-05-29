@@ -36,9 +36,9 @@ def nibble_gen(img):
     for y in range(height):
         for x in range(width):
             r, g, b = img.getpixel((x, y))
-            yield (r >> 4) & 0xF
-            yield (g >> 4) & 0xF
             yield (b >> 4) & 0xF
+            yield (g >> 4) & 0xF
+            yield (r >> 4) & 0xF
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__.strip())

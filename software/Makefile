@@ -69,7 +69,8 @@ $(TEXURES_BIN): $(TEXTURES_SRCS)
 
 $(TEXURES_OBJ): $(TEXURES_BIN)
 	$(OBJCOPY) -I binary -O elf32-littleriscv \
-	--rename-section .data=.textures,alloc,load,readonly \
+	--rename-section .data=.rodata,alloc,load,readonly \
+	--redefine-sym=_binary_build_textures_bin_start=_stextures \
 	$< $@
 
 # Link the object files into an ELF file

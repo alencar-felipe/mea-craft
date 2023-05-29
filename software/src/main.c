@@ -1,5 +1,7 @@
 #include "mylib.h"
 
+extern char _stextures;
+
 #define CLUSTER_COUNT  (3)
 #define CLUSTER_SIZE   (20)
 #define TEXTURE_WIDTH  (64)
@@ -21,10 +23,47 @@ typedef struct __attribute__((packed)) {
 
 #define CLUSTERS ( (volatile cluster_t *) (0x20000000) )
 
+void texture_load(void *dest, void *src)
+{
+    size_t i = 0;
+    size_t j = 32;
+    size_t k = 0;
+
+    uint32_t *read_ptr  = (uint32_t *) src;
+    uint32_t *write_ptr = (uint32_t *) dest;
+
+    uint32_t read_buf  = 0;
+    uint32_t write_buf = 0;
+
+    for(i = 0; i < 3*TEXTURE_WIDTH*TEXTURE_HEIGHT; i++) {
+        if(j >= 32) {
+            read_buf = *(read_ptr++);
+            j = 0;
+        }
+
+        if(k >= 12) {
+            *(write_ptr++) = write_buf;
+            write_buf = 0;
+            k = 0;
+        }
+
+        write_buf |= (read_buf & 0xF) << k;
+        read_buf = read_buf >> 4;
+
+        j += 4;
+        k += 4;
+    }
+}
+
 int main()
 {   
+    //while(!READ_WORD(GPIO_A));
+
     memset( (void *) CLUSTERS, 0, CLUSTER_COUNT*sizeof(cluster_t));
 
+    texture_load((void *) CLUSTERS[1].texture, &_stextures);
+
+/*
     for(int j = 0; j < 64; j++) {
         for(int i = 0; i < 64; i++) {
             uint32_t r = (16 * i) / 64;
@@ -34,14 +73,14 @@ int main()
             CLUSTERS[0].texture[j][i] = color;
         }
     }
-
+*/
     for(int j = 0; j < 64; j++) {
         for(int i = 0; i < 64; i++) {
             uint32_t b = (16 * i) / 64;
             uint32_t r = (16 * j) / 64;
             uint32_t g = (16 * (i+j)) / 128;
             uint32_t color = (r << 8) + (g << 4) + (b << 0);
-            CLUSTERS[1].texture[j][i] = color;
+            CLUSTERS[0].texture[j][i] = color;
         }
     }
 
@@ -51,10 +90,10 @@ int main()
         for(int i = 0; i < 4; i++) {
             CLUSTERS[0].sprites[i + j*4].sx = i*64;
             CLUSTERS[0].sprites[i + j*4].sy = j*64;
-            CLUSTERS[0].sprites[i + j*4].stx = (i % 2) ? 0 : 16;
-            CLUSTERS[0].sprites[i + j*4].sty = (j % 2) ? 0 : 16;
-            CLUSTERS[0].sprites[i + j*4].stw = 32;
-            CLUSTERS[0].sprites[i + j*4].sth = 32;
+            CLUSTERS[0].sprites[i + j*4].stx = 0;
+            CLUSTERS[0].sprites[i + j*4].sty = 0;
+            CLUSTERS[0].sprites[i + j*4].stw = 64;
+            CLUSTERS[0].sprites[i + j*4].sth = 64;
         }
     }
 

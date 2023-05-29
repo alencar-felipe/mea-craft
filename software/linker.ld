@@ -26,13 +26,6 @@ SECTIONS
         *(.rodata*)
     } > ram
 
-    .textures :
-    {
-        _stextures = .;
-        *(.textures)
-        _etextures = .;
-    } > ram
-
     .data :
     {
         *(.data)
