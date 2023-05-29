@@ -8,7 +8,7 @@ module gpu #(
     parameter CLUSTER_COUNT  = 5,
     parameter CLUSTER_SIZE   = 16,
 
-    parameter integer CLUSTER_SCALE [CLUSTER_COUNT] = '{1, 2, 2, 2, 2}    
+    parameter integer CLUSTER_SCALE [CLUSTER_COUNT] = '{2, 4, 4, 4, 4}    
 ) (
     input  logic clk, // 50 MHz
     input  logic rst,
@@ -147,9 +147,9 @@ module gpu #(
         logic [$clog2(CLUSTER_COUNT):0] k;
 
         if (visible) begin
-            pixel = 0;
+            pixel = 12'h8CE;
             for (k = 0; k < CLUSTER_COUNT; k++) begin
-                if(cluster_pixel[k] != 24'hFFF) begin
+                if(cluster_pixel[k] != 12'hFFF) begin
                     pixel = cluster_pixel[k];
                     break;
                 end

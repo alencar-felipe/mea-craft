@@ -9,10 +9,12 @@
 
 /* GPU ====================================================================== */
 
-#define CLUSTER_COUNT  (3)
-#define CLUSTER_SIZE   (16)
-#define TEXTURE_WIDTH  (64)
-#define TEXTURE_HEIGHT (64)
+#define GPU_W        (640)
+#define GPU_H        (480)
+#define GPU_CL_COUNT (5)
+#define GPU_CL_SIZE  (16)
+#define GPU_TEXT_W   (64)
+#define GPU_TEXT_H   (64)
 
 typedef struct __attribute__((packed)) {
     uint32_t sx;
@@ -24,12 +26,12 @@ typedef struct __attribute__((packed)) {
 } sprite_t;
 
 typedef struct __attribute__((packed)) {
-    sprite_t sprites[CLUSTER_SIZE];
-    uint32_t texture[TEXTURE_HEIGHT][TEXTURE_WIDTH];
+    sprite_t sprites[GPU_CL_SIZE];
+    uint32_t texture[GPU_TEXT_H][GPU_TEXT_W];
 } cluster_t;
 
 typedef struct __attribute__((packed)) {
-    cluster_t clusters[CLUSTER_COUNT];
+    cluster_t clusters[GPU_CL_COUNT];
 } gpu_t;
 
 #define GPU ( (volatile gpu_t *) (GPU_BASE) )

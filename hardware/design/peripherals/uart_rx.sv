@@ -11,7 +11,7 @@ module uart_rx #(
     input  logic                 data_ready,
     input  logic                 rx
 );
-    parameter PERIOD = CLK_FREQ/BAUD_RATE;
+    localparam PERIOD = CLK_FREQ/BAUD_RATE;
 
     integer unsigned clk_count;
     integer unsigned bit_count;

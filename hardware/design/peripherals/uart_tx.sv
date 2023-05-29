@@ -11,7 +11,7 @@ module uart_tx #(
     output logic                 data_ready,
     output logic                 tx
 );
-    parameter PERIOD = CLK_FREQ/BAUD_RATE;
+    localparam PERIOD = CLK_FREQ/BAUD_RATE;
 
     integer unsigned clk_count;
     integer unsigned bit_count;

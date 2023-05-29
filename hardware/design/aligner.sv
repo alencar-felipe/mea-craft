@@ -51,10 +51,10 @@ module aligner #(
     output logic                   m_rready
 );
 
-    parameter ELEM_WIDTH = DATA_WIDTH/STRB_WIDTH;
-    parameter REST_WIDTH = $clog2(STRB_WIDTH);
-    parameter QUOT_WIDTH = ADDR_WIDTH - REST_WIDTH;
-    parameter MEM_LEN = QUOT_WIDTH**2;
+    localparam ELEM_WIDTH = DATA_WIDTH/STRB_WIDTH;
+    localparam REST_WIDTH = $clog2(STRB_WIDTH);
+    localparam QUOT_WIDTH = ADDR_WIDTH - REST_WIDTH;
+    localparam MEM_LEN = QUOT_WIDTH**2;
 
     typedef struct packed {
         logic s_addr_ok;

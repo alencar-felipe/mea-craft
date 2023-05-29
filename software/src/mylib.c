@@ -117,15 +117,16 @@ int __divsi3(int dividend, int divisor)
     return sign * quotient;
 }
 
-unsigned int __umodsi3(unsigned int dividend, unsigned int divisor)
-{
-	if (divisor == 0) {
-		return 0;
-	}
+unsigned int __umodsi3(unsigned int dividend, unsigned int divisor) {
+    if (divisor == 0) {
+        return 0;
+    }
 
-	unsigned int quotient = dividend / divisor;
-	unsigned int remainder = dividend - (quotient * divisor);
-	return remainder;
+    while (dividend >= divisor) {
+        dividend -= divisor;
+    }
+
+    return dividend;
 }
 
 static void printchar(char **str, int c)
