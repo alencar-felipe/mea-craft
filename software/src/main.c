@@ -54,8 +54,8 @@ int main()
             offset_y += GPIO_A_IN->sw;
         }
 
-        walk = offset_x % 3;
-        
+        walk = offset_x;
+
         render_world(offset_x, offset_y);
         steve_render(100, 100, walk, dir);
     }

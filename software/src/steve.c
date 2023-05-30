@@ -37,9 +37,9 @@ void steve_load()
 
     // Arm 15
     GPU->clusters[0].sprites[ 4].stx = 0;
-    GPU->clusters[0].sprites[ 4].sty = 12;
+    GPU->clusters[0].sprites[ 4].sty = 16;
     GPU->clusters[0].sprites[ 4].stw = 20;
-    GPU->clusters[0].sprites[ 4].sth = 26;
+    GPU->clusters[0].sprites[ 4].sth = 24;
 
     // Body
     GPU->clusters[0].sprites[ 5].stx = 56;
@@ -61,14 +61,18 @@ void steve_load()
 
     // Leg 15
     GPU->clusters[0].sprites[ 8].stx =  0;
-    GPU->clusters[0].sprites[ 8].sty = 38;
+    GPU->clusters[0].sprites[ 8].sty = 40;
     GPU->clusters[0].sprites[ 8].stw = 20;
-    GPU->clusters[0].sprites[ 8].sth = 26;
+    GPU->clusters[0].sprites[ 8].sth = 24;
 }
 
 void steve_render(int x, int y, int walk, int dir)
 {
-    walk = walk % 3;
+    walk = walk % 6;
+    
+    if(walk >= 3) {
+        walk = 5 - walk;
+    }
 
     // Head right
     if(dir >= 0) {
