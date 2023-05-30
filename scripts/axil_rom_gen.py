@@ -43,6 +43,8 @@ module {{ module_name }} #
 (
     // Width of address bus in bits
     parameter ADDR_WIDTH = {{ address_width }},
+    // Width of data bus in bits
+    parameter DATA_WIDTH = {{ data_width }},
     // Extra pipeline register on output
     parameter PIPELINE_OUTPUT = 0
 )
@@ -59,15 +61,13 @@ module {{ module_name }} #
     output wire                   s_axil_rvalid,
     input  wire                   s_axil_rready
 );
-
-// Width of data bus in bits
-parameter DATA_WIDTH = {{ data_width }}; 
+ 
 // Width of data bus in words
-parameter DATA_WORD_WIDTH = (DATA_WIDTH/8);
+localparam DATA_WORD_WIDTH = (DATA_WIDTH/8);
 // Length of memory in words
-parameter MEM_LEN = {{ words | length }};
+localparam MEM_LEN = {{ words | length }};
 
-parameter VALID_ADDR_WIDTH = ADDR_WIDTH - $clog2(DATA_WORD_WIDTH);
+localparam VALID_ADDR_WIDTH = ADDR_WIDTH - $clog2(DATA_WORD_WIDTH);
 
 reg mem_rd_en;
 

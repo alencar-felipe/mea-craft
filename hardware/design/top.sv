@@ -250,7 +250,7 @@ module top (
 
     axil_ram #(
         .DATA_WIDTH (32),
-        .ADDR_WIDTH (15),
+        .ADDR_WIDTH (16),
         .STRB_WIDTH (32/8)
     ) ram (
         .clk (dclk),

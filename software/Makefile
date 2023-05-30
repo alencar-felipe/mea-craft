@@ -65,7 +65,7 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.s
 
 # Compile textures into binary file
 $(TEXURES_BIN): $(TEXTURES_SRCS)
-	$(IMGCOPY) $< -o $@
+	$(IMGCOPY) $(TEXTURES_SRCS) -o $@
 
 $(TEXURES_OBJ): $(TEXURES_BIN)
 	$(OBJCOPY) -I binary -O elf32-littleriscv \

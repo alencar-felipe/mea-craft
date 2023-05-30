@@ -8,7 +8,7 @@ module gpu #(
     parameter CLUSTER_COUNT  = 5,
     parameter CLUSTER_SIZE   = 16,
 
-    parameter integer CLUSTER_SCALE [CLUSTER_COUNT] = '{2, 4, 4, 4, 4}    
+    parameter integer CLUSTER_SCALE [CLUSTER_COUNT] = '{2,4,4,4,4}    
 ) (
     input  logic clk, // 50 MHz
     input  logic rst,

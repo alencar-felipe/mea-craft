@@ -129,6 +129,18 @@ unsigned int __umodsi3(unsigned int dividend, unsigned int divisor) {
     return dividend;
 }
 
+int __modsi3(int dividend, int divisor) {
+    if (divisor == 0) {
+        return 0;
+    }
+
+    while (dividend >= divisor) {
+        dividend -= divisor;
+    }
+
+    return dividend;
+}
+
 static void printchar(char **str, int c)
 {
 	if (str) {

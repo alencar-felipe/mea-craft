@@ -1,4 +1,6 @@
 #include "mylib.h"
+#include "steve.h"
+#include "texture.h"
 
 #define WORLD_W (128)
 #define WORLD_H (64)
@@ -17,9 +19,6 @@
 #define BLOCK_GOLD    (11)
 #define BLOCK_DIAMOND (12)
 
-extern char _stextures;
-
-void texture_load(void *dest, void *src);
 void init_gpu();
 void build_world();
 void render_world();
@@ -31,71 +30,50 @@ int main()
     init_gpu();
     build_world();
 
-    int offset_x = 0;
-    int offset_y = 0;
+    int offset_x = 300;
+    int offset_y = -28*BLOCK_SIZE;
+    int walk = 0;
+    int dir = 0;
 
     while(1) {
         if(GPIO_A_IN->btn_l) {
-            offset_x += GPIO_A_IN->sw;
+            offset_x -= GPIO_A_IN->sw;
+            dir = -1;
         }
 
         if(GPIO_A_IN->btn_r) {
-            offset_x -= GPIO_A_IN->sw;
+            offset_x += GPIO_A_IN->sw;
+            dir = +1;
         }
 
         if(GPIO_A_IN->btn_u) {
-            offset_y += GPIO_A_IN->sw;
-        }
-
-        if(GPIO_A_IN->btn_d) {
             offset_y -= GPIO_A_IN->sw;
         }
 
+        if(GPIO_A_IN->btn_d) {
+            offset_y += GPIO_A_IN->sw;
+        }
+
+        walk = offset_x % 3;
+        
         render_world(offset_x, offset_y);
+        steve_render(100, 100, walk, dir);
     }
 
     return 0;
 }
 
-void texture_load(void *dest, void *src)
-{
-    size_t i = 0;
-    size_t j = 32;
-    size_t k = 0;
-
-    uint32_t *read_ptr  = (uint32_t *) src;
-    uint32_t *write_ptr = (uint32_t *) dest;
-
-    uint32_t read_buf  = 0;
-    uint32_t write_buf = 0;
-
-    for(i = 0; i < 3*GPU_TEXT_W*GPU_TEXT_H; i++) {
-        if(j >= 32) {
-            read_buf = *(read_ptr++);
-            j = 0;
-        }
-
-        if(k >= 12) {
-            *(write_ptr++) = write_buf;
-            write_buf = 0;
-            k = 0;
-        }
-
-        write_buf |= (read_buf & 0xF) << k;
-        read_buf = read_buf >> 4;
-
-        j += 4;
-        k += 4;
-    }
-}
-
 void init_gpu()
 {
+    int i, j;
+
     memset((void *) GPU, 0, sizeof(*GPU));
     
-    for(int i = 1; i < GPU_CL_COUNT; i++) {
-        texture_load((void *) GPU->clusters[i].texture, &_stextures);
-        for(int j = 0; j < GPU_CL_SIZE; j++) {
+    /* Blocks */
+
+    for(i = 1; i < GPU_CL_COUNT; i++) {
+        texture_load((void *) GPU->clusters[i].texture, TEXTURE0);
+        for(j = 0; j < GPU_CL_SIZE; j++) {
             GPU->clusters[i].sprites[j].sx = 480;
             GPU->clusters[i].sprites[j].sy = 640;
             GPU->clusters[i].sprites[j].stx = (i*16)%64;
@@ -104,6 +82,8 @@ void init_gpu()
             GPU->clusters[i].sprites[j].sth = 16;
         }
     }
+
+    steve_load();    
 }
 
 void build_world()
@@ -138,12 +118,12 @@ void build_world()
 void render_world(int ox, int oy)
 {
     int i = 0;
-    int j = 0;
+    int j = WORLD_H-1;
     int c = 1;
     int s = 0;
     int block = 0;
 
-    while(j < WORLD_H) {
+    while(j >= 0) {
         int sx = i*BLOCK_SIZE - ox;
         int sy = (GPU_H - (j+1)*BLOCK_SIZE) - oy;
 
@@ -176,7 +156,7 @@ void render_world(int ox, int oy)
 
         if(i >= WORLD_W) {
             i = 0;
-            j++;
+            j--;
         }
     }
 
