@@ -5,7 +5,7 @@ uint8_t world[WORLD_H][WORLD_W];
 void world_load_textures()
 {
     int i, j;
-    
+
     memset((void *) GPU, 0, sizeof(*GPU));
     
     for(i = 1; i < GPU_CL_COUNT; i++) {
@@ -50,17 +50,17 @@ void world_build()
     }
 }
 
-void world_render(int x, int y)
+void world_render(vec2_t p)
 {
     int i = 0;
-    int j = WORLD_H-1;
+    int j = 0;
     int c = 1;
     int s = 0;
     int block = 0;
 
-    while(j >= 0) {
-        int sx = i*BLOCK_SIZE - x;
-        int sy = (GPU_H - (j+1)*BLOCK_SIZE) - y;
+    while(j < WORLD_H) {
+        int sx = i*BLOCK_SIZE - p.x;
+        int sy = (GPU_H - (j+1)*BLOCK_SIZE) - p.y;
 
         if(
             (world[j][i] != 0) &&
@@ -91,7 +91,7 @@ void world_render(int x, int y)
 
         if(i >= WORLD_W) {
             i = 0;
-            j--;
+            j++;
         }
     }
 
@@ -105,5 +105,37 @@ void world_render(int x, int y)
             s = 0;
             c++;
         }
+    }
+}
+
+int world_get(vec2_t screen)
+{
+    vec2_t w;
+
+    w.x = screen.x/BLOCK_SIZE;
+    w.y = (GPU_H - screen.y)/BLOCK_SIZE;  
+
+    if(
+        (w.x >= 0 && w.x < WORLD_W) &&
+        (w.y >= 0 && w.y < WORLD_H)
+    ) {
+        return world[w.y][w.x];
+    } else {
+        return 0;
+    }
+}
+
+void world_set(vec2_t screen, int value)
+{
+    vec2_t w;
+
+    w.x = screen.x/BLOCK_SIZE;
+    w.y = (GPU_H - screen.y)/BLOCK_SIZE;  
+
+    if(
+        (w.x >= 0 && w.x < WORLD_W) &&
+        (w.y >= 0 && w.y < WORLD_H)
+    ) {
+        world[w.y][w.x] = value;
     }
 }

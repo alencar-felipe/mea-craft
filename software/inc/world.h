@@ -2,6 +2,7 @@
 
 #include "mylib.h"
 #include "texture.h"
+#include "vec2.h"
 
 #define WORLD_W (128)
 #define WORLD_H (64)
@@ -25,3 +26,5 @@ extern uint8_t world[WORLD_H][WORLD_W];
 void world_load_textures();
 void world_build();
 void world_render();
+int world_get(vec2_t screen);
+void world_set(vec2_t screen, int value);

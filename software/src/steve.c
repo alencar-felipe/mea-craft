@@ -66,7 +66,7 @@ void steve_load()
     GPU->clusters[0].sprites[ 8].sth = 24;
 }
 
-void steve_render(int x, int y, int walk, int dir)
+void steve_render(vec2_t p, int walk, int dir)
 {
     walk = walk % 6;
     
@@ -76,8 +76,8 @@ void steve_render(int x, int y, int walk, int dir)
 
     // Head right
     if(dir >= 0) {
-        GPU->clusters[0].sprites[ 0].sx = x;
-        GPU->clusters[0].sprites[ 0].sy = y;
+        GPU->clusters[0].sprites[ 0].sx = p.x;
+        GPU->clusters[0].sprites[ 0].sy = p.y;
     } else {
         GPU->clusters[0].sprites[ 0].sx = GPU_W;
         GPU->clusters[0].sprites[ 0].sy = GPU_H;
@@ -85,8 +85,8 @@ void steve_render(int x, int y, int walk, int dir)
 
     // Head left
     if(dir < 0) {
-        GPU->clusters[0].sprites[ 1].sx = x;
-        GPU->clusters[0].sprites[ 1].sy = y;
+        GPU->clusters[0].sprites[ 1].sx = p.x;
+        GPU->clusters[0].sprites[ 1].sy = p.y;
     } else {
         GPU->clusters[0].sprites[ 1].sx = GPU_W;
         GPU->clusters[0].sprites[ 1].sy = GPU_H;
@@ -94,8 +94,8 @@ void steve_render(int x, int y, int walk, int dir)
     
     // Arm 0
     if(walk == 0) {
-        GPU->clusters[0].sprites[ 2].sx = x +  8;
-        GPU->clusters[0].sprites[ 2].sy = y + 32;
+        GPU->clusters[0].sprites[ 2].sx = p.x +  8;
+        GPU->clusters[0].sprites[ 2].sy = p.y + 32;
     } else {
         GPU->clusters[0].sprites[ 2].sx = GPU_W;
         GPU->clusters[0].sprites[ 2].sy = GPU_H;
@@ -103,8 +103,8 @@ void steve_render(int x, int y, int walk, int dir)
 
     // Arm 7
     if(walk == 1) {
-        GPU->clusters[0].sprites[ 3].sx = x +  4;
-        GPU->clusters[0].sprites[ 3].sy = y + 32;
+        GPU->clusters[0].sprites[ 3].sx = p.x +  4;
+        GPU->clusters[0].sprites[ 3].sy = p.y + 32;
     } else {
         GPU->clusters[0].sprites[ 3].sx = GPU_W;
         GPU->clusters[0].sprites[ 3].sy = GPU_H;
@@ -112,21 +112,21 @@ void steve_render(int x, int y, int walk, int dir)
 
     // Arm 15
     if(walk == 2) {
-        GPU->clusters[0].sprites[ 4].sx = x -  4;
-        GPU->clusters[0].sprites[ 4].sy = y + 32;
+        GPU->clusters[0].sprites[ 4].sx = p.x -  4;
+        GPU->clusters[0].sprites[ 4].sy = p.y + 32;
     } else {
         GPU->clusters[0].sprites[ 4].sx = GPU_W;
         GPU->clusters[0].sprites[ 4].sy = GPU_H;
     }
 
     // Body
-    GPU->clusters[0].sprites[ 5].sx = x +  8;
-    GPU->clusters[0].sprites[ 5].sy = y + 32;
+    GPU->clusters[0].sprites[ 5].sx = p.x +  8;
+    GPU->clusters[0].sprites[ 5].sy = p.y + 32;
     
     // Leg 0
     if(walk == 0) {
-        GPU->clusters[0].sprites[ 6].sx = x +  8;
-        GPU->clusters[0].sprites[ 6].sy = y + 32 + 24;
+        GPU->clusters[0].sprites[ 6].sx = p.x +  8;
+        GPU->clusters[0].sprites[ 6].sy = p.y + 32 + 24;
     } else {
         GPU->clusters[0].sprites[ 6].sx = GPU_W;
         GPU->clusters[0].sprites[ 6].sy = GPU_H;
@@ -134,8 +134,8 @@ void steve_render(int x, int y, int walk, int dir)
 
     // Leg 7
     if(walk == 1) {
-        GPU->clusters[0].sprites[ 7].sx = x +  4;
-        GPU->clusters[0].sprites[ 7].sy = y + 32 + 24;
+        GPU->clusters[0].sprites[ 7].sx = p.x +  4;
+        GPU->clusters[0].sprites[ 7].sy = p.y + 32 + 24;
     } else {
         GPU->clusters[0].sprites[ 7].sx = GPU_W;
         GPU->clusters[0].sprites[ 7].sy = GPU_H;
@@ -143,8 +143,8 @@ void steve_render(int x, int y, int walk, int dir)
 
     // Leg 15
     if(walk == 2) {
-        GPU->clusters[0].sprites[ 8].sx = x -  4;
-        GPU->clusters[0].sprites[ 8].sy = y + 32 + 24;
+        GPU->clusters[0].sprites[ 8].sx = p.x -  4;
+        GPU->clusters[0].sprites[ 8].sy = p.y + 32 + 24;
     } else {
         GPU->clusters[0].sprites[ 8].sx = GPU_W;
         GPU->clusters[0].sprites[ 8].sy = GPU_H;
