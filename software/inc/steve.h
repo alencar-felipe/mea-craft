@@ -4,7 +4,7 @@
 #include "texture.h"
 #include "vec2.h"
 
-#define STEVE_W (16)
+#define STEVE_W (32)
 #define STEVE_H (104)
 
 void steve_load();
