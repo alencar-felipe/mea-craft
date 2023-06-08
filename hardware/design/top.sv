@@ -5,8 +5,8 @@ module top (
     output logic         uart_tx,
     input  logic         uart_rx,
 
-    output logic [31: 0] gpio_out [1:0],
-    input  logic [31: 0] gpio_in  [1:0],
+    input  logic [31:0] btn,
+    output logic [31:0] led,
 
     output logic [ 3: 0] vga_red,
     output logic [ 3: 0] vga_green,
@@ -22,6 +22,11 @@ module top (
 
     logic core_irq;
     logic ps2_irq;
+
+    logic [31: 0] gpio_in  [1:0];
+    logic [31: 0] gpio_out [1:0];
+
+    logic [31: 0] frame_counter;
 
     logic [31: 0] core_awaddr;
     logic [ 2: 0] core_awprot;
@@ -226,9 +231,7 @@ module top (
         .m_rvalid  (core_aligner_rvalid),
         .m_rready  (core_aligner_rready)
     );
-
-    assign core_irq = 0;
-
+    
     axil_rom_bootldr rom_bootldr (
         .clk (dclk),
         .rst (drst),
@@ -302,7 +305,9 @@ module top (
         .blue  (vga_blue),
 
         .hsync (vga_hsync),
-        .vsync (vga_vsync)
+        .vsync (vga_vsync),
+
+        .counter (frame_counter)
     );
 
     peripherals peripherals (
@@ -451,4 +456,12 @@ module top (
         .m03_axil_rready (peripherals_rready)
     );
 
+    always_comb begin
+        gpio_in[0] = btn;
+        gpio_in[1] = frame_counter;
+
+        led = gpio_out[0];
+
+        core_irq = gpio_out[1] != gpio_in[1];
+    end
 endmodule

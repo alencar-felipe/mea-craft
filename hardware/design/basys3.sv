@@ -28,15 +28,14 @@ module basys3 (
     input  logic ps2_data
 );
 
-    logic [31: 0] gpio_out [1:0];
-    logic [31: 0] gpio_in  [1:0];
+    logic [31: 0] btn;
+    logic [31: 0] led32;
 
-    assign gpio_in[0][15: 0] = sw;
-    assign gpio_in[0][19:16] = {btn_d, btn_r, btn_l, btn_u};
-    assign gpio_in[0][31:20] = 0;
-    assign gpio_in[1] = 0;
+    assign btn[15: 0] = sw;
+    assign btn[19:16] = {btn_d, btn_r, btn_l, btn_u};
+    assign btn[31:20] = 0;
 
-    assign led = gpio_out[0][15:0];
+    assign led = led32[15:0];
 
     top top (
         .clk (clk),
@@ -45,9 +44,9 @@ module basys3 (
         .uart_tx (uart_tx),
         .uart_rx (uart_rx),
 
-        .gpio_out (gpio_out),
-        .gpio_in  (gpio_in),
-
+        .btn   (btn),
+        .led   (led32),
+        
         .vga_red   (vga_red),
         .vga_green (vga_green),
         .vga_blue  (vga_blue),

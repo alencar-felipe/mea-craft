@@ -59,7 +59,7 @@ typedef struct __attribute__((packed)) {
 #define GPIO_B              (GPIO_BASE + 0x0004)
 
 typedef struct __attribute__((packed)) {
-    uint16_t sw;
+    uint16_t sw : 16;
     uint8_t  btn_u : 1;
     uint8_t  btn_l : 1;
     uint8_t  btn_r : 1;
@@ -68,12 +68,22 @@ typedef struct __attribute__((packed)) {
 } gpio_a_in_t;
 
 typedef struct __attribute__((packed)) {
-    uint16_t led;
-    uint32_t reserved : 28;
+    uint16_t led : 16;
+    uint16_t reserved : 16;
 } gpio_a_out_t;
 
-#define GPIO_A_IN ( (volatile gpio_a_in_t *) GPIO_A )
-#define GPIO_A_OUT ( (volatile gpio_b_in_t *) GPIO_A )
+typedef struct __attribute__((packed)) {
+    uint32_t frame_counter : 32;
+} gpio_b_in_t;
+
+typedef struct __attribute__((packed)) {
+
+} gpio_b_out_t;
+
+#define GPIO_A_IN  ( (volatile gpio_a_in_t  *) GPIO_A )
+#define GPIO_A_OUT ( (volatile gpio_a_out_t *) GPIO_A )
+#define GPIO_B_IN  ( (volatile gpio_b_in_t  *) GPIO_B )
+#define GPIO_B_OUT ( (volatile gpio_b_out_t *) GPIO_B )
 
 /* Peripherals / PS2 ======================================================== */
 

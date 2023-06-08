@@ -30,7 +30,9 @@ module gpu #(
     output logic [3:0] blue,
 
     output logic hsync,
-    output logic vsync
+    output logic vsync,
+
+    output logic [DATA_WIDTH-1:0] counter
 );
     localparam WIDTH  = 640;
     localparam HEIGHT = 480;
@@ -57,6 +59,8 @@ module gpu #(
     logic                   cluster_wen   [CLUSTER_COUNT-1:0];
 
     logic [COLOR_WIDTH-1:0] pixel;
+
+    logic last_vsync;
 
     clkdiv #(
         .DIV (2)
@@ -179,6 +183,19 @@ module gpu #(
             else begin
                 cluster_wen[i] = 0;
             end
+        end
+    end
+
+    always_ff @(posedge clk) begin
+        if (rst) begin
+            last_vsync <= 1;
+            counter <= 0;
+        end
+        else begin
+            if(vsync == 0 && last_vsync == 1) begin
+                counter <= counter + 1;
+            end
+            last_vsync <= vsync;
         end
     end
 

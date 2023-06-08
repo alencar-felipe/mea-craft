@@ -13,22 +13,25 @@ irq_handler_counter:
 
     /* Save registers. */
 
-    addi sp, sp, -8
+    addi sp, sp, -12
     sw t0, 0(sp)
     sw t1, 1(sp)
+    sw t2, 2(sp)
 
     /* Increment value in address 4095. */
 
-    li t0, 4095
-    lw t1, 0(t0)
-    addi t1, t1, 1
-    sw t1, 0(t0)
+    li t0, 0x30010000
+    li t1, 0x30010004
+    lw t2, 0(t1)
+    sw t2, 0(t1)
+    sw t2, 0(t0)
 
     /* Restore registers. */
 
     lw t0, 0(sp)
     lw t1, 1(sp)
-    addi sp, sp, 8
+    lw t2, 2(sp)
+    addi sp, sp, 12
 
     /* Return from interrupt. */
 

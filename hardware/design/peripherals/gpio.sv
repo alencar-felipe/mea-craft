@@ -1,7 +1,8 @@
 module gpio #(
-    parameter ADDR_WIDTH = 2,
+    parameter ADDR_WIDTH = 16,
     parameter DATA_WIDTH = 32,
-    parameter STRB_WIDTH = (DATA_WIDTH/8)
+    parameter STRB_WIDTH = (DATA_WIDTH/8),
+    parameter GPIO_WIDTH = 2
 ) (
     input  logic                  clk,
     input  logic                  rst,
@@ -26,8 +27,8 @@ module gpio #(
     output logic                  rvalid,
     input  logic                  rready,
 
-    output logic [DATA_WIDTH-1:0] out [ADDR_WIDTH-1:0],
-    input  logic [DATA_WIDTH-1:0] in [ADDR_WIDTH-1:0]
+    output logic [DATA_WIDTH-1:0] out [GPIO_WIDTH-1:0],
+    input  logic [DATA_WIDTH-1:0] in  [GPIO_WIDTH-1:0]
 );
     localparam WORD_WIDTH = STRB_WIDTH; 
     localparam WORD_SIZE = DATA_WIDTH/WORD_WIDTH;
@@ -56,7 +57,7 @@ module gpio #(
     read_state_t r_curr;
     read_state_t r_next;
     
-    logic [DATA_WIDTH-1:0] out_next [ADDR_WIDTH-1:0];
+    logic [DATA_WIDTH-1:0] out_next [GPIO_WIDTH-1:0];
     
     /* Write */
     
@@ -70,7 +71,7 @@ module gpio #(
             w_curr.data <= 0;
             w_curr.strb <= 0;
 
-            for (int j = 0; j < ADDR_WIDTH; j++) begin
+            for (int j = 0; j < GPIO_WIDTH; j++) begin
                 out[j] <= 0;
             end
         end
@@ -89,7 +90,7 @@ module gpio #(
         bresp = 0;
         bvalid = 0;
 
-        for (int i = 0; i < ADDR_WIDTH; i++) begin
+        for (int i = 0; i < GPIO_WIDTH; i++) begin
             out_next[i] = out[i];
         end
 
@@ -129,8 +130,8 @@ module gpio #(
             // Update state.
 
             for (int i = 0; i < WORD_WIDTH; i++) begin
-                if (w_curr.strb[i]) begin
-                    out_next[w_curr.addr][WORD_SIZE*i +: WORD_SIZE] =
+                if (w_curr.strb[i] && (w_curr.addr >> 2) < GPIO_WIDTH**2) begin
+                    out_next[w_curr.addr >> 2][WORD_SIZE*i +: WORD_SIZE] =
                         w_curr.data[WORD_SIZE*i +: WORD_SIZE];
                 end
             end
@@ -196,8 +197,13 @@ module gpio #(
         else if (!r_curr.data_ok) begin
             // Load correponding data.
             
-            r_next.data = in[r_curr.addr];
-            
+            if ((r_curr.addr >> 2) < GPIO_WIDTH**2) begin
+                r_next.data = in[r_curr.addr >> 2]; 
+            end
+            else begin
+                r_next.data = 0;
+            end
+
             r_next.data_ok = 1;
         end 
         else if (!r_curr.resp_ok) begin

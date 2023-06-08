@@ -25,8 +25,8 @@ int main()
     int block;
 
     while(1) {
-        speed = GPIO_A_IN->sw & 0xFF;
-        block = GPIO_A_IN->sw >> 8;
+        speed = (GPIO_A_IN->sw >> 8) & 0xFF;
+        block = (GPIO_A_IN->sw >> 0) & 0xFF;
 
         ground = vec2_add(p, (vec2_t) {0, -STEVE_H-64});
 
@@ -71,6 +71,8 @@ int main()
         
         world_render(wp);
         steve_render(vec2_sub(p, wp), walk, dir);
+
+        //GPIO_A_OUT->led = (int16_t) GPIO_B_IN->frame_counter;
     }
 
     return 0;
