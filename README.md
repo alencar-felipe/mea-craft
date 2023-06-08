@@ -13,6 +13,7 @@
 - [riscv-simple-sv](https://github.com/tilk/riscv-simple-sv)
 - [An Introduction to RV32I Interrupts and Traps](https://www.youtube.com/watch?v=l7JIry6PEX4)
 - [RISC-V Interrupts](https://five-embeddev.com/quickref/interrupts.html)
+- [CSR Map](https://docs.openhwgroup.org/projects/cv32e40s-user-manual/en/latest/control_status_registers.html)
 
 ### Advanced eXtensible Interface
 

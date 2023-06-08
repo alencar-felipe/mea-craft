@@ -43,7 +43,7 @@ module alu (
             ALU_CTRL_AND:
                 out = a & b;
             ALU_CTRL_CLR:
-                out = a | ~b;
+                out = a & ~b;
             default:
                 out = 0;
         endcase        
