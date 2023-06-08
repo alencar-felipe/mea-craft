@@ -77,7 +77,7 @@ typedef struct __attribute__((packed)) {
 } gpio_b_in_t;
 
 typedef struct __attribute__((packed)) {
-
+    uint32_t frame_counter : 32;
 } gpio_b_out_t;
 
 #define GPIO_A_IN  ( (volatile gpio_a_in_t  *) GPIO_A )
@@ -104,3 +104,19 @@ typedef struct __attribute__((packed)) {
 #define READ_WORD(ADDR) (*((volatile uint32_t *)(ADDR)))
 #define READ_HALF(ADDR) (*((volatile uint16_t *)(ADDR)))
 #define READ_BYTE(ADDR) (*((volatile uint8_t  *)(ADDR)))
+
+inline void enable_interrupt()
+{
+    asm volatile (
+        "li t0, 0x00000800 \n"
+        "csrrs x0, mie, t0 \n"
+    );
+}
+
+inline void disable_interrupt()
+{
+    asm volatile (
+        "li t0, 0x00000800 \n"
+        "csrrc x0, mie, t0 \n"
+    );
+}

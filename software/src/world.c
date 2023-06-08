@@ -1,6 +1,8 @@
 #include "world.h"
 
-uint8_t world[WORLD_H][WORLD_W];
+extern uint8_t _sworld_data;
+
+uint8_t *world;
 
 void world_load_textures()
 {
@@ -21,10 +23,12 @@ void world_load_textures()
     }
 }
 
-void world_build()
+void world_init()
 {
-    int i, j;
-
+    //int i, j;
+    
+    world = &_sworld_data;
+    /*
     memset((void *) world, 0, sizeof(world));
 
     uint8_t levels[WORLD_H];
@@ -48,6 +52,8 @@ void world_build()
             if(i % 10 == 0) world[j][i] = ((i/10) % 12)+1;
         }
     }
+
+    */
 }
 
 void world_render(vec2_t p)
@@ -63,14 +69,14 @@ void world_render(vec2_t p)
         int sy = (GPU_H - (j+1)*BLOCK_SIZE) - p.y;
 
         if(
-            (world[j][i] != 0) &&
+            (world[WORLD_W*j + i] != 0) &&
             (sx >= -BLOCK_SIZE && sx < GPU_W) &&
             (sy >= -BLOCK_SIZE && sy < GPU_H) 
         ) {
             GPU->clusters[c].sprites[s].sx = sx;
             GPU->clusters[c].sprites[s].sy = sy;
 
-            block = world[j][i] - 1;
+            block = world[WORLD_W*j + i] - 1;
 
             GPU->clusters[c].sprites[s].stx = (block % 4)*16;
             GPU->clusters[c].sprites[s].sty = (block / 4)*16;
@@ -119,7 +125,7 @@ int world_get(vec2_t screen)
         (w.x >= 0 && w.x < WORLD_W) &&
         (w.y >= 0 && w.y < WORLD_H)
     ) {
-        return world[w.y][w.x];
+        return world[WORLD_W*w.y + w.x];
     } else {
         return 0;
     }
@@ -136,6 +142,6 @@ void world_set(vec2_t screen, int value)
         (w.x >= 0 && w.x < WORLD_W) &&
         (w.y >= 0 && w.y < WORLD_H)
     ) {
-        world[w.y][w.x] = value;
+        world[WORLD_W*w.y + w.x] = value;
     }
 }

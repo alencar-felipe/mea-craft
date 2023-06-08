@@ -21,10 +21,10 @@
 #define BLOCK_GOLD    (11)
 #define BLOCK_DIAMOND (12)
 
-extern uint8_t world[WORLD_H][WORLD_W];
+extern uint8_t *world;
 
 void world_load_textures();
-void world_build();
+void world_init();
 void world_render();
 int world_get(vec2_t screen);
 void world_set(vec2_t screen, int value);

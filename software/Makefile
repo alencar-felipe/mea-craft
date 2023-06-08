@@ -8,6 +8,7 @@ OBJDUMP = llvm-objdump
 AXIL_ROM_GEN = ../scripts/axil_rom_gen.py
 IMGCOPY = ../scripts/imgcopy.py  
 FLASHER = ../scripts/flasher.py
+WORLD_GEN = ../scripts/world_gen.py
 
 # Define linker script path
 LDSCRIPT = linker.ld
@@ -33,10 +34,12 @@ TEXTURES_SRCS = $(wildcard $(RES_DIR)/*.png)
 ASM_OBJS = $(patsubst $(SRC_DIR)/%.s, $(BUILD_DIR)/%.o, $(ASM_SRCS))
 C_OBJS = $(patsubst $(SRC_DIR)/%.c, $(BUILD_DIR)/%.o, $(C_SRCS))
 TEXURES_OBJ = $(BUILD_DIR)/textures.o
-OBJS = $(ASM_OBJS) $(C_OBJS) $(TEXURES_OBJ)
+WORLD_DATA_OBJ = $(BUILD_DIR)/world_data.o
+OBJS = $(ASM_OBJS) $(C_OBJS) $(TEXURES_OBJ) $(WORLD_DATA_OBJ)
 
 # Others
 TEXURES_BIN = $(BUILD_DIR)/textures.bin
+WORLD_DATA_BIN = $(BUILD_DIR)/world_data.bin
 
 # Targets
 ELF_TARGET = $(BUILD_DIR)/build.elf
@@ -67,10 +70,22 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.s
 $(TEXURES_BIN): $(TEXTURES_SRCS)
 	$(IMGCOPY) $(TEXTURES_SRCS) -o $@
 
+# Converts texture binary files to an object file
 $(TEXURES_OBJ): $(TEXURES_BIN)
 	$(OBJCOPY) -I binary -O elf32-littleriscv \
 	--rename-section .data=.rodata,alloc,load,readonly \
 	--redefine-sym=_binary_build_textures_bin_start=_stextures \
+	$< $@
+
+# Generates world binary file
+$(WORLD_DATA_BIN): $(WORLD_GEN)
+	$(WORLD_GEN) -o $@
+
+# Converts world binary file to an object file 
+$(WORLD_DATA_OBJ): $(WORLD_DATA_BIN)
+	$(OBJCOPY) -I binary -O elf32-littleriscv \
+	--rename-section .data=.rodata,alloc,load,readonly \
+	--redefine-sym=_binary_build_world_data_bin_start=_sworld_data \
 	$< $@
 
 # Link the object files into an ELF file
