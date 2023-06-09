@@ -17,12 +17,18 @@
 #define GPU_TEXT_H   (64)
 
 typedef struct __attribute__((packed)) {
-    uint32_t sx;
-    uint32_t sy;
-    uint32_t stx;
-    uint32_t sty;
-    uint32_t stw;
-    uint32_t sth;
+    int16_t sx;
+    int16_t reserved0;
+    int16_t sy;
+    int16_t reserved1;
+    int16_t stx;
+    int16_t reserved2;
+    int16_t sty;
+    int16_t reserved3;
+    int16_t stw;
+    int16_t reserved4;
+    int16_t sth;
+    int16_t reserved5;
 } sprite_t;
 
 typedef struct __attribute__((packed)) {

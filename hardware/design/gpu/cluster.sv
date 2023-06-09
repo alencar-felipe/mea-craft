@@ -40,6 +40,15 @@ module cluster #(
     logic [INT_WIDTH-1:0] stw [CLUSTER_SIZE-1:0]; // sprite texture width
     logic [INT_WIDTH-1:0] sth [CLUSTER_SIZE-1:0]; // sprite texture height
 
+    logic signed [INT_WIDTH-1:0] sig_x;
+    logic signed [INT_WIDTH-1:0] sig_y;
+    logic signed [INT_WIDTH-1:0] sig_sx  [CLUSTER_SIZE-1:0];     
+    logic signed [INT_WIDTH-1:0] sig_sy  [CLUSTER_SIZE-1:0]; 
+    logic signed [INT_WIDTH-1:0] sig_stx [CLUSTER_SIZE-1:0]; 
+    logic signed [INT_WIDTH-1:0] sig_sty [CLUSTER_SIZE-1:0]; 
+    logic signed [INT_WIDTH-1:0] sig_stw [CLUSTER_SIZE-1:0]; 
+    logic signed [INT_WIDTH-1:0] sig_sth [CLUSTER_SIZE-1:0];
+
     position_reg #(
         .ADDR_WIDTH   (ADDR_WIDTH),
         .INT_WIDTH    (16),
@@ -77,6 +86,22 @@ module cluster #(
     );
 
     always_comb begin
+        logic [CLUSTER_WIDTH:0] k;
+
+        sig_x = $signed(x);
+        sig_y = $signed(y);
+
+        for(k = 0; k < CLUSTER_SIZE; k++) begin
+            sig_sx[k] = $signed(sx[k]);
+            sig_sy[k] = $signed(sy[k]);
+            sig_stx[k] = $signed(stx[k]);
+            sig_sty[k] = $signed(sty[k]);
+            sig_stw[k] = $signed(stw[k]);
+            sig_sth[k] = $signed(sth[k]);
+        end
+    end
+
+    always_comb begin
         position_waddr = 0;
         position_wdata = 0;
         position_wen   = 0;
@@ -106,11 +131,13 @@ module cluster #(
         
         for(k = 0; k < CLUSTER_SIZE; k++) begin
             if (
-                (x >= sx[k] && x < sx[k] + stw[k]*SCALE) &&
-                (y >= sy[k] && y < sy[k] + sth[k]*SCALE)
+                (sig_x >= sig_sx[k]) &&
+                (sig_x <  sig_sx[k] + sig_stw[k]*SCALE) &&
+                (sig_y >= sig_sy[k]) &&
+                (sig_y <  sig_sy[k] + sig_sth[k]*SCALE)
             ) begin
-                raddr = ((stx[k] + (x - sx[k])/SCALE)                ) + 
-                        ((sty[k] + (y - sy[k])/SCALE) * TEXTURE_WIDTH);
+                raddr = (sig_stx[k] + (sig_x - sig_sx[k])/SCALE) + 
+                        (sig_sty[k] + (sig_y - sig_sy[k])/SCALE)*TEXTURE_WIDTH;
                 valid = 1;
                 break;
             end

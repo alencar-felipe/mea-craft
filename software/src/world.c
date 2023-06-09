@@ -25,35 +25,7 @@ void world_load_textures()
 
 void world_init()
 {
-    //int i, j;
-    
     world = &_sworld_data;
-    /*
-    memset((void *) world, 0, sizeof(world));
-
-    uint8_t levels[WORLD_H];
-
-    levels[0] = BLOCK_DIAMOND;
-
-    for(j = 1; j < 27; j++) {
-        levels[j] = BLOCK_STONE;
-    }
-
-    for(j = 27; j < 31; j++) {
-        levels[j] = BLOCK_DIRT;
-    }
-
-    levels[31] = BLOCK_GRASS;
-
-    for(j = 0; j < WORLD_H; j++) {
-        for(i = 0; i < WORLD_W; i++) {
-            world[j][i] = levels[j];
-
-            if(i % 10 == 0) world[j][i] = ((i/10) % 12)+1;
-        }
-    }
-
-    */
 }
 
 void world_render(vec2_t p)

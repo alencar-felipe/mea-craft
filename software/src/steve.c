@@ -64,9 +64,27 @@ void steve_load()
     GPU->clusters[0].sprites[ 8].sty = 40;
     GPU->clusters[0].sprites[ 8].stw = 20;
     GPU->clusters[0].sprites[ 8].sth = 24;
+
+    // Heart 1
+    GPU->clusters[0].sprites[ 9].stx = 56;
+    GPU->clusters[0].sprites[ 9].sty = 33;
+    GPU->clusters[0].sprites[ 9].stw = 7;
+    GPU->clusters[0].sprites[ 9].sth = 7;
+
+    // Heart 2
+    GPU->clusters[0].sprites[10].stx = 56;
+    GPU->clusters[0].sprites[10].sty = 33;
+    GPU->clusters[0].sprites[10].stw = 7;
+    GPU->clusters[0].sprites[10].sth = 7;
+
+    // Heart 3
+    GPU->clusters[0].sprites[11].stx = 56;
+    GPU->clusters[0].sprites[11].sty = 33;
+    GPU->clusters[0].sprites[11].stw = 7;
+    GPU->clusters[0].sprites[11].sth = 7;
 }
 
-void steve_render(vec2_t p, int walk, int dir)
+void steve_render(vec2_t p, int walk, int dir, int hearts)
 {
     walk = walk % 6;
     
@@ -148,5 +166,29 @@ void steve_render(vec2_t p, int walk, int dir)
     } else {
         GPU->clusters[0].sprites[ 8].sx = GPU_W;
         GPU->clusters[0].sprites[ 8].sy = GPU_H;
+    }
+
+    if(hearts >= 1) {
+        GPU->clusters[0].sprites[ 9].sx = 583;
+        GPU->clusters[0].sprites[ 9].sy = 10;
+    } else {
+        GPU->clusters[0].sprites[ 9].sx = GPU_W;
+        GPU->clusters[0].sprites[ 9].sy = GPU_H;
+    }
+
+    if(hearts >= 2) {
+        GPU->clusters[0].sprites[10].sx = 593;
+        GPU->clusters[0].sprites[10].sy = 10;
+    } else {
+        GPU->clusters[0].sprites[10].sx = GPU_W;
+        GPU->clusters[0].sprites[10].sy = GPU_H;
+    }
+
+    if(hearts >= 2) {
+        GPU->clusters[0].sprites[11].sx = 10;
+        GPU->clusters[0].sprites[11].sy = 10;
+    } else {
+        GPU->clusters[0].sprites[11].sx = GPU_W;
+        GPU->clusters[0].sprites[11].sy = GPU_H;
     }
 }

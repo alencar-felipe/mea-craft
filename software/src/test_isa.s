@@ -228,61 +228,68 @@ test_isa_op:
     beq t3, t4, 12                      // assert t3 == t4
     li a0, 31
     j test_isa_return
+
+    li t5, 40                           // t5 = 40
+    sub t3, t0, t5                      // t3 = t0 - t5
+    li t4, 0                            // t4 = 80
+    beq t3, t4, 12                      // assert t3 == t4
+    li a0, 32
+    j test_isa_return
     
     li t5, -40                          // t5 = -40
     slt t3, t0, t5                      // t3 = t0 < t5
     li t4, 0
     beq t3, t4, 12                      // assert t3 == t4
-    li a0, 32
+    li a0, 33
     j test_isa_return
 
     li t5, -40                          // t5 = -40
     sltu t3, t0, t5                     // t3 = u(t0) < u(t5)
     li t4, 1                            // t4 = 1
     beq t3, t4, 12                      // assert t3 == t4
-    li a0, 33
+    li a0, 34
     j test_isa_return
 
     li t5, 0x92                         // t5 = 0x92
     xor t3, t1, t5                      // t3 = t1 ^ t5
     li t4, 0x38                         // t4 = 0x38
     beq t3, t4, 12                      // assert t3 == t4
-    li a0, 34
+    li a0, 35
     j test_isa_return
 
     li t5, 0x92                         // t5 = 0x92
     or t3, t1, t5                       // t3 = t1 | t5
     li t4, 0xBA                         // t4 = 0xBA
     beq t3, t4, 12                      // assert t3 == t4
-    li a0, 35
+    li a0, 36
     j test_isa_return
 
     li t5, 0x92                         // t5 = 0x92
     and t3, t1, t5                      // t3 = t1 & t5
     li t4, 0x82                         // t4 = 0x82
     beq t3, t4, 12                      // assert t3 == t4
-    li a0, 36
+    li a0, 37
     j test_isa_return
 
     li t5, 2                            // t2 = 2
     sll t3, t0, t5                      // t3 = t0 << t5
     li t4, 160                          // t4 = 160
     beq t3, t4, 12                      // assert t3 == t4
-    li a0, 37
+    li a0, 38
     j test_isa_return
 
     li t5, 2                            // t5 = 2
     srl t3, t0, t5                      // t3 = t0 >> t5
     li t4, 10                           // t4 = 10
     beq t3, t4, 12                      // assert t3 == t4
-    li a0, 38
+    li a0, 39
     j test_isa_return
 
     li t5, 2                            // t5 = 2
     sra t3, t2, t5                      // t3 = s(t2) >> t5
     li t4, -10                          // t4 = -10
     beq t3, t4, 12                      // assert t3 == t4
-    li a0, 39
+    li a0, 40
     j test_isa_return
 
 test_isa_end:

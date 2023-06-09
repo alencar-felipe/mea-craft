@@ -8,4 +8,4 @@
 #define STEVE_H (104)
 
 void steve_load();
-void steve_render(vec2_t p, int walk, int dir);
+void steve_render(vec2_t p, int walk, int dir, int hearts);

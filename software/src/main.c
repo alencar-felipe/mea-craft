@@ -43,7 +43,7 @@ int main()
         }
 
         world_render(wp);
-        steve_render(vec2_sub(p, wp), walk, dir);
+        steve_render(vec2_sub(p, wp), walk, dir, 3);
     }
 
     return 0;
