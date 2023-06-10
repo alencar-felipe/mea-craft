@@ -24,6 +24,10 @@
 
 - [Open source Minecraft texture pack](https://github.com/Richienb/Rosources)
 - [How to Make Pixel Art in GIMP](https://thegimptutorials.com/how-to-make-pixel-art/)
+
+### Report
+
+- [latex-datasheet-template](https://github.com/PetteriAimonen/latex-datasheet-template)
 ### Others
 
 - [Small Printf](https://www.menie.org/georges/embedded/small_printf_source_code.html)
