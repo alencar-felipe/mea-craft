@@ -2,16 +2,19 @@
 #include "steve.h"
 #include "world.h"
 
+void banner_loop();
+void game_loop();
+
 void gpu_init();
+void banner_init();
 void physics_init();
 void physics();
-void display_greating();
 
 const int gravity = 3;
 const int walk_speed = 3;
 const int jump_speed = 20;
 const int walk_prescaler = 4;
-const int max_speed = 30;
+const int max_speed = 50;
 
 vec2_t p;
 vec2_t v;
@@ -20,13 +23,41 @@ vec2_t wp;
 int walk;
 int walk_counter;
 int dir;
+int hearts;
+
+int last_btn_d;
 
 int main()
 {   
+    disable_interrupt();
+
+    while(1) {
+        banner_loop();
+        game_loop();
+    }
+}
+
+void banner_loop()
+{
+    uint8_t btn_d;
+
+    gpu_init();
+    world_init();
+    banner_init();
+
+    last_btn_d = GPIO_A_IN->btn_d;
+
+    while(1) {
+        btn_d = GPIO_A_IN->btn_d;
+
+        if(btn_d == 1 && last_btn_d == 0) break;
+    }
+}
+
+void game_loop()
+{
     uint32_t current;
     uint32_t last;
-
-    disable_interrupt();
 
     gpu_init();
     world_init();
@@ -43,10 +74,12 @@ int main()
         }
 
         world_render(wp);
-        steve_render(vec2_sub(p, wp), walk, dir, 3);
-    }
+        steve_render(vec2_sub(p, wp), walk, dir, hearts);
 
-    return 0;
+        if(hearts <= 0) {
+            break;
+        }
+    }
 }
 
 void gpu_init()
@@ -55,15 +88,33 @@ void gpu_init()
     steve_load();    
 }
 
+void banner_init()
+{
+    texture_load((void *) GPU->clusters[0].texture, TEXTURE2);
+
+    GPU->clusters[0].sprites[0].stx = 0;
+    GPU->clusters[0].sprites[0].sty = 0;
+    GPU->clusters[0].sprites[0].stw = 64;
+    GPU->clusters[0].sprites[0].sth = 64;
+
+    GPU->clusters[0].sprites[0].sx = 256;
+    GPU->clusters[0].sprites[0].sy = 176;
+
+    for(int i = 1; i < GPU_CL_SIZE; i++) {
+        GPU->clusters[0].sprites[i].sx = GPU_W;
+        GPU->clusters[0].sprites[i].sy = GPU_H;
+    }
+}
+
 void physics_init()
 {
     p = (vec2_t) {300, -28*BLOCK_SIZE};
     v = (vec2_t) {0, 0};
     a = (vec2_t) {0, 0};
+    wp = (vec2_t) {0, 0};
     walk = 0;
     dir = 0;
-
-    wp = (vec2_t) {0, 0};
+    hearts = 3;
 }
 
 void physics()
@@ -98,6 +149,10 @@ void physics()
         a.y = gravity;
     } else {
         a.y = 0;
+
+        if(v.y <= -max_speed) {
+            hearts -= 1;
+        }
 
         v.y = (down.y % BLOCK_SIZE);
 
@@ -146,24 +201,6 @@ void physics()
 
     wp.x = (7*wp.x + (p.x - GPU_W/2))/8;
     wp.y = (7*wp.y + (p.y - GPU_H/2))/8;
-}
-
-void display_greating()
-{
-    texture_load((void *) GPU->clusters[0].texture, TEXTURE2);
-
-    GPU->clusters[0].sprites[0].stx = 0;
-    GPU->clusters[0].sprites[0].sty = 0;
-    GPU->clusters[0].sprites[0].stw = 64;
-    GPU->clusters[0].sprites[0].sth = 64;
-
-    GPU->clusters[0].sprites[0].sx = 256;
-    GPU->clusters[0].sprites[0].sy = 40;
-
-    for(int i = 1; i < GPU_CL_SIZE; i++) {
-        GPU->clusters[0].sprites[i].sx = GPU_W;
-        GPU->clusters[0].sprites[i].sy = GPU_H;
-    }
 }
 
 // interrupt handler
