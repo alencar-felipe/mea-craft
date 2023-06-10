@@ -126,7 +126,6 @@ void physics()
     vec2_t front_low;
     vec2_t back_low;
 
-    int speed;
     int block;
 
     uint8_t btn_u = GPIO_A_IN->btn_u;
@@ -134,7 +133,6 @@ void physics()
     uint8_t btn_r = GPIO_A_IN->btn_r;
     uint8_t btn_d = GPIO_A_IN->btn_d;
 
-    speed = (GPIO_A_IN->sw >> 8) & 0xFF;
     block = (GPIO_A_IN->sw >> 0) & 0xFF;
 
     low         = vec2_add(p    , (vec2_t) {0             , -STEVE_H      });
@@ -161,34 +159,40 @@ void physics()
         }
     }
 
-    if(btn_d) {
-        world_set(down, block);
-    }
-
-    if(btn_l) {
-        if(
-            (world_get(back_high) == 0) &&
-            (world_get(back_low) == 0)
-        ) {
-            p.x -= walk_speed;
-            dir = -1;
+    if(btn_d == 0 && last_btn_d == 1) {
+        if(btn_l) {
+            world_set(back_low, block);
+        } else if(btn_r) {
+            world_set(front_low, block);
+        } else {
+            world_set(down, block);
         }
-    } else if(btn_r) {
-        if(
-            (world_get(front_high) == 0) &&
-            (world_get(front_low) == 0)
-        ) {
-            p.x += walk_speed;
-            dir = +1;
+    } else if(btn_d == 0) {
+        if(btn_l) {
+            if(
+                (world_get(back_high) == 0) &&
+                (world_get(back_low) == 0)
+            ) {
+                p.x -= walk_speed;
+                dir = -1;
+            }
+        } else if(btn_r) {
+            if(
+                (world_get(front_high) == 0) &&
+                (world_get(front_low) == 0)
+            ) {
+                p.x += walk_speed;
+                dir = +1;
+            }
         }
-    }
 
-    if(btn_l || btn_r) {
-        if(walk_counter % walk_prescaler == 0) walk++; 
-        walk_counter++;
-    } else {
-        walk_counter = 0;
-        walk = 0;
+        if(btn_l || btn_r) {
+            if(walk_counter % walk_prescaler == 0) walk++; 
+            walk_counter++;
+        } else {
+            walk_counter = 0;
+            walk = 0;
+        }
     }
 
     v = vec2_add(v, a);
@@ -201,6 +205,8 @@ void physics()
 
     wp.x = (7*wp.x + (p.x - GPU_W/2))/8;
     wp.y = (7*wp.y + (p.y - GPU_H/2))/8;
+
+    last_btn_d = btn_d;
 }
 
 // interrupt handler
