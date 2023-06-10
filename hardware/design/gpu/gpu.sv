@@ -32,7 +32,9 @@ module gpu #(
     output logic hsync,
     output logic vsync,
 
-    output logic [DATA_WIDTH-1:0] counter
+    output logic [DATA_WIDTH-1:0] counter,
+
+    input  logic texture_lock
 );
     localparam WIDTH  = 640;
     localparam HEIGHT = 480;
@@ -142,7 +144,9 @@ module gpu #(
 
                 .x     (x),
                 .y     (y),
-                .pixel (cluster_pixel[i])
+                .pixel (cluster_pixel[i]),
+
+                .texture_lock (texture_lock)
             );
         end
     endgenerate
@@ -162,10 +166,6 @@ module gpu #(
         else begin
             pixel = 0;
         end
-
-        red   = pixel[11: 8];
-        green = pixel[ 7: 4];
-        blue  = pixel[ 3: 0];
     end
 
     always_comb begin
@@ -184,6 +184,12 @@ module gpu #(
                 cluster_wen[i] = 0;
             end
         end
+    end
+
+    always_ff @(posedge clk25) begin
+        red   <= pixel[11: 8];
+        green <= pixel[ 7: 4];
+        blue  <= pixel[ 3: 0];
     end
 
     always_ff @(posedge clk) begin

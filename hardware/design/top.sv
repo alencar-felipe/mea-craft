@@ -27,6 +27,7 @@ module top (
     logic [31: 0] gpio_out [1:0];
 
     logic [31: 0] frame_counter;
+    logic         texture_lock;
 
     logic [31: 0] core_awaddr;
     logic [ 2: 0] core_awprot;
@@ -307,7 +308,9 @@ module top (
         .hsync (vga_hsync),
         .vsync (vga_vsync),
 
-        .counter (frame_counter)
+        .counter (frame_counter),
+
+        .texture_lock (texture_lock)
     );
 
     peripherals peripherals (
@@ -347,6 +350,10 @@ module top (
 
     axil_crossbar_wrap_1x4 #(
         .S00_ACCEPT (1),
+        .M00_ISSUE (1),
+        .M01_ISSUE (1),
+        .M02_ISSUE (1),
+        .M03_ISSUE (1),
         .M00_BASE_ADDR (32'h00000000),  // rom
         .M01_BASE_ADDR (32'h10000000),  // ram
         .M02_BASE_ADDR (32'h20000000),  // gpu
@@ -461,6 +468,7 @@ module top (
         gpio_in[1] = frame_counter;
 
         led = gpio_out[0];
+        texture_lock = gpio_out[0][31];
 
         core_irq = gpio_out[1] != gpio_in[1];
     end

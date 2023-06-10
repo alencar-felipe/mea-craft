@@ -29,7 +29,7 @@ int last_btn_d;
 
 int main()
 {   
-    disable_interrupt();
+    //disable_interrupt();
 
     while(1) {
         banner_loop();
@@ -73,7 +73,10 @@ void game_loop()
             last++;
         }
 
-        world_render(wp);
+        if(!(GPIO_A_IN->sw & (1 << 15))) {
+            world_render(wp);
+        }
+
         steve_render(vec2_sub(p, wp), walk, dir, hearts);
 
         if(hearts <= 0) {
@@ -84,14 +87,18 @@ void game_loop()
 
 void gpu_init()
 {
+    GPIO_A_OUT->texture_lock = 0;  
     world_load_textures();
-    steve_load();    
+    steve_load();
+    GPIO_A_OUT->texture_lock = 1;    
 }
 
 void banner_init()
 {
+    GPIO_A_OUT->texture_lock = 0;  
     texture_load((void *) GPU->clusters[0].texture, TEXTURE2);
-
+    GPIO_A_OUT->texture_lock = 1; 
+    
     GPU->clusters[0].sprites[0].stx = 0;
     GPU->clusters[0].sprites[0].sty = 0;
     GPU->clusters[0].sprites[0].stw = 64;

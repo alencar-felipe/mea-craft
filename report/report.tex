@@ -1,4 +1,6 @@
-\documentclass[10pt]{datasheet}
+\documentclass[10pt]{article}
+
+\usepackage[left=2cm, right=2cm, top=2cm, bottom=3cm]{geometry}
 
 % Input encoding and typographical rules for English language
 \usepackage[utf8]{inputenc}
@@ -12,131 +14,239 @@
 \usepackage{circuitikz}
 \usetikzlibrary{calc}
 
+\usepackage{enumitem}
+\usepackage{multicol}
+
+\makeatletter
+\renewcommand{\maketitle}{
+{\Huge\textbf{\@title}} \\
+\noindent\rule{\textwidth}{1pt} \\
+\medskip
+}
+\makeatother
+
+% Section header size and spacing
+\makeatletter
+\renewcommand{\section}{%
+  \@startsection{section}{1}{0pt}{-3.5ex plus -1ex minus -.2ex}{2.3ex plus .2ex}{\Large\bfseries\sffamily}%
+}
+\makeatother
+
+% No numbering for section titles
+\setcounter{secnumdepth}{0}
+
+% ============================================================================ %
+
 % These define global texts that are used in headers and titles.
 \title{mea-craft}
 \author{Felipe Paiva Alencar}
 \date{June 2023}
-\revision{Revision 1}
-\companylogo{\Huge Felipe Paiva Alencar}
+% \revision{Revision 1}
 
 \begin{document}
 \maketitle
 
+\begin{multicols}{2}
+
 \section{Features}
 
 \begin{itemize}
-\item{Classic datasheet style in LaTeX}
-\item{Write math equations as easy as $e^{i \pi}$}
-\item{Easy to use document class}
-\end{itemize}
 
-\section{Applications}
-
+\item \textbf{RISC-V Core:}
 \begin{itemize}
-\item{Data sheets for electronics components}
-\item{Technical sales brochures}
-\item{Functional specifications}
+\item DIY implementation of the RV32I instruction set architecture (ISA),
+providing a flexible and customizable processing core.
+\item Uses the AXI4-Lite memory interface enabling a seamless interface with
+different memory devices.
+\item Has support for interrupts allowing the implementation of event-driven
+functionalities.
 \end{itemize}
 
-\section{General Description}
-The \textbf{datasheet} document class makes it easy to write great looking
-data sheets using the LaTeX typesetting system. It follows the classic style used
-by most manufacturers of electronic components.
+\item \textbf{Graphics:}
+\begin{itemize}
+\item The sprite architecture presented in class, has been enhanced to enable
+dynamic changes to sprite contents, multiple texture scales, and memory sharing
+between sprites.
+\item Fully parametric, has support 80 sprites arranged in 5 clusters in the
+default configuration.
+\end{itemize}
 
-You can download the document class from
-\href{https://github.com/PetteriAimonen/latex-datasheet-template/}{latex-datasheet-template}
-GitHub repository.
-The repository includes this example datasheet as \textbf{example.tex} and
-the document class as \textbf{datasheet.cls}.
-You can build the PDF document using command \texttt{latexmk -pdf}.
+\item \textbf{Memory:} 
+\begin{itemize}
+\item 4 kilobytes of ROM: Storing a small bootloader that also performs a quick
+test of the ISA implementation.
+\item 64 kilobytes of RAM: More than sufficient memory capacity to
+handle game, texture, and world data.
+\item 20.48 kilopixels of texture memory: arranged in 5 clusters of sprites.
+\end{itemize}
 
-% Switch to next column
-\vfill\break
+\item \textbf{Peripherals:}
+\begin{itemize}
+\item General Purpose Input/Output (GPIO) that allows the interface of the
+software with the buttons and switches. 
+\item Universal asynchronous receiver-transmitter (UART) that provides a
+communication channel.
+\end{itemize}
 
-\begin{figure}[h]
-    \begin{circuitikz}[european]
-        \node[op amp] (amp1) {};
-        \node[op amp, below = 0.5cm, xscale = -1] (amp2) {};
-        \draw (amp1.out) |- (amp2.-);
-        \draw (amp2.-) ++(0, 0.3cm) node[circ]{} to +(2,0) node[above left]{5};
-        \draw (amp2.out) to (amp1.+);
-        \draw (amp1.+) ++(0, -0.3cm) node[circ]{} to +(-2,0) node[above right]{2};
-        \draw (amp1.-) to +(-2,0) node[above right]{1};
-        \draw (amp2.+) to +(2,0) node[above left]{4};
-        \draw (amp1.out) +(0,0.5cm) node (Vdd) {$\mathrm{V_{DD}}$};
-        \draw (Vdd.east) to +(1.5,0) node [above left]{6};
-        \draw (amp2.out) +(0,-0.5cm) node (Vss) {$\mathrm{V_{SS}}$};
-        \draw (Vss.west) to +(-1.6,0) node [above right]{3};
-        \draw ($(amp1.north west) + (-0.5,0.5)$) rectangle ($(amp2.south west) + (0.5,-0.5)$);
-    \end{circuitikz}
-    \caption{Pinout and internal circuit}
-\end{figure}
+\item \textbf{Build Tools:}
+\begin{itemize}
+\item The build and flashing process is efficiently automated by a well designed
+Makefile, simplifying the compilation, texture packaging, world generation, and
+linking tasks.
+\item Support for bulding and flashing via a single command, saving valuable
+development time and effort.
+\end{itemize}
 
-\begin{figure}[h]
-    \begin{tikzpicture}
-        \sffamily
-        \begin{axis}[
-            width=7cm,
-            xlabel={Number of LaTeX packages},
-            ytick distance=20,
-            yticklabel={\pgfmathprintnumber{\tick}\%},
-            xmajorgrids, ymajorgrids]
-        \addplot[smooth,mark=*] plot coordinates {
-            (0,4)
-            (5,50)
-            (10,80)
-            (15,95)
-            (20,98)
-        };
-        \end{axis}
-    \end{tikzpicture}
-    \caption{Typical data sheet production efficiency}
-\end{figure}
+\end{itemize}
 
-% For wide tables, a single column layout is better. It can be switched
-% page-by-page.
-\onecolumn
 
-\section{Electrical Specifications}
-All specifications are in $-40\degree C \leq T_A \leq 85\degree C$ unless otherwise noted.
+   
 
-\begin{table}[h]
-\begin{threeparttable}
-\caption{Example Data Sheet Specifications}
-\begin{tabularx}{\textwidth}{l | c | c c c | c | X}
-    \thickhline
-    \textbf{Parameter} & \textbf{Symbol} & \textbf{Min.} & \textbf{Typ.} & \textbf{Max.} &
-    \textbf{Unit} & \textbf{Conditions} \\
-    \hline
-    Page width  & $p_w$ & 20.9 & 21.0 & 21.1 & cm & \multirow{2}{*}{Standard A4 paper} \\
-    Page height & $p_h$ & 29.6 & 29.7 & 29.8 & cm &  \\
-    \hline
-    Insulation voltage & $E_{max}$\tnote{1} & & 1 & & kV & \\
-    \thickhline
-\end{tabularx}
-\begin{tablenotes}
-\item[1]{Based on characterization data, not tested in production.}
-\end{tablenotes}
-\end{threeparttable}
-\end{table}
+ 
 
-\section{Absolute Maximum Ratings}
 
-\begin{table}[h]
-\caption{Absolute Maximum Ratings of Example Data Sheet}
-\begin{tabularx}{\textwidth}{l | X}
-    \thickhline
-    \textbf{Parameter} & \textbf{Rating} \hspace{5cm} \\
-    \hline
-    Daily exposure to LaTeX & 24 hours \\
-    \thickhline
-\end{tabularx}
-\end{table}
 
-\textbf{Note:} Stresses above those listed under Absolute Maximum Ratings can
-cause permanent damage to the device. This is a stress rating only. Functional
-operation of the device is not implied in any conditions above those indicated
-in the Electrical Specifications section.
+\end{multicols}
+
+
+%     \item[\textbf{2.}] \textbf{Memory:}
+%     \begin{itemize}
+%         \item 
+%         \item 
+%     \end{itemize}
+    
+%     \item[\textbf{3.}] \textbf{Interrupt Support:} Enables efficient handling of interrupts, allowing you to
+    
+%     \item[\textbf{4.}] \textbf{2D GPU:}
+%     \begin{itemize}
+%         \item VGA Labs-based GPU: A simple 2D graphics processing unit based on VGA Labs, delivering a resolution of 20480 pixels in video memory, facilitating rich visual experiences in your game.
+%         \item 80 Sprites: Supports up to 80 sprites, divided into 5 clusters, enhancing your game's ability to render dynamic and interactive graphics.
+%     \end{itemize}
+    
+%     \item[\textbf{5.}] \textbf{Compiler:}
+%     \begin{itemize}
+%         \item Clang LLVM Compiler: Utilizes the modern Clang LLVM compiler, which provides efficient code generation and optimization capabilities, enabling faster and more optimized execution of your game code.
+%     \end{itemize}
+    
+%     \item[\textbf{6.}] \textbf{Well-Made Makefile:} A carefully crafted Makefile automates the build process, streamlining the compilation, linking, and packaging of textures, world data, and other game assets, saving you valuable development time and effort.
+% \end{itemize}
+
+% Additional Specifications:
+% \begin{itemize}
+%     \item Power Supply: [Specify power supply requirements]
+%     \item Clock Speed: [Specify clock speed or frequency]
+%     \item I/O Interfaces: [Specify any additional input/output interfaces supported by the processor]
+%     \item Operating Voltage: [Specify the required operating voltage range]
+%     \item Debugging Support: [Specify any additional debugging capabilities or interfaces available]
+% \end{itemize}
+
+% \section{Applications}
+
+% \begin{itemize}
+% \item{Data sheets for electronics components}
+% \item{Technical sales brochures}
+% \item{Functional specifications}
+% \end{itemize}
+
+% \section{General Description}
+% The \textbf{datasheet} document class makes it easy to write great looking
+% data sheets using the LaTeX typesetting system. It follows the classic style used
+% by most manufacturers of electronic components.
+
+% You can download the document class from
+% \href{https://github.com/PetteriAimonen/latex-datasheet-template/}{latex-datasheet-template}
+% GitHub repository.
+% The repository includes this example datasheet as \textbf{example.tex} and
+% the document class as \textbf{datasheet.cls}.
+% You can build the PDF document using command \texttt{latexmk -pdf}.
+
+% % Switch to next column
+% \vfill\break
+
+% \begin{figure}[h]
+%     \begin{circuitikz}[european]
+%         \node[op amp] (amp1) {};
+%         \node[op amp, below = 0.5cm, xscale = -1] (amp2) {};
+%         \draw (amp1.out) |- (amp2.-);
+%         \draw (amp2.-) ++(0, 0.3cm) node[circ]{} to +(2,0) node[above left]{5};
+%         \draw (amp2.out) to (amp1.+);
+%         \draw (amp1.+) ++(0, -0.3cm) node[circ]{} to +(-2,0) node[above right]{2};
+%         \draw (amp1.-) to +(-2,0) node[above right]{1};
+%         \draw (amp2.+) to +(2,0) node[above left]{4};
+%         \draw (amp1.out) +(0,0.5cm) node (Vdd) {$\mathrm{V_{DD}}$};
+%         \draw (Vdd.east) to +(1.5,0) node [above left]{6};
+%         \draw (amp2.out) +(0,-0.5cm) node (Vss) {$\mathrm{V_{SS}}$};
+%         \draw (Vss.west) to +(-1.6,0) node [above right]{3};
+%         \draw ($(amp1.north west) + (-0.5,0.5)$) rectangle ($(amp2.south west) + (0.5,-0.5)$);
+%     \end{circuitikz}
+%     \caption{Pinout and internal circuit}
+% \end{figure}
+
+% \begin{figure}[h]
+%     \begin{tikzpicture}
+%         \sffamily
+%         \begin{axis}[
+%             width=7cm,
+%             xlabel={Number of LaTeX packages},
+%             ytick distance=20,
+%             yticklabel={\pgfmathprintnumber{\tick}\%},
+%             xmajorgrids, ymajorgrids]
+%         \addplot[smooth,mark=*] plot coordinates {
+%             (0,4)
+%             (5,50)
+%             (10,80)
+%             (15,95)
+%             (20,98)
+%         };
+%         \end{axis}
+%     \end{tikzpicture}
+%     \caption{Typical data sheet production efficiency}
+% \end{figure}
+
+% % For wide tables, a single column layout is better. It can be switched
+% % page-by-page.
+% \onecolumn
+
+% \section{Electrical Specifications}
+% All specifications are in $-40\degree C \leq T_A \leq 85\degree C$ unless otherwise noted.
+
+% \begin{table}[h]
+% \begin{threeparttable}
+% \caption{Example Data Sheet Specifications}
+% \begin{tabularx}{\textwidth}{l | c | c c c | c | X}
+%     \thickhline
+%     \textbf{Parameter} & \textbf{Symbol} & \textbf{Min.} & \textbf{Typ.} & \textbf{Max.} &
+%     \textbf{Unit} & \textbf{Conditions} \\
+%     \hline
+%     Page width  & $p_w$ & 20.9 & 21.0 & 21.1 & cm & \multirow{2}{*}{Standard A4 paper} \\
+%     Page height & $p_h$ & 29.6 & 29.7 & 29.8 & cm &  \\
+%     \hline
+%     Insulation voltage & $E_{max}$\tnote{1} & & 1 & & kV & \\
+%     \thickhline
+% \end{tabularx}
+% \begin{tablenotes}
+% \item[1]{Based on characterization data, not tested in production.}
+% \end{tablenotes}
+% \end{threeparttable}
+% \end{table}
+
+% \section{Absolute Maximum Ratings}
+
+% \begin{table}[h]
+% \caption{Absolute Maximum Ratings of Example Data Sheet}
+% \begin{tabularx}{\textwidth}{l | X}
+%     \thickhline
+%     \textbf{Parameter} & \textbf{Rating} \hspace{5cm} \\
+%     \hline
+%     Daily exposure to LaTeX & 24 hours \\
+%     \thickhline
+% \end{tabularx}
+% \end{table}
+
+% \textbf{Note:} Stresses above those listed under Absolute Maximum Ratings can
+% cause permanent damage to the device. This is a stress rating only. Functional
+% operation of the device is not implied in any conditions above those indicated
+% in the Electrical Specifications section.
 
 \end{document}
 

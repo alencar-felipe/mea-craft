@@ -18,7 +18,9 @@ module cluster #(
 
     input  logic [INT_WIDTH-1:0]   x,
     input  logic [INT_WIDTH-1:0]   y,
-    output logic [COLOR_WIDTH-1:0] pixel
+    output logic [COLOR_WIDTH-1:0] pixel,
+
+    input  logic texture_lock
 ); 
     localparam CLUSTER_WIDTH = $clog2(CLUSTER_SIZE);
 
@@ -118,7 +120,7 @@ module cluster #(
         else begin
             texture_waddr  = waddr - CLUSTER_SIZE*6;
             texture_wcolor = wdata[COLOR_WIDTH-1:0];
-            texture_wen    = wen;
+            texture_wen    = (!texture_lock) && wen;
         end
     end
 

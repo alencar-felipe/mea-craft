@@ -75,7 +75,8 @@ typedef struct __attribute__((packed)) {
 
 typedef struct __attribute__((packed)) {
     uint16_t led : 16;
-    uint16_t reserved : 16;
+    uint16_t reserved : 15;
+    uint8_t  texture_lock : 1;
 } gpio_a_out_t;
 
 typedef struct __attribute__((packed)) {
