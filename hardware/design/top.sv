@@ -88,7 +88,7 @@ module top (
     logic         rom_bootldr_rvalid;
     logic         rom_bootldr_rready;
 
-    logic [14: 0] ram_awaddr;
+    logic [15: 0] ram_awaddr;
     logic [ 2: 0] ram_awprot;
     logic         ram_awvalid;
     logic         ram_awready;
@@ -99,7 +99,7 @@ module top (
     logic [ 1: 0] ram_bresp;
     logic         ram_bvalid;
     logic         ram_bready;
-    logic [14: 0] ram_araddr;
+    logic [15: 0] ram_araddr;
     logic [ 2: 0] ram_arprot;
     logic         ram_arvalid;
     logic         ram_arready;

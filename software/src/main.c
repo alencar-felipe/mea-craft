@@ -5,6 +5,7 @@
 void gpu_init();
 void physics_init();
 void physics();
+void display_greating();
 
 const int gravity = 3;
 const int walk_speed = 3;
@@ -15,11 +16,10 @@ const int max_speed = 30;
 vec2_t p;
 vec2_t v;
 vec2_t a;
+vec2_t wp;
 int walk;
 int walk_counter;
 int dir;
-
-vec2_t wp;
 
 int main()
 {   
@@ -146,6 +146,24 @@ void physics()
 
     wp.x = (7*wp.x + (p.x - GPU_W/2))/8;
     wp.y = (7*wp.y + (p.y - GPU_H/2))/8;
+}
+
+void display_greating()
+{
+    texture_load((void *) GPU->clusters[0].texture, TEXTURE2);
+
+    GPU->clusters[0].sprites[0].stx = 0;
+    GPU->clusters[0].sprites[0].sty = 0;
+    GPU->clusters[0].sprites[0].stw = 64;
+    GPU->clusters[0].sprites[0].sth = 64;
+
+    GPU->clusters[0].sprites[0].sx = 256;
+    GPU->clusters[0].sprites[0].sy = 40;
+
+    for(int i = 1; i < GPU_CL_SIZE; i++) {
+        GPU->clusters[0].sprites[i].sx = GPU_W;
+        GPU->clusters[0].sprites[i].sy = GPU_H;
+    }
 }
 
 // interrupt handler
