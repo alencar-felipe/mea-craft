@@ -12,15 +12,22 @@
 
 % Required package
 \usepackage{tikz}
-\usetikzlibrary{arrows, arrows.meta}
+\usetikzlibrary{arrows, arrows.meta, decorations.markings, shapes.geometric}
 \usetikzlibrary{positioning}
 
-\tikzset{
-  myarrow/.style={
-    double distance=1mm,
-    {Stealth[length=3.5mm]}-{Stealth[length=3.5mm]}
-  }
-}
+\tikzstyle{dbusarrow} = [
+    thick,
+    decoration={
+        markings,
+        mark=at position 0 with {\arrowreversed[semithick]{open triangle 60}},
+        mark=at position 1 with {\arrow[semithick]{open triangle 60}}
+    },
+    double distance=1.4pt,
+    shorten >= 5.5pt,
+    shorten <= 5.5pt,
+    preaction = {decorate},
+    postaction = {draw,line width=1.4pt, white,shorten >= 4.5pt, shorten <= 4.5pt}
+]
 
 \usepackage{enumitem}
 \usepackage{multicol}
@@ -110,7 +117,6 @@ development time and effort.
 
 \begin{tikzpicture}
 
-% Controller
 \node [draw,
     minimum width=2cm,
     minimum height=2cm,
@@ -164,71 +170,98 @@ development time and effort.
     below=0.5cm of gpio
 ]  (uart) {UART};
 
-\draw[myarrow] (core.south) -- (aligner.north);
+\draw[dbusarrow] (core.south) -- (aligner.north);
 
 \node[right=1cm of aligner] (ref0) {};
-\draw[myarrow] (aligner.east) -- (ref0);
+\draw[dbusarrow] (aligner.east) -- (ref0);
 
 \node[left=1cm of rom] (ref1) {};
-\draw[myarrow] (rom.west) -- (ref1);
+\draw[dbusarrow] (rom.west) -- (ref1);
 
 \node[left=1cm of ram] (ref2) {};
-\draw[myarrow] (ram.west) -- (ref2);
+\draw[dbusarrow] (ram.west) -- (ref2);
 
 \node[left=1cm of gpu] (ref3) {};
-\draw[myarrow] (gpu.west) -- (ref3);
+\draw[dbusarrow] (gpu.west) -- (ref3);
 
 \node[below left=0.5cm and 1cm of gpu] (ref4) {};
 \node[below right=0.5cm and 1cm of gpu] (ref5) {};
-\draw[myarrow] (ref4) -- (ref5);
+\draw[dbusarrow] (ref4) -- (ref5);
 
 \node[left=1cm of gpio] (ref6) {};
-\draw[myarrow] (gpio.west) -- (ref6);
+\draw[dbusarrow] (gpio.west) -- (ref6);
 
 \node[left=1cm of uart] (ref7) {};
-\draw[myarrow] (uart.west) -- (ref7);
+\draw[dbusarrow] (uart.west) -- (ref7);
+    
+\end{tikzpicture}
+
+\pagebreak
+
+\begin{tikzpicture}
+
+\node [draw,
+    minimum width=2cm,
+    minimum height=1cm,
+] (cluster_0) {Cluster 0};
+
+\node [draw,
+    minimum width=2cm,
+    minimum height=1cm,
+    below=0.5cm of cluster_0
+] (cluster_1) {Cluster 1};
+
+\node [draw,
+    minimum width=2cm,
+    minimum height=1cm,
+    below=0.5cm of cluster_1
+] (cluster_dot) {...};
+
+\node [draw,
+    minimum width=2cm,
+    minimum height=1cm,
+    below=0.5cm of cluster_dot
+] (cluster_n) {Cluster N};
+
+\node [draw,
+    dashed,
+    minimum width=2.5cm,
+    minimum height=6cm,
+    rotate=180,
+    below right=0.25cm and 0.25cm of cluster_n
+] (clusters) {};
+
+\node [draw,
+    minimum width=2.5cm,
+    minimum height=1cm,
+    below=1cm of cluster_n
+] (vga) {VGA Counter};
+
+\node [draw,
+    minimum width=0.5cm,
+    minimum height=5.5cm,
+    below left=-2.5cm and 1cm of cluster_1
+] (interconnect) {};
+
+\node[draw,
+    shape=trapezium,
+    trapezium left angle=80,
+    trapezium right angle=80,
+    rotate=-90,
+    minimum width=5.5cm,
+    minimum height=1cm,
+    trapezium stretches=true,
+    below right=-3.25cm and 5cm of interconnect
+] (mux) {};
 
 % \node [draw,
-%     minimum width=2cm,
-%     minimum height=2cm,
-%     right=1.5cm of core
-% ]  (aligner) {\begin{tabular}{c} Memory \\ Aligner \end{tabular}};
+%     shape=trapezium,
+%     rotate=-90,
+%     minimum width=0.5cm,
+%     minimum height=5.5cm,
+%     below right=-2.5cm and 1cm of cluster_1
+% ] (mux) {};
 
-% % System H(s)
-% \node [draw,
-%     fill=SpringGreen, 
-%     minimum width=2cm, 
-%     minimum height=1.2cm,
-%     right=1.5cm of controller
-% ] (system) {$H(s)$};
-    
-% % Sensor block
-% \node [draw,
-%     fill=SeaGreen, 
-%     minimum width=2cm, 
-%     minimum height=1.2cm, 
-%     below right= 1cm and -0.25cm of controller
-% ]  (sensor) {$G(s)$};
-    
-% % Arrows with text label
-% \draw[-stealth] (sum.east) -- (controller.west)
-%     node[midway,above]{$e$};
-    
-% \draw[-stealth] (controller.east) -- (system.west) 
-%     node[midway,above]{$u$};
-    
-% \draw[-stealth] (system.east) -- ++ (1.25,0) 
-%     node[midway](output){}node[midway,above]{$y$};
-    
-% \draw[-stealth] (output.center) |- (sensor.east);
-    
-% \draw[-stealth] (sensor.west) -| (sum.south) 
-%     node[near end,left]{$y_m$};
-    
-% \draw (sum.west) -- ++(-1,0) 
-%     node[midway,above]{$y_{ref}$};
-    
-    
 \end{tikzpicture}
 
 \end{document}
