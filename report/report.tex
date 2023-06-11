@@ -7,12 +7,20 @@
 \usepackage[english]{babel}
 \usepackage[english]{isodate}
 
-% tikz is used to draw images in this example, but you can
-% also use \includegraphics{}.
+% More defined colors
+\usepackage[dvipsnames]{xcolor}
+
+% Required package
 \usepackage{tikz}
-\usepackage{pgfplots}
-\usepackage{circuitikz}
-\usetikzlibrary{calc}
+\usetikzlibrary{arrows, arrows.meta}
+\usetikzlibrary{positioning}
+
+\tikzset{
+  myarrow/.style={
+    double distance=1mm,
+    {Stealth[length=3.5mm]}-{Stealth[length=3.5mm]}
+  }
+}
 
 \usepackage{enumitem}
 \usepackage{multicol}
@@ -47,9 +55,7 @@
 \maketitle
 
 \begin{multicols}{2}
-
 \section{Features}
-
 \begin{itemize}
 
 \item \textbf{RISC-V Core:}
@@ -98,155 +104,111 @@ development time and effort.
 \end{itemize}
 
 \end{itemize}
-
-
-   
-
- 
-
-
-
 \end{multicols}
 
+\pagebreak
 
-%     \item[\textbf{2.}] \textbf{Memory:}
-%     \begin{itemize}
-%         \item 
-%         \item 
-%     \end{itemize}
+\begin{tikzpicture}
+
+% Controller
+\node [draw,
+    minimum width=2cm,
+    minimum height=2cm,
+]  (core) {\begin{tabular}{c} RISC-V \\ Core \end{tabular}};
+
+\node [draw,
+    minimum width=2cm,
+    minimum height=2cm,
+    below=1.5cm of core
+]  (aligner) {\begin{tabular}{c} Memory \\ Aligner \end{tabular}};
+
+\node [draw,
+    minimum width=0.5cm,
+    minimum height=5.5cm,
+    below right=-2cm and 1cm of core
+]  (crossbar) {\rotatebox{90}{Crossbar}};
+
+\node [draw,
+    minimum width=2cm,
+    minimum height=1cm,
+    below right=-5.5cm and 1cm of crossbar
+]  (rom) {ROM};
+
+\node [draw,
+    minimum width=2cm,
+    minimum height=1cm,
+    below=0.5cm of rom
+]  (ram) {RAM};
+
+\node [draw,
+    minimum width=2cm,
+    minimum height=1cm,
+    below=0.5cm of ram
+]  (gpu) {GPU};
+
+\node [draw,
+    minimum width=0.5cm,
+    minimum height=5.5cm,
+    right=4cm of crossbar
+]  (interconnect) {\rotatebox{90}{Interconnect}};
+
+\node [draw,
+    minimum width=2cm,
+    minimum height=1cm,
+    below right=-5.5cm and 1cm of interconnect
+]  (gpio) {GPIO};
+
+\node [draw,
+    minimum width=2cm,
+    minimum height=1cm,
+    below=0.5cm of gpio
+]  (uart) {UART};
+
+\draw[myarrow] (core.south) -- (aligner.north);
+\draw[myarrow] (aligner.east) |- (crossbar);
+
+% \node [draw,
+%     minimum width=2cm,
+%     minimum height=2cm,
+%     right=1.5cm of core
+% ]  (aligner) {\begin{tabular}{c} Memory \\ Aligner \end{tabular}};
+
+% % System H(s)
+% \node [draw,
+%     fill=SpringGreen, 
+%     minimum width=2cm, 
+%     minimum height=1.2cm,
+%     right=1.5cm of controller
+% ] (system) {$H(s)$};
     
-%     \item[\textbf{3.}] \textbf{Interrupt Support:} Enables efficient handling of interrupts, allowing you to
+% % Sensor block
+% \node [draw,
+%     fill=SeaGreen, 
+%     minimum width=2cm, 
+%     minimum height=1.2cm, 
+%     below right= 1cm and -0.25cm of controller
+% ]  (sensor) {$G(s)$};
     
-%     \item[\textbf{4.}] \textbf{2D GPU:}
-%     \begin{itemize}
-%         \item VGA Labs-based GPU: A simple 2D graphics processing unit based on VGA Labs, delivering a resolution of 20480 pixels in video memory, facilitating rich visual experiences in your game.
-%         \item 80 Sprites: Supports up to 80 sprites, divided into 5 clusters, enhancing your game's ability to render dynamic and interactive graphics.
-%     \end{itemize}
+% % Arrows with text label
+% \draw[-stealth] (sum.east) -- (controller.west)
+%     node[midway,above]{$e$};
     
-%     \item[\textbf{5.}] \textbf{Compiler:}
-%     \begin{itemize}
-%         \item Clang LLVM Compiler: Utilizes the modern Clang LLVM compiler, which provides efficient code generation and optimization capabilities, enabling faster and more optimized execution of your game code.
-%     \end{itemize}
+% \draw[-stealth] (controller.east) -- (system.west) 
+%     node[midway,above]{$u$};
     
-%     \item[\textbf{6.}] \textbf{Well-Made Makefile:} A carefully crafted Makefile automates the build process, streamlining the compilation, linking, and packaging of textures, world data, and other game assets, saving you valuable development time and effort.
-% \end{itemize}
-
-% Additional Specifications:
-% \begin{itemize}
-%     \item Power Supply: [Specify power supply requirements]
-%     \item Clock Speed: [Specify clock speed or frequency]
-%     \item I/O Interfaces: [Specify any additional input/output interfaces supported by the processor]
-%     \item Operating Voltage: [Specify the required operating voltage range]
-%     \item Debugging Support: [Specify any additional debugging capabilities or interfaces available]
-% \end{itemize}
-
-% \section{Applications}
-
-% \begin{itemize}
-% \item{Data sheets for electronics components}
-% \item{Technical sales brochures}
-% \item{Functional specifications}
-% \end{itemize}
-
-% \section{General Description}
-% The \textbf{datasheet} document class makes it easy to write great looking
-% data sheets using the LaTeX typesetting system. It follows the classic style used
-% by most manufacturers of electronic components.
-
-% You can download the document class from
-% \href{https://github.com/PetteriAimonen/latex-datasheet-template/}{latex-datasheet-template}
-% GitHub repository.
-% The repository includes this example datasheet as \textbf{example.tex} and
-% the document class as \textbf{datasheet.cls}.
-% You can build the PDF document using command \texttt{latexmk -pdf}.
-
-% % Switch to next column
-% \vfill\break
-
-% \begin{figure}[h]
-%     \begin{circuitikz}[european]
-%         \node[op amp] (amp1) {};
-%         \node[op amp, below = 0.5cm, xscale = -1] (amp2) {};
-%         \draw (amp1.out) |- (amp2.-);
-%         \draw (amp2.-) ++(0, 0.3cm) node[circ]{} to +(2,0) node[above left]{5};
-%         \draw (amp2.out) to (amp1.+);
-%         \draw (amp1.+) ++(0, -0.3cm) node[circ]{} to +(-2,0) node[above right]{2};
-%         \draw (amp1.-) to +(-2,0) node[above right]{1};
-%         \draw (amp2.+) to +(2,0) node[above left]{4};
-%         \draw (amp1.out) +(0,0.5cm) node (Vdd) {$\mathrm{V_{DD}}$};
-%         \draw (Vdd.east) to +(1.5,0) node [above left]{6};
-%         \draw (amp2.out) +(0,-0.5cm) node (Vss) {$\mathrm{V_{SS}}$};
-%         \draw (Vss.west) to +(-1.6,0) node [above right]{3};
-%         \draw ($(amp1.north west) + (-0.5,0.5)$) rectangle ($(amp2.south west) + (0.5,-0.5)$);
-%     \end{circuitikz}
-%     \caption{Pinout and internal circuit}
-% \end{figure}
-
-% \begin{figure}[h]
-%     \begin{tikzpicture}
-%         \sffamily
-%         \begin{axis}[
-%             width=7cm,
-%             xlabel={Number of LaTeX packages},
-%             ytick distance=20,
-%             yticklabel={\pgfmathprintnumber{\tick}\%},
-%             xmajorgrids, ymajorgrids]
-%         \addplot[smooth,mark=*] plot coordinates {
-%             (0,4)
-%             (5,50)
-%             (10,80)
-%             (15,95)
-%             (20,98)
-%         };
-%         \end{axis}
-%     \end{tikzpicture}
-%     \caption{Typical data sheet production efficiency}
-% \end{figure}
-
-% % For wide tables, a single column layout is better. It can be switched
-% % page-by-page.
-% \onecolumn
-
-% \section{Electrical Specifications}
-% All specifications are in $-40\degree C \leq T_A \leq 85\degree C$ unless otherwise noted.
-
-% \begin{table}[h]
-% \begin{threeparttable}
-% \caption{Example Data Sheet Specifications}
-% \begin{tabularx}{\textwidth}{l | c | c c c | c | X}
-%     \thickhline
-%     \textbf{Parameter} & \textbf{Symbol} & \textbf{Min.} & \textbf{Typ.} & \textbf{Max.} &
-%     \textbf{Unit} & \textbf{Conditions} \\
-%     \hline
-%     Page width  & $p_w$ & 20.9 & 21.0 & 21.1 & cm & \multirow{2}{*}{Standard A4 paper} \\
-%     Page height & $p_h$ & 29.6 & 29.7 & 29.8 & cm &  \\
-%     \hline
-%     Insulation voltage & $E_{max}$\tnote{1} & & 1 & & kV & \\
-%     \thickhline
-% \end{tabularx}
-% \begin{tablenotes}
-% \item[1]{Based on characterization data, not tested in production.}
-% \end{tablenotes}
-% \end{threeparttable}
-% \end{table}
-
-% \section{Absolute Maximum Ratings}
-
-% \begin{table}[h]
-% \caption{Absolute Maximum Ratings of Example Data Sheet}
-% \begin{tabularx}{\textwidth}{l | X}
-%     \thickhline
-%     \textbf{Parameter} & \textbf{Rating} \hspace{5cm} \\
-%     \hline
-%     Daily exposure to LaTeX & 24 hours \\
-%     \thickhline
-% \end{tabularx}
-% \end{table}
-
-% \textbf{Note:} Stresses above those listed under Absolute Maximum Ratings can
-% cause permanent damage to the device. This is a stress rating only. Functional
-% operation of the device is not implied in any conditions above those indicated
-% in the Electrical Specifications section.
+% \draw[-stealth] (system.east) -- ++ (1.25,0) 
+%     node[midway](output){}node[midway,above]{$y$};
+    
+% \draw[-stealth] (output.center) |- (sensor.east);
+    
+% \draw[-stealth] (sensor.west) -| (sum.south) 
+%     node[near end,left]{$y_m$};
+    
+% \draw (sum.west) -- ++(-1,0) 
+%     node[midway,above]{$y_{ref}$};
+    
+    
+\end{tikzpicture}
 
 \end{document}
 
