@@ -165,7 +165,28 @@ development time and effort.
 ]  (uart) {UART};
 
 \draw[myarrow] (core.south) -- (aligner.north);
-\draw[myarrow] (aligner.east) |- (crossbar);
+
+\node[right=1cm of aligner] (ref0) {};
+\draw[myarrow] (aligner.east) -- (ref0);
+
+\node[left=1cm of rom] (ref1) {};
+\draw[myarrow] (rom.west) -- (ref1);
+
+\node[left=1cm of ram] (ref2) {};
+\draw[myarrow] (ram.west) -- (ref2);
+
+\node[left=1cm of gpu] (ref3) {};
+\draw[myarrow] (gpu.west) -- (ref3);
+
+\node[below left=0.5cm and 1cm of gpu] (ref4) {};
+\node[below right=0.5cm and 1cm of gpu] (ref5) {};
+\draw[myarrow] (ref4) -- (ref5);
+
+\node[left=1cm of gpio] (ref6) {};
+\draw[myarrow] (gpio.west) -- (ref6);
+
+\node[left=1cm of uart] (ref7) {};
+\draw[myarrow] (uart.west) -- (ref7);
 
 % \node [draw,
 %     minimum width=2cm,
