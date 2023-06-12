@@ -1,5 +1,13 @@
 # mea-craft
 
+<p align="center">
+<img src="report/thumb.jpeg" width="50%">
+</p>
+
+## Repository
+
+[GitHub](https://github.com/alencar-felipe/mea-craft)
+
 ## References
 
 ### Architecture
