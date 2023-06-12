@@ -210,7 +210,46 @@ interface for the registers and RAM.
 
 \section{Software}
 
+In this case, a final project of the embedded systems subject, I belive that the
+tools used to build the software (the game) are more relevant than the game it
+self. Therefore, much thought and time were put into these tools.
 
+I choose the Clang/LLVM toolchain due to its inherent focus on extensibility.
+By utilizing this toolchain, I could, for example, seamlessly integrate my own
+instructions into the assembler. However, it's important to note that no custom
+instructions have been implemented thus far.
+
+The \texttt{make} tool is extensively used to automate the building process,
+determining the source code files that require recompilation and specifying how
+they should be compiled. It accomplishes this by leveraging a set of rules and
+dependency relationships defined in the \texttt{Makefile}. However, as an
+experienced programmer, I have encountered more flawed examples of
+\texttt{Makefiles} than commendable ones. Despite its imperfections, I have
+invested considerable thought and consideration into this project's
+\texttt{Makefile}. Additionally, I have integrated a few helpful scripts into
+the build process. For instance, you can effortlessly execute
+\texttt{make flash} to compile all textures, generate the world, compile the
+code, link everything, and flash the resuting binary.
+
+Moving on to the code itself, let's delve into how the interface with the
+hardware is implemented. It's important to emphasize that, in this
+architecture, the specialized is essentially just a region of memory for the
+CPU. To handle this, the \texttt{hardware.h} header contains a set of 
+definitions that abstract the memory mapping.
+
+Among the \texttt{\#defines}, you will find \texttt{structs} that provide
+information regarding how data is organized in the different hardware registers.
+Additionally, there are further \texttt{\#defines} that enable the conversion
+of pure addresses into pointers to these specialized
+structures.
+
+The usage of the \texttt{volatile} qualifier is crucial in this context. It
+signals to the compiler that the associated variables may undergo unexpected
+changes. By doing so, it prevents unwanted optimizations that could potentially
+result in incorrect program behavior.
+
+Ultimately, a robust and intuitive interface to the hardware is achieved,
+which greatly facilitates software development and minimizes the risk of bugs.
 
 \end{document}
 
