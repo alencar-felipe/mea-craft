@@ -141,6 +141,8 @@ void physics()
     uint8_t btn_d = GPIO_A_IN->btn_d;
 
     block = (GPIO_A_IN->sw >> 0) & 0xFF;
+    block = (block < 12) ? block : 1;
+
 
     low         = vec2_add(p    , (vec2_t) {0             , -STEVE_H      });
     high        = vec2_add(p    , (vec2_t) {0             , 0             });
