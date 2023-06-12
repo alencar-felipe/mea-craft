@@ -1,4 +1,4 @@
-\documentclass[10pt]{article}
+\documentclass[12pt,a4paper]{article}
 
 \usepackage[left=2cm, right=2cm, top=2cm, bottom=3cm]{geometry}
 
@@ -7,30 +7,12 @@
 \usepackage[english]{babel}
 \usepackage[english]{isodate}
 
-% More defined colors
-\usepackage[dvipsnames]{xcolor}
-
-% Required package
-\usepackage{tikz}
-\usetikzlibrary{arrows, arrows.meta, decorations.markings, shapes.geometric}
-\usetikzlibrary{positioning}
-
-\tikzstyle{dbusarrow} = [
-    thick,
-    decoration={
-        markings,
-        mark=at position 0 with {\arrowreversed[semithick]{open triangle 60}},
-        mark=at position 1 with {\arrow[semithick]{open triangle 60}}
-    },
-    double distance=1.4pt,
-    shorten >= 5.5pt,
-    shorten <= 5.5pt,
-    preaction = {decorate},
-    postaction = {draw,line width=1.4pt, white,shorten >= 4.5pt, shorten <= 4.5pt}
-]
-
+\usepackage{bytefield}
+\usepackage{caption}
 \usepackage{enumitem}
+\usepackage{graphicx}
 \usepackage{multicol}
+\usepackage{times}
 
 \makeatletter
 \renewcommand{\maketitle}{
@@ -47,8 +29,17 @@
 }
 \makeatother
 
+% Removes paragraph indentation
+\setlength{\parindent}{0pt}
+
+% Configures the spacing between paragraphs
+\setlength{\parskip}{12pt} 
+
 % No numbering for section titles
 \setcounter{secnumdepth}{0}
+
+% Remove spacing between items
+\setlist[itemize]{itemsep=0pt}
 
 % ============================================================================ %
 
@@ -62,7 +53,18 @@
 \maketitle
 
 \begin{multicols}{2}
+
+\section{Project Details}
+
+\begin{itemize}
+\item Author: Felipe Paiva Alencar
+\item Subject: Embedded Systems - Pascal Benoit
+\item University: Polytech Montpellier
+\item Date: June 2023
+\end{itemize}
+
 \section{Features}
+
 \begin{itemize}
 
 \item \textbf{RISC-V Core:}
@@ -115,154 +117,100 @@ development time and effort.
 
 \pagebreak
 
-\begin{tikzpicture}
+\section{Hardware}
 
-\node [draw,
-    minimum width=2cm,
-    minimum height=2cm,
-]  (core) {\begin{tabular}{c} RISC-V \\ Core \end{tabular}};
+\begin{center}
+\captionof{figure}{Top Architecture}
+\includegraphics{schema0.pdf}
+\label{fig:schema0}
+\end{center}
 
-\node [draw,
-    minimum width=2cm,
-    minimum height=2cm,
-    below=1.5cm of core
-]  (aligner) {\begin{tabular}{c} Memory \\ Aligner \end{tabular}};
+The top architecture is composed of a RISC-V core, a memory aligner, a crossbar,
+read-only memory (ROM), random-access memory (RAM) and simple 2D graphics
+accelerator. Futhermore, the GPIO and UART are classified as peripherals and
+communitate with the CPU via a simpler interconnect.
 
-\node [draw,
-    minimum width=0.5cm,
-    minimum height=5.5cm,
-    below right=-2cm and 1cm of core
-]  (crossbar) {\rotatebox{90}{Crossbar}};
+Everything is interconnected with the help AXI4-Lite interfaces. The crossbar
+and interconnect are imported from the \texttt{verilog-axi} library.
+Everything else, including the RISC-V core, was completely developed in-house.
+Both of them are overkill for this context, but this architecture was conceived
+with the use of multiple cores in mind where the use of crossbars and
+interconnects would be fundamental.
 
-\node [draw,
-    minimum width=2cm,
-    minimum height=1cm,
-    below right=-5.5cm and 1cm of crossbar
-]  (rom) {ROM};
+The RISC-V core implements the \texttt{rv32i} Base Integer Instruction Set. The 
+\texttt{Zicsr} Control and Status Register (CSR) Instructions were also
+implemented because they are essential for the implementation of interupts. 
+Interrupts were implemented, but are not currently used for anything useful.
+The core is multicycle but not pipelined. A simple ISA test is performed by the
+bootloader in order to maintain one's mental well-being during the process of
+software development.
 
-\node [draw,
-    minimum width=2cm,
-    minimum height=1cm,
-    below=0.5cm of rom
-]  (ram) {RAM};
+The read-only memory (ROM) is 4 kilobytes long and is used by bootloader. The
+use of a bootloader developed to avoid having to rebuild the FPGA bitstream 
+every software iteration.
 
-\node [draw,
-    minimum width=2cm,
-    minimum height=1cm,
-    below=0.5cm of ram
-]  (gpu) {GPU};
+The random-access memory (RAM) is 64 kilobytes long and is used for the C code,
+texture data and world data. The texture data is initially located in RAM, but
+is moved to the video memory before the start of the game. This allows for 
+changes in the textures without having to rebuild the bitstream. In fact, one
+could implement a completely different game without rebuilding the hardware 
+implementation.
 
-\node [draw,
-    minimum width=0.5cm,
-    minimum height=5.5cm,
-    right=4cm of crossbar
-]  (interconnect) {\rotatebox{90}{Interconnect}};
+The General Purpose Input/Output (GPIO) implementation is very basic consisting
+of simple registers. Therefore, there is no hardware support for changing the 
+GPIO state with a mask.
 
-\node [draw,
-    minimum width=2cm,
-    minimum height=1cm,
-    below right=-5.5cm and 1cm of interconnect
-]  (gpio) {GPIO};
+The Universal Asynchronous Receiver Transmitter (UART) operates at 115200 bauds
+with 8 data bits, 1 stop bit and no parity bits. This interface is fundamental
+for the bootloader and is very helpful during software development since it
+provides some kind debuging support through the use of the \texttt{printf}
+function.
 
-\node [draw,
-    minimum width=2cm,
-    minimum height=1cm,
-    below=0.5cm of gpio
-]  (uart) {UART};
+\begin{center}
+\captionof{figure}{GPU Architecture}
+\includegraphics{schema1.pdf}
+\label{fig:schema1}
+\end{center} 
 
-\draw[dbusarrow] (core.south) -- (aligner.north);
+The graphics accelerator developed in class was greatilly overhauled into the
+architecture described in the schema above. The renewed architecture is fully
+parametric and is capable of displaying 80 sprites with transparency support 
+in the current configuration. These sprites are divided in 5 clusters. 
+A cluster is a group of sprites that uses the same texture RAM. This division
+was introduced to mitigate the hardware size. A perk of this architecture is
+that transparency does not work between overlapping sprites in the same cluster.
+Futhermore, a sprite is not obliged to use the whole texture. A sub-region can
+be configured for each sprite through register access in software.
 
-\node[right=1cm of aligner] (ref0) {};
-\draw[dbusarrow] (aligner.east) -- (ref0);
+The GPU has AXI4-Lite interface that allows for cluster register access. This
+interface is not propaged to the clusters because it's features are not needed
+and using a simpler interface reduces hardware complexity. Therefore, a 
+converter is present in the GPU top architecture. The converter is not present
+in the schema.
 
-\node[left=1cm of rom] (ref1) {};
-\draw[dbusarrow] (rom.west) -- (ref1);
+The VGA Counter provides the VGA synchrony signals and the current position of
+the electron beam in the screen. This position is used by each cluster to
+compute the pixel color value. Finally, combinatory logic decides the final
+value of the VGA color signals based upon the color value of each cluster,
+the visibility signal of the VGA Counter and the cluster priority order. 
+Transparency is implemented resignifying the value 0xFFF to mean transparency.
+The sky color is hardcoded in this logic.
 
-\node[left=1cm of ram] (ref2) {};
-\draw[dbusarrow] (ram.west) -- (ref2);
+\begin{center}
+\captionof{figure}{Cluster Architecture}
+\includegraphics{schema2.pdf}
+\label{fig:schema2}
+\end{center}
 
-\node[left=1cm of gpu] (ref3) {};
-\draw[dbusarrow] (gpu.west) -- (ref3);
+Each cluster is composed of registers that store the position and texture
+coordinates of each sprite. With the position value, combinatory logic
+computes the address that stores the current color value. Then, this value is
+retrived in the texture RAM. A very simple interconnect provides a write-only
+interface for the registers and RAM.
 
-\node[below left=0.5cm and 1cm of gpu] (ref4) {};
-\node[below right=0.5cm and 1cm of gpu] (ref5) {};
-\draw[dbusarrow] (ref4) -- (ref5);
+\section{Software}
 
-\node[left=1cm of gpio] (ref6) {};
-\draw[dbusarrow] (gpio.west) -- (ref6);
 
-\node[left=1cm of uart] (ref7) {};
-\draw[dbusarrow] (uart.west) -- (ref7);
-    
-\end{tikzpicture}
-
-\pagebreak
-
-\begin{tikzpicture}
-
-\node [draw,
-    minimum width=2cm,
-    minimum height=1cm,
-] (cluster_0) {Cluster 0};
-
-\node [draw,
-    minimum width=2cm,
-    minimum height=1cm,
-    below=0.5cm of cluster_0
-] (cluster_1) {Cluster 1};
-
-\node [draw,
-    minimum width=2cm,
-    minimum height=1cm,
-    below=0.5cm of cluster_1
-] (cluster_dot) {...};
-
-\node [draw,
-    minimum width=2cm,
-    minimum height=1cm,
-    below=0.5cm of cluster_dot
-] (cluster_n) {Cluster N};
-
-\node [draw,
-    dashed,
-    minimum width=2.5cm,
-    minimum height=6cm,
-    rotate=180,
-    below right=0.25cm and 0.25cm of cluster_n
-] (clusters) {};
-
-\node [draw,
-    minimum width=2.5cm,
-    minimum height=1cm,
-    below=1cm of cluster_n
-] (vga) {VGA Counter};
-
-\node [draw,
-    minimum width=0.5cm,
-    minimum height=5.5cm,
-    below left=-2.5cm and 1cm of cluster_1
-] (interconnect) {};
-
-\node[draw,
-    shape=trapezium,
-    trapezium left angle=80,
-    trapezium right angle=80,
-    rotate=-90,
-    minimum width=5.5cm,
-    minimum height=1cm,
-    trapezium stretches=true,
-    below right=-3.25cm and 5cm of interconnect
-] (mux) {};
-
-% \node [draw,
-%     shape=trapezium,
-%     rotate=-90,
-%     minimum width=0.5cm,
-%     minimum height=5.5cm,
-%     below right=-2.5cm and 1cm of cluster_1
-% ] (mux) {};
-
-\end{tikzpicture}
 
 \end{document}
 
