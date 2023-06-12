@@ -279,12 +279,40 @@ please refer to the references.
 I won't go into extensive explanations about the game mechanics algorithms as I
 don't consider they as the main focus of the project. If the reader seeks a
 detailed description of the implementation, they can refer to the source code
-itself, which serves as the ultimate reference. However, I will present a
+itself, which serves as the ultimate reference. However, I present a
 simplified overview of the key components that merit attention: the world
 "rendering" algorithm, which efficiently handles 8192 blocks using only 64
 block sprites, and the game physics algorithm, which, although flawed and
 convoluted, can be better understood with the aid of a flowchart for readers
 interested in exploring the code further.
+
+Finally, I acknowledge that the controls may not be intuitive due to the
+available input method. Allow me to provide a brief explanation:
+
+\begin{itemize}
+\item The center button serves to reset the architecture (think of it as an
+additional game objective: avoid resetting the architecture while playing).
+
+\item To make the character jump, press the up button.
+
+\item Use the left button to move the character to the left, and the right
+button to move the character to the right.
+
+\item Selecting a block is done by utilizing the lower four switches. Note that
+not all combinations of switches will result in a valid block selection.
+To place a selected block below the character, press the down button.
+
+\item Placing a block to the left of the character involves the following
+sequence: press down, press left, release down, release left. Similarly, for
+placing a block to the right of the character: press down, press right, release
+down, release right.
+
+\end{itemize}
+
+I hope this quick explanation clarifies the control scheme and helps improve
+the overall gameplay experience. By the way, the game doesn't have an objective. 
+Suggestion: Try not to die from falling and glitching while maybe building a
+little house. 
 
 \end{document}
 
