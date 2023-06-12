@@ -260,6 +260,32 @@ which proves to be immensely useful in the debugging process. It's important
 to note that this function was not developed by me. If you are interested in it,
 please refer to the references.
 
+\begin{center}
+\begin{minipage}{0.4\textwidth}
+\centering
+\captionof{figure}{World Render Flowchart}
+\includegraphics[scale=0.8]{schema3.pdf}
+\label{fig:image1}
+\end{minipage}
+\hfill
+\begin{minipage}{0.4\textwidth}
+\centering
+\captionof{figure}{Physics Flowchart}
+\includegraphics[scale=0.8]{schema4.pdf}
+\label{fig:image2}
+\end{minipage}
+\end{center}
+
+I won't go into extensive explanations about the game mechanics algorithms as I
+don't consider they as the main focus of the project. If the reader seeks a
+detailed description of the implementation, they can refer to the source code
+itself, which serves as the ultimate reference. However, I will present a
+simplified overview of the key components that merit attention: the world
+"rendering" algorithm, which efficiently handles 8192 blocks using only 64
+block sprites, and the game physics algorithm, which, although flawed and
+convoluted, can be better understood with the aid of a flowchart for readers
+interested in exploring the code further.
+
 \end{document}
 
 
