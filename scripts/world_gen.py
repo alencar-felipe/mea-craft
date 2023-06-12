@@ -26,7 +26,7 @@ BLOCK_DIAMOND = 12
 DELTA_SEA_LEVEL = 10
 DELTA_DIRT = 5
 
-def world_gen(width, height, out, seed=1):
+def world_gen(width, height, out, seed=10):
     rnd = Random()
 
     rnd.seed(seed)
@@ -92,7 +92,7 @@ if __name__ == '__main__':
         help='World width')
     parser.add_argument('-H', '--height', type=int, default=64,
         help='World height')
-    parser.add_argument('-s', '--seed', type=int, default=1,
+    parser.add_argument('-s', '--seed', type=int, default=10,
         help='World seed')
     parser.add_argument('-o', '--out', required=True,
         help='Output file path')
