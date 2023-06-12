@@ -99,7 +99,7 @@ handle game, texture, and world data.
 \begin{itemize}
 \item General Purpose Input/Output (GPIO) that allows the interface of the
 software with the buttons and switches. 
-\item Universal asynchronous receiver-transmitter (UART) that provides a
+\item Universal Asynchronous Receiver Transmitter (UART) that provides a
 communication channel.
 \end{itemize}
 
@@ -146,8 +146,8 @@ bootloader in order to maintain one's mental well-being during the process of
 software development.
 
 The read-only memory (ROM) is 4 kilobytes long and is used by bootloader. The
-use of a bootloader developed to avoid having to rebuild the FPGA bitstream 
-every software iteration.
+use of a bootloader avoids having to rebuild the FPGA bitstream every software
+iteration.
 
 The random-access memory (RAM) is 64 kilobytes long and is used for the C code,
 texture data and world data. The texture data is initially located in RAM, but
@@ -182,7 +182,7 @@ that transparency does not work between overlapping sprites in the same cluster.
 Futhermore, a sprite is not obliged to use the whole texture. A sub-region can
 be configured for each sprite through register access in software.
 
-The GPU has AXI4-Lite interface that allows for cluster register access. This
+The GPU has a AXI4-Lite interface that allows for cluster register access. This
 interface is not propaged to the clusters because it's features are not needed
 and using a simpler interface reduces hardware complexity. Therefore, a 
 converter is present in the GPU top architecture. The converter is not present
@@ -233,8 +233,8 @@ code, link everything, and flash the resuting binary.
 
 Moving on to the code itself, let's delve into how the interface with the
 hardware is implemented. It's important to emphasize that, in this
-architecture, the specialized is essentially just a region of memory for the
-CPU. To handle this, the \texttt{hardware.h} header contains a set of 
+architecture, the specialized hardware is essentially just a region of memory
+for the core. To handle this, the \texttt{hardware.h} header contains a set of 
 definitions that abstract the memory mapping.
 
 Among the \texttt{\#defines}, you will find \texttt{structs} that provide
@@ -251,10 +251,10 @@ result in incorrect program behavior.
 Ultimately, a robust and intuitive interface to the hardware is achieved,
 which greatly facilitates software development and minimizes the risk of bugs.
 
-Following the previous section, we come across the mylib.c file, where we have
+Following the previous section, we come across the mylib.c file, where I have
 provided implementations for functions typically offered by the standard
 library. I opted out of using the standard library, and as a result, these
-functionalities are implemented on a as-need basis. A significant portion of
+functionalities are implemented on a as-needed basis. A significant portion of
 this code is dedicated to the implementation of the \texttt{printf} function,
 which proves to be immensely useful in the debugging process. It's important
 to note that this function was not developed by me. If you are interested in it,
